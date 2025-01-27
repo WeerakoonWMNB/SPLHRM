@@ -20,6 +20,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Add Passphrase-Protected Key
+        env:
+            SSH_PASSPHRASE: ${{ secrets.SSH_PASSPHRASE }}
+        run: |
+            echo "$SSH_PASSPHRASE" | ssh-add -
+
       # Step 3: Deploy changes to the server
       - name: Deploy to Server
         run: |
