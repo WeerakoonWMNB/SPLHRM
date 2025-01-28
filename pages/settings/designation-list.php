@@ -28,46 +28,46 @@
                 <div class="col-md-12 grid-margin stretch-card">
                   <div class="card">
                     <div class="card-body">
-                      <p class="card-title"><h4 id="title-name">Company List</h4></p>
+                      <p class="card-title"><h4 id="title-name">Designation List</h4></p>
                       <hr id="title-hr">
 
-                      <button type="button" data-bs-toggle="modal" data-bs-target="#myModal" class="btn btn-success" onclick="add_company()"><i class="mdi mdi-playlist-plus me-1"></i> Add Company</button>
+                      <button type="button" data-bs-toggle="modal" data-bs-target="#myModal" class="btn btn-success" onclick="add_designation()"><i class="mdi mdi-playlist-plus me-1"></i> Add Designation</button>
                         <?php 
-                            $stmt = $conn->prepare("SELECT * FROM companies WHERE status = 1");
+                            $stmt = $conn->prepare("SELECT * FROM designations WHERE status = 1");
      
                             $stmt->execute(); // Execute the query
-                            $companies = $stmt->get_result(); // Fetch the result
+                            $designations = $stmt->get_result(); // Fetch the result
 
                         ?>
                             <table id="myTable" class="display" width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Company Code</th>
-                                            <th>Company Name</th>
+                                            <th>Designation Code</th>
+                                            <th>Designation</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
                                             $i = 1;
-                                            foreach($companies as $company)
+                                            foreach($designations as $designation)
                                             {
                                                 ?>
                                                 <tr>
                                                     <td><?= $i ?></td>
-                                                    <td><?= $company['company_code'] ?> </td>
-                                                    <td><?= $company['comany_name'] ?></td>
+                                                    <td><?= $designation['desig_code'] ?> </td>
+                                                    <td><?= $designation['designation'] ?></td>
                                                     <td>
-                                                    <form method="POST" action="../../back/company-manage.php" >
-                                                        <input type="hidden" name="company_id" value="<?= $company['company_id'] ?>">
-                                                        <button type="button" class="btn btn-warning btn-sm" onclick="company_set(<?= $company['company_id'] ?>)"><i class="mdi mdi-playlist-check"></i></button>
+                                                    <form method="POST" action="../../back/designation-manage.php" >
+                                                        <input type="hidden" name="desig_id" value="<?= $designation['desig_id'] ?>">
+                                                        <button type="button" class="btn btn-warning btn-sm" onclick="designation_set(<?= $designation['desig_id'] ?>)"><i class="mdi mdi-playlist-check"></i></button>
                                                     
                                                         <button 
                                                         type="submit" 
-                                                        name="delete_company" 
+                                                        name="delete_designation" 
                                                         class="btn btn-danger btn-sm" 
-                                                        onclick="return confirm('Are you sure you want to delete this company?');">
+                                                        onclick="return confirm('Are you sure you want to delete this designation?');">
                                                         <i class="mdi mdi-playlist-remove"></i>
                                                         </button>
                                                     </form>
@@ -97,7 +97,7 @@
 
       <!-- Modal Header -->
       <div class="modal-header">
-        <h4 class="modal-title">Add Company</h4>
+        <h4 class="modal-title">Add Designation</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal" ></button>
       </div>
 
@@ -106,20 +106,20 @@
         <div class="row">
             <div class="col-sm-12 col-xl-12">
                 <div class="bg-light rounded h-100 p-4">
-                    <form id="myform" method="POST" action="../../back/company-manage.php" enctype="multipart/form-data">
+                    <form id="myform" method="POST" action="../../back/designation-manage.php" enctype="multipart/form-data">
                         <input type="hidden" name="edit_id" id="edit_id">
 
                         <div class="row mb-3">
-                            <label for="inputEmail3" class="col-sm-3 col-form-label">Company Code *</label>
+                            <label for="inputEmail3" class="col-sm-3 col-form-label">Designation Code *</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="company_code" name="company_code" placeholder="001" required>
+                                <input type="text" class="form-control" id="designation_code" name="designation_code" placeholder="senior-executive" required>
                             </div>
                         </div>
                                             
                         <div class="row mb-3">
-                            <label for="inputPassword3" class="col-sm-3 col-form-label">Company Name *</label>
+                            <label for="inputPassword3" class="col-sm-3 col-form-label">Designation Name *</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="company_name" name="company_name" placeholder="Sadaharitha" required>
+                                <input type="text" class="form-control" id="designation_name" name="designation_name" placeholder="Senior Executive" required>
                             </div>
                         </div>
 
@@ -150,24 +150,24 @@
     
         });
 
-        function company_set(companyId) {
+        function designation_set(designationId) {
     $.ajax({
-        url: '../../back/company-manage.php', // Replace with your endpoint that fetches user details
+        url: '../../back/designation-manage.php', // Replace with your endpoint that fetches user details
         type: 'POST',
-        data: { search_id: companyId },
+        data: { search_id: designationId },
         dataType: 'json',
         success: function(response) {
             if (response.success) {
                 // Populate the form fields with the fetched data
-                $('.modal-title').html('Edit Company');
-                $('#edit_id').val(response.data.company_id);
-                $('#company_code').val(response.data.company_code);
-                $('#company_code').attr('readonly', true);
-                $('#company_name').val(response.data.comany_name);
+                $('.modal-title').html('Edit Designation');
+                $('#edit_id').val(response.data.desig_id );
+                $('#designation_code').val(response.data.desig_code);
+                $('#designation_code').attr('readonly', true);
+                $('#designation_name').val(response.data.designation);
                 $('#myModal').modal('show');
             } else {              
                 const alertBox = document.getElementById('customAlert');
-                alertBox.textContent = 'Failed to fetch comapny details: ' + response.message;
+                alertBox.textContent = 'Failed to fetch designation details: ' + response.message;
                 alertBox.style.display = 'block';
 
                 // Hide the alert after 3 seconds
@@ -177,17 +177,17 @@
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error fetching company details:', error);
+            console.error('Error fetching designation details:', error);
         }
     });
 }
 
-function add_company() {
-                $('.modal-title').html('Add Company');
+function add_designation() {
+                $('.modal-title').html('Add Designation');
                 $('#edit_id').val('');
-                $('#company_code').val('');
-                $('#company_code').attr('readonly', false);
-                $('#company_name').val('');
+                $('#designation_code').val('');
+                $('#designation_code').attr('readonly', false);
+                $('#designation_name').val('');
 }
   </script>
 </body>

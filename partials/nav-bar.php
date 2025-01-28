@@ -92,6 +92,12 @@
             <span class="menu-title">Companies</span>
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../pages/settings/designation-list.php">
+          <i class="mdi mdi-account-card-details menu-icon"></i>
+            <span class="menu-title">Designations</span>
+          </a>
+        </li>
 
         <li class="nav-item">
           <a class="nav-link" href="../general/logout.php">
