@@ -81,6 +81,18 @@
             <span class="menu-title">Users</span>
           </a>
         </li>
+
+        <li class="nav-item sidebar-category">
+          <p>Settings</p>
+          <span></span>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../pages/settings/company-list.php">
+          <i class="mdi mdi-home-variant menu-icon"></i>
+            <span class="menu-title">Companies</span>
+          </a>
+        </li>
+
         <li class="nav-item">
           <a class="nav-link" href="../general/logout.php">
             <button class="btn bg-danger btn-sm menu-title"> <i class="mdi mdi-logout"></i> Log Out</button>
