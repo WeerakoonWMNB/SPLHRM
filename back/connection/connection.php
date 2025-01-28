@@ -6,5 +6,4 @@
 $conn = mysqli_connect("localhost", "root", "", "clearance");
 $now = new DateTime(null, new DateTimeZone('Asia/Colombo'));
 $datetime = $now->format('Y-m-d H:i:s');
-
 ?>
