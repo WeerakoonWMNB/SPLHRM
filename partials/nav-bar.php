@@ -93,6 +93,12 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" href="../../pages/settings/department-list.php">
+          <i class="mdi mdi-source-branch menu-icon"></i>
+            <span class="menu-title">Branch/Dept</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="../../pages/settings/designation-list.php">
           <i class="mdi mdi-account-card-details menu-icon"></i>
             <span class="menu-title">Designations</span>
