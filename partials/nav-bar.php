@@ -71,6 +71,19 @@
             </ul>
           </div>
         </li>
+
+        <li class="nav-item sidebar-category">
+          <p>Employees</p>
+          <span></span>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../pages/employees/employee-list.php">
+          <i class="mdi mdi-account-settings menu-icon"></i>
+            <span class="menu-title">Employees</span>
+          </a>
+        </li>
+
+
         <li class="nav-item sidebar-category">
           <p>System</p>
           <span></span>
