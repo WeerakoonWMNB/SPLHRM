@@ -5,7 +5,7 @@
 <?php
         include "../../back/credential-check.php";
         if (!checkAccess([1])) {
-            header("Location: index.php");
+          header("Location: ../general/dashboard.php");
             exit();
         }
         include "../../back/connection/connection.php";

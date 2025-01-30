@@ -83,17 +83,27 @@
           </a>
         </li> -->
 
-        <li class="nav-item sidebar-category">
-          <p>System</p>
-          <span></span>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="../../pages/users/user-list.php">
-          <i class="mdi mdi-account menu-icon"></i>
-            <span class="menu-title">Users</span>
-          </a>
-        </li>
+        <?php
+          if (checkAccess([1])) {
+        ?>
+          <li class="nav-item sidebar-category">
+            <p>System</p>
+            <span></span>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/users/user-list.php">
+            <i class="mdi mdi-account menu-icon"></i>
+              <span class="menu-title">Users</span>
+            </a>
+          </li>
 
+        <?php
+          }
+        ?>
+
+        <?php
+          if (checkAccess([1])) {
+        ?>
         <li class="nav-item sidebar-category">
           <p>Settings</p>
           <span></span>
@@ -116,6 +126,10 @@
             <span class="menu-title">Designations</span>
           </a>
         </li>
+
+        <?php
+          }
+        ?>
 
         <li class="nav-item">
           <a class="nav-link" href="../general/logout.php">
