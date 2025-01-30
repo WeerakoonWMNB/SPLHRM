@@ -20,4 +20,4 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: "/home/sadahari/sandbox.sadaharitha.com/clearance"  # Change this to your target directory
+        server-dir: "/home/sadahari/sandbox.sadaharitha.com/clearance/"  # Change this to your target directory
