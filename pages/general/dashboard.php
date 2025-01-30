@@ -17,7 +17,7 @@
       <?php require '../../partials/top-nav.php'; ?>
       <div class="main-panel">
         <div class="content-wrapper">
-          // ...existing code...
+          
         </div>
       </div>
     </div>
