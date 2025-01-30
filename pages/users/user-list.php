@@ -69,7 +69,13 @@
                                                         <input type="hidden" name="user_id" value="<?= $user['user_id'] ?>">
                                                         <button type="button" class="btn btn-warning btn-sm" onclick="user_set(<?= $user['user_id'] ?>)"><i class="mdi mdi-account-convert"></i></button>
                                                     
-                                                        <button type="submit" name="delete_user" class="btn btn-danger btn-sm"><i class="mdi mdi-account-remove"></i></button>
+                                                        <button 
+                                                        type="submit" 
+                                                        name="delete_user" 
+                                                        class="btn btn-danger btn-sm" 
+                                                        onclick="return confirm('Are you sure you want to delete this user?');">
+                                                        <i class="mdi mdi-account-remove"></i>
+                                                        </button>
                                                     </form>
                                                     
                                                     </td>
