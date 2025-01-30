@@ -2,12 +2,14 @@
 <html lang="en">
 
 <?php
-        include "../../back/credential-check.php";
         include "../../back/connection/connection.php";
 ?>
 
 <head>
-  <?php require '../../partials/head.php'; ?>
+  <?php 
+  require '../../partials/head.php'; 
+  include "../../back/credential-check.php";
+  ?>
 </head>
 
 <body>
