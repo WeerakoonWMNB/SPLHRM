@@ -5,7 +5,7 @@
 <?php
         include "../../back/credential-check.php";
         if (!checkAccess([1])) {
-            header("Location: index.php");
+            header("Location: ../general/dashboard.php");
             exit();
         }
         include "../../back/connection/connection.php";
@@ -143,13 +143,11 @@
                         </div>
 
                         <div class="row mb-3">
-                            <label for="inputEmail3" class="col-sm-3 col-form-label">Branch/Department</label>
+                            <label for="inputEmail3" class="col-sm-3 col-form-label">Branch/Department *</label>
                             <div class="col-sm-9">
 
                             <select class="form-control" id="branch" name ="branch" required>
                                 <option value=''>Select</option>
-                                <option value="1">Yes</option>  
-                                <option value="0">No</option>
                             </select>
                             </div>
                         </div>
@@ -178,12 +176,21 @@
                         <div class="row mb-3">
                             <label for="inputEmail3" class="col-sm-3 col-form-label">Emp Type *</label>
                             <div class="col-sm-9">
-
+                            <?php
+                                    $stmt_cat = $conn->prepare("SELECT * FROM emp_category WHERE status = 1");
+                                    $stmt_cat->execute(); // Execute the query
+                                    $categories = $stmt_cat->get_result(); // Fetch the result
+                                ?>
                             <select class="form-control" id="emp_type" name ="emp_type" required>
                                 <option value=''>Select</option>
-                                <option value='0'>Back Office</option>
-                                <option value='1'>Marketing (Permanent)</option>
-                                <option value='2'>FIC</option>
+                                <?php
+                                    foreach($categories as $category)
+                                    {
+                                        ?>
+                                        <option value="<?= $category['cat_code'] ?>"><?= $category['cat_name'] ?></option>
+                                        <?php
+                                    }
+                                ?>
                             </select>
                             </div>
                         </div>
@@ -191,7 +198,14 @@
                         <div class="row mb-3">
                             <label for="inputPassword3" class="col-sm-3 col-form-label">Emp Code *</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="emp_code" name="emp_code" placeholder="DKD1-7985P-5652/2516" required>
+                                <input type="text" class="form-control" id="emp_code" name="emp_code" placeholder="DKD1-7985P-5652" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="inputPassword3" class="col-sm-3 col-form-label">EPF No *</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="epf" name="epf" placeholder="2516" required>
                             </div>
                         </div>
 
@@ -247,7 +261,19 @@
                         <div class="row mb-3">
                             <label for="inputPassword3" class="col-sm-3 col-form-label">E-Mail </label>
                             <div class="col-sm-9">
-                                <input type="email" class="form-control" id="email" name="email"  >
+                                <input type="email" class="form-control" id="email" name="email" placeholder="someone@gmail.com" >
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="reporting" class="col-sm-3 col-form-label">Reporting Officer</label>
+                            <div class="col-sm-9 position-relative">
+                                <input type="text" id="searchEmployee" class="form-control" placeholder="Search Reporting Officer">
+                                <div id="employeeList" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                                
+                                <select class="form-control mt-2" id="reporting" name="reporting" style="display: none;">
+                                    <option value="">Select</option>
+                                </select>
                             </div>
                         </div>
 
@@ -325,7 +351,73 @@ function add_employee() {
                 // $('#company').val(''); 
                 // $('#is_branch').val('');
 }
+
+// Fetch branches based on selected company
+$(document).ready(function() {
+    $("#company").change(function() {
+        let companyCode = $(this).val();
+        
+        if (companyCode) {
+            $.ajax({
+                url: "../../back/employee-manage.php", // Change this to your server-side script
+                type: "POST",
+                data: { company_code: companyCode },
+                dataType: "json",
+                success: function(response) {
+                    $("#branch").empty().append('<option value="">Select</option>');
+                    $.each(response, function(index, item) {
+                        $("#branch").append(`<option value="${item.bd_code}">${item.bd_name}</option>`);
+                    });
+                },
+                error: function() {
+                    alert("Error fetching branches");
+                }
+            });
+        } else {
+            $("#branch").empty().append('<option value="">Select</option>');
+        }
+    });
+});
+
   </script>
+  <script>
+$(document).ready(function(){
+    $("#searchEmployee").on("keyup", function() {
+        let searchText = $(this).val();
+        if(searchText.length > 1) { // Trigger search on 2+ characters
+            $.ajax({
+                url: "../../back/employee-manage.php", 
+                method: "POST",
+                data: {query: searchText},
+                success: function(response) {
+                    $("#employeeList").html(response).show();
+                }
+            });
+        } else {
+            $("#employeeList").hide();
+        }
+    });
+
+    // Handle click on suggestion
+    $(document).on("click", ".employee-option", function(){
+        let employeeName = $(this).text();
+        let employeeId = $(this).data("id");
+
+        $("#searchEmployee").val(employeeName); // Set input field
+        $("#employeeList").hide(); // Hide suggestion box
+        
+        // Add selected employee to dropdown and select it
+        $("#reporting").html(`<option value="${employeeId}" selected>${employeeName}</option>`);
+    });
+
+    // Hide the suggestion list when clicking outside
+    $(document).click(function(e) {
+        if (!$(e.target).closest("#searchEmployee, #employeeList").length) {
+            $("#employeeList").hide();
+        }
+    });
+});
+</script>
 </body>
 
 </html>

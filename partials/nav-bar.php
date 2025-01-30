@@ -72,22 +72,35 @@
           </div>
         </li> -->
 
-        <!-- <li class="nav-item sidebar-category">
-          <p>Employees</p>
+        <?php
+          if (checkAccess([1])) {
+        ?>
+        <li class="nav-item sidebar-category">
+          <p>Employees Manage</p>
           <span></span>
-        </li> -->
-        <!-- <li class="nav-item">
-          <a class="nav-link" href="../../pages/employees/employee-list.php">
-          <i class="mdi mdi-account-settings menu-icon"></i>
-            <span class="menu-title">Employees</span>
-          </a>
-        </li> -->
+        </li> 
 
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="collapse" href="#employees" aria-expanded="false" aria-controls="employees">
+            <i class="mdi mdi-account-settings menu-icon"></i>
+            <span class="menu-title">Employees</span>
+            <i class="menu-arrow"></i>
+          </a>
+          <div class="collapse" id="employees">
+            <ul class="nav flex-column sub-menu">
+              <li class="nav-item"> <a class="nav-link" href="../../pages/employees/employee-list.php"> Employee List</a></li>
+            </ul>
+          </div>
+        </li>
+
+        <?php
+          }
+        ?>
         <?php
           if (checkAccess([1])) {
         ?>
           <li class="nav-item sidebar-category">
-            <p>System</p>
+            <p>System Users</p>
             <span></span>
           </li>
           <li class="nav-item">
@@ -105,26 +118,24 @@
           if (checkAccess([1])) {
         ?>
         <li class="nav-item sidebar-category">
-          <p>Settings</p>
+          <p>System Settings</p>
           <span></span>
         </li>
+
         <li class="nav-item">
-          <a class="nav-link" href="../../pages/settings/company-list.php">
-          <i class="mdi mdi-home-variant menu-icon"></i>
-            <span class="menu-title">Companies</span>
+          <a class="nav-link" data-bs-toggle="collapse" href="#settings" aria-expanded="false" aria-controls="settings">
+            <i class="mdi mdi-settings menu-icon"></i>
+            <span class="menu-title">Settings</span>
+            <i class="menu-arrow"></i>
           </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="../../pages/settings/department-list.php">
-          <i class="mdi mdi-source-branch menu-icon"></i>
-            <span class="menu-title">Branch/Dept</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="../../pages/settings/designation-list.php">
-          <i class="mdi mdi-account-card-details menu-icon"></i>
-            <span class="menu-title">Designations</span>
-          </a>
+          <div class="collapse" id="settings">
+            <ul class="nav flex-column sub-menu">
+              <li class="nav-item"> <a class="nav-link" href="../../pages/settings/company-list.php"> Companies </a></li>
+              <li class="nav-item"> <a class="nav-link" href="../../pages/settings/department-list.php"> Branch/Dept </a></li>
+              <li class="nav-item"> <a class="nav-link" href="../../pages/settings/designation-list.php"> Designations </a></li>
+              <li class="nav-item"> <a class="nav-link" href="../../pages/settings/type-list.php"> Emp. Categories </a></li>
+            </ul>
+          </div>
         </li>
 
         <?php
