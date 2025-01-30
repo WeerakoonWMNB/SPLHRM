@@ -79,7 +79,7 @@
         <li class="nav-item">
           <a class="nav-link" href="../../pages/employees/employee-list.php">
           <i class="mdi mdi-account-settings menu-icon"></i>
-            <span class="menu-title">Employees</span>
+            <span class="menu-title">Employee</span>
           </a>
         </li>
 
