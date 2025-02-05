@@ -7,6 +7,7 @@ if (isset($_POST['edit_id']) && !empty($_POST['edit_id'])) {
         $edit_id = intval($_POST['edit_id']);
         $company_code = trim($_POST['company']);
         $is_branch = intval($_POST['is_branch']);
+        $cluster = trim($_POST['cluster']) == '' ? NULL : trim($_POST['cluster']);
         $branch_code = trim($_POST['branch_code']);
         $branch_name = trim($_POST['branch_name']);
         $max_dates_office = intval($_POST['max_dates_office']);
@@ -23,9 +24,9 @@ if (isset($_POST['edit_id']) && !empty($_POST['edit_id'])) {
 
     
         if ($edit_id) {
-            $sql = "UPDATE branch_departments SET bd_code = ?, bd_name = ?, is_branch = ?, company_id = ? , company_code = ?, seiling_dates_for_backoffice = ?, ceiling_dates_for_marketing = ?";
-            $params = [$branch_code, $branch_name, $is_branch, $company_id, $company_code, $max_dates_office, $max_dates_marketing];
-            $types = 'ssiisii';
+            $sql = "UPDATE branch_departments SET bd_code = ?, bd_name = ?, is_branch = ?, company_id = ? , company_code = ?, seiling_dates_for_backoffice = ?, ceiling_dates_for_marketing = ?, cluster = ? ";
+            $params = [$branch_code, $branch_name, $is_branch, $company_id, $company_code, $max_dates_office, $max_dates_marketing, $cluster];
+            $types = 'ssiisiii';
     
     
             $sql .= " WHERE bd_id = ?";
@@ -76,6 +77,7 @@ if (isset($_POST['edit_id']) && empty($_POST['edit_id'])) {
         $branch_name = trim($_POST['branch_name']);
         $max_dates_office = intval($_POST['max_dates_office']);
         $max_dates_marketing = intval($_POST['max_dates_marketing']);
+        $cluster = trim($_POST['cluster']) == '' ? NULL : trim($_POST['cluster']);
 
         $company_id = 0;
         // Prepare the SQL statement
@@ -86,12 +88,12 @@ if (isset($_POST['edit_id']) && empty($_POST['edit_id'])) {
         $stmt->fetch();
         $stmt->close();
     
-        $sql = "INSERT INTO branch_departments (bd_code , bd_name, is_branch, company_id, company_code, seiling_dates_for_backoffice, ceiling_dates_for_marketing) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO branch_departments (bd_code , bd_name, is_branch, company_id, company_code, seiling_dates_for_backoffice, ceiling_dates_for_marketing, cluster) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
     
         if ($stmt) {
-            $stmt->bind_param('ssiisii', $branch_code, $branch_name, $is_branch, $company_id, $company_code, $max_dates_office, $max_dates_marketing);
+            $stmt->bind_param('ssiisiii', $branch_code, $branch_name, $is_branch, $company_id, $company_code, $max_dates_office, $max_dates_marketing, $cluster);
     
             if ($stmt->execute()) {
                 

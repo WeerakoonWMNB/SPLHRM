@@ -49,6 +49,7 @@
                                             <th>Company</th>
                                             <th>Branch/Department Code</th>
                                             <th>Branch/Department Name</th>
+                                            <th>Cluster</th>
                                             <th>Max Clearance Dates (back office)</th>
                                             <th>Max Clearance Dates (marketing)</th>
                                             <th>Action</th>
@@ -65,6 +66,7 @@
                                                     <td><?= $branch['comany_name'] ?> </td>
                                                     <td><?= $branch['bd_code'] ?></td>
                                                     <td><?= $branch['bd_name'] ?></td>
+                                                    <td><?= $branch['cluster'] ?></td>
                                                     <td><?= $branch['seiling_dates_for_backoffice'] ?></td>
                                                     <td><?= $branch['ceiling_dates_for_marketing'] ?></td>
                                                     <td>
@@ -155,6 +157,20 @@
                         </div>
 
                         <div class="row mb-3">
+                            <label for="inputEmail3" class="col-sm-3 col-form-label">Cluster </label>
+                            <div class="col-sm-9">
+
+                            <select class="form-control" id="cluster" name ="cluster">
+                                <option value=''>Select</option>
+                                <option value="1">Cluster 1</option>  
+                                <option value="2">Cluster 2</option>
+                                <option value="3">Cluster 3</option>
+                                <option value="4">Cluster 4</option>
+                            </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
                             <label for="inputEmail3" class="col-sm-3 col-form-label">Branch/Department Code *</label>
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="branch_code" name="branch_code" placeholder="hr" required>
@@ -227,6 +243,7 @@
                 $('#max_dates_marketing').val(response.data.ceiling_dates_for_marketing);
                 $('#company').val(response.data.company_code);
                 $('#is_branch').val(response.data.is_branch);
+                $('#cluster').val(response.data.cluster);
                 $('#myModal').modal('show');
             } else {              
                 const alertBox = document.getElementById('customAlert');
@@ -254,6 +271,7 @@ function add_branch() {
                 $('#max_dates_office').val('');
                 $('#max_dates_marketing').val('');
                 $('#company').val(''); 
+                $('#cluster').val('');
                 $('#is_branch').val('');
 }
   </script>
