@@ -114,18 +114,33 @@
           }
         ?>
 
+
         <?php
           if (checkAccess([1])) {
         ?>
         <li class="nav-item sidebar-category">
-          <p>System Settings</p>
+          <p>Settings</p>
           <span></span>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="collapse" href="#clsettings" aria-expanded="false" aria-controls="settings">
+            <i class="mdi mdi-settings menu-icon"></i>
+            <span class="menu-title">Clearance Settings</span>
+            <i class="menu-arrow"></i>
+          </a>
+          <div class="collapse" id="clsettings">
+            <ul class="nav flex-column sub-menu">
+              <li class="nav-item"> <a class="nav-link" href="../../pages/settings/cl-cash-list.php"> Amount Items </a></li>
+              <li class="nav-item"> <a class="nav-link" href="../../pages/settings/cl-physical-list.php"> Receivable Items </a></li>
+            </ul>
+          </div>
         </li>
 
         <li class="nav-item">
           <a class="nav-link" data-bs-toggle="collapse" href="#settings" aria-expanded="false" aria-controls="settings">
             <i class="mdi mdi-settings menu-icon"></i>
-            <span class="menu-title">Settings</span>
+            <span class="menu-title">System Settings</span>
             <i class="menu-arrow"></i>
           </a>
           <div class="collapse" id="settings">
