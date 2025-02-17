@@ -7,14 +7,17 @@ if (isset($_POST['edit_id']) && !empty($_POST['edit_id'])) {
         $edit_id = intval($_POST['edit_id']);
         $name = trim($_POST['name']);
         $user_level = intval($_POST['user_level']);
+        $process_level = intval($_POST['process_level']); // 1=hod, 2=rsm, 3=bsm, 4=cro, 5=executive
+        $branch = isset($_POST['branch']) ? implode(',', $_POST['branch']) : '';
+        $emp_id = intval($_POST['emp']);
         $username = trim($_POST['username']);
         $password = !empty($_POST['password']) ? trim($_POST['password']) : null;
         $edit_user = $_SESSION['uid'];
     
         if ($edit_id) {
-            $sql = "UPDATE users SET name = ?, user_level = ?, username = ?, updated_by = ? , updated_date = ?";
-            $params = [$name, $user_level, $username, $edit_user, $datetime];
-            $types = 'sisis';
+            $sql = "UPDATE users SET name = ?, user_level = ?, process_level = ?, bd_id = ?, emp_id = ?, username = ?, updated_by = ? , updated_date = ?";
+            $params = [$name, $user_level, $process_level, $branch, $emp_id, $username, $edit_user, $datetime];
+            $types = 'siisisis';
     
             // Only update password if it's provided
             if ($password) {
@@ -67,15 +70,18 @@ if (isset($_POST['edit_id']) && empty($_POST['edit_id'])) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name']);
         $user_level = intval($_POST['user_level']);
+        $process_level = intval($_POST['process_level']); // 1=hod, 2=rsm, 3=bsm, 4=cro, 5=executive
+        $branch = isset($_POST['branch']) ? implode(',', $_POST['branch']) : '';
+        $emp_id = intval($_POST['emp']);
         $username = trim($_POST['username']);
         $password = trim($_POST['password']); 
         $add_user = $_SESSION['uid'];
     
-        $sql = "INSERT INTO users (name, user_level, username, password, created_by, created_date) VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO users (name, user_level, username, password, process_level, bd_id, emp_id, created_by, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
     
         if ($stmt) {
-            $stmt->bind_param('sissis', $name, $user_level, $username, $password, $add_user, $datetime);
+            $stmt->bind_param('sissisiis', $name, $user_level, $username, $password, $process_level, $branch, $emp_id , $add_user, $datetime);
     
             if ($stmt->execute()) {
                 
@@ -126,7 +132,8 @@ if (isset($_POST['delete_user'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['search_id'])) {
     $user_id = intval($_POST['search_id']);
 
-    $stmt = $conn->prepare("SELECT user_id, name, user_level, username, password FROM users WHERE user_id = ?");
+    $stmt = $conn->prepare("SELECT users.user_id, users.name, users.user_level, users.username, users.password, r.name_with_initials as employee_name, users.bd_id, users.emp_id, users.process_level FROM users 
+    LEFT JOIN employees r ON users.emp_id = r.emp_id WHERE users.user_id = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();

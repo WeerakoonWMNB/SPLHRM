@@ -29,7 +29,7 @@
                 <div class="col-md-12 grid-margin stretch-card">
                   <div class="card">
                     <div class="card-body">
-                      <p class="card-title"><h4 id="title-name">Amount Items</h4></p>
+                      <p class="card-title"><h4 id="title-name">Monetery Items</h4></p>
                       <hr id="title-hr">
 
                       <button type="button" data-bs-toggle="modal" data-bs-target="#myModal" class="btn btn-success" onclick="add_branch()"><i class="mdi mdi-playlist-plus me-1"></i> Add Item</button>
@@ -118,7 +118,7 @@
 
       <!-- Modal Header -->
       <div class="modal-header">
-        <h4 class="modal-title">Add Amount Items</h4>
+        <h4 class="modal-title">Add Monetery Items</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal" ></button>
       </div>
 
@@ -209,7 +209,7 @@
         success: function(response) {
             if (response.success) {
                 // Populate the form fields with the fetched data
-                $('.modal-title').html('Edit Amount Items');
+                $('.modal-title').html('Edit Monetery Items');
                 $('#edit_id').val(response.data.cl_amount_item_id);
                 $('#p_type').val(response.data.item_type);
                 $('#p_type').attr('readonly', true);
@@ -218,7 +218,7 @@
                 $('#myModal').modal('show');
             } else {              
                 const alertBox = document.getElementById('customAlert');
-                alertBox.textContent = 'Failed to fetch Amount items details: ' + response.message;
+                alertBox.textContent = 'Failed to fetch items details: ' + response.message;
                 alertBox.style.display = 'block';
 
                 // Hide the alert after 3 seconds
@@ -228,13 +228,13 @@
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error fetching Amount items details:', error);
+            console.error('Error fetching items details:', error);
         }
     });
 }
 
 function add_branch() {
-                $('.modal-title').html('Add Amount Items');
+                $('.modal-title').html('Add Monetery Items');
                 $('#edit_id').val('');
                 $('#department').val('');
                 $('#p_type').attr('readonly', false);

@@ -76,6 +76,32 @@
           if (checkAccess([1])) {
         ?>
         <li class="nav-item sidebar-category">
+          <p>Clearance</p>
+          <span></span>
+        </li> 
+
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="collapse" href="#clearance" aria-expanded="false" aria-controls="clearance">
+            <i class="mdi mdi-account-settings menu-icon"></i>
+            <span class="menu-title">Clearance</span>
+            <i class="menu-arrow"></i>
+          </a>
+          <div class="collapse" id="clearance">
+            <ul class="nav flex-column sub-menu">
+              <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/summary.php"> Summary</a></li>
+              <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/clearance-list.php"> Clearance List</a></li>
+            </ul>
+          </div>
+        </li>
+
+        <?php
+          }
+        ?>
+
+        <?php
+          if (checkAccess([1])) {
+        ?>
+        <li class="nav-item sidebar-category">
           <p>Employees Manage</p>
           <span></span>
         </li> 
@@ -131,8 +157,8 @@
           </a>
           <div class="collapse" id="clsettings">
             <ul class="nav flex-column sub-menu">
-              <li class="nav-item"> <a class="nav-link" href="../../pages/settings/cl-cash-list.php"> Amount Items </a></li>
-              <li class="nav-item"> <a class="nav-link" href="../../pages/settings/cl-physical-list.php"> Receivable Items </a></li>
+              <li class="nav-item"> <a class="nav-link" href="../../pages/settings/cl-cash-list.php"> Monetary Items </a></li>
+              <li class="nav-item"> <a class="nav-link" href="../../pages/settings/cl-physical-list.php"> Material Items </a></li>
             </ul>
           </div>
         </li>

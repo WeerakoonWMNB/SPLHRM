@@ -29,7 +29,7 @@
                 <div class="col-md-12 grid-margin stretch-card">
                   <div class="card">
                     <div class="card-body">
-                      <p class="card-title"><h4 id="title-name">Physical Items</h4></p>
+                      <p class="card-title"><h4 id="title-name">Material Items</h4></p>
                       <hr id="title-hr">
 
                       <button type="button" data-bs-toggle="modal" data-bs-target="#myModal" class="btn btn-success" onclick="add_branch()"><i class="mdi mdi-playlist-plus me-1"></i> Add Item</button>
@@ -47,6 +47,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Item Name</th>
+                                            <th>Type</th>
                                             <th>Branch/Department Name</th>
                                             <th>Action</th>
                                         </tr>
@@ -60,6 +61,13 @@
                                                 <tr>
                                                     <td><?= $i ?></td>
                                                     <td><?= $branch['item_name'] ?> </td>
+                                                    <td><?php if ($branch['item_type'] == 1) {
+                                                        echo "Receive";
+                                                    }
+                                                    if ($branch['item_type'] == 2) {
+                                                        echo "Issue";
+                                                    }
+                                                      ?></td>
                                                     <td><?php if ($branch['bd_id'] == 9999999) {
                                                         echo "All Branches";
                                                     } 
@@ -107,7 +115,7 @@
 
       <!-- Modal Header -->
       <div class="modal-header">
-        <h4 class="modal-title">Add Cash Items</h4>
+        <h4 class="modal-title">Add Material Items</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal" ></button>
       </div>
 
@@ -138,6 +146,17 @@
                                     }
                                 ?>
                                 <option value='9999999'>All Branches</option>
+                            </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="inputEmail3" class="col-sm-3 col-form-label">Item Type *</label>
+                            <div class="col-sm-9">
+                            <select class="form-control" id="item_type" name ="item_type" required>
+                                <option value=''>Select</option>
+                                <option value="1">Receive</option>  
+                                <option value="2">Issue</option>
                             </select>
                             </div>
                         </div>
@@ -185,14 +204,15 @@
         success: function(response) {
             if (response.success) {
                 // Populate the form fields with the fetched data
-                $('.modal-title').html('Edit Receivable Items');
+                $('.modal-title').html('Edit Material Items');
                 $('#edit_id').val(response.data.cl_physical_item_id);
                 $('#department').val(response.data.bd_id);
                 $('#item_name').val(response.data.item_name);
+                $('#item_type').val(response.data.item_type);
                 $('#myModal').modal('show');
             } else {              
                 const alertBox = document.getElementById('customAlert');
-                alertBox.textContent = 'Failed to fetch receivable items details: ' + response.message;
+                alertBox.textContent = 'Failed to fetch Material items details: ' + response.message;
                 alertBox.style.display = 'block';
 
                 // Hide the alert after 3 seconds
@@ -208,10 +228,10 @@
 }
 
 function add_branch() {
-                $('.modal-title').html('Add Receivable Items');
-                $('#edit_id').val('');
-                $('#department').val('');
-                $('#item_name').val('');
+      $('.modal-title').html('Add Material Items');
+      $('#edit_id').val('');
+      $('#department').val('');
+      $('#item_name').val('');
 }
   </script>
 </body>

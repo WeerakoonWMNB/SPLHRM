@@ -37,23 +37,29 @@ while ($row = $dataResult->fetch_assoc()) {
     $actionButtons = '
         <form method="POST" action="../../back/employee-manage.php">
             <input type="hidden" name="emp_id" value="' . $emp_id . '">
-            <button type="button" class="btn btn-warning btn-sm" onclick="emp_set(' . $emp_id . ')">
-                <i class="mdi mdi-playlist-check"></i>
-            </button>
-            <button 
-                type="submit" 
-                name="delete_employee" 
-                class="btn btn-danger btn-sm" 
-                onclick="return confirm(\'Are you sure you want to delete this Employee?\');">
-                <i class="mdi mdi-playlist-remove"></i>
-            </button>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Promotion/Demotion" onclick="emp_promote(' . $emp_id . ')">
+                    <i class="mdi mdi-account-convert"></i>
+                </button>
+                <button type="button" class="btn btn-warning btn-sm" onclick="emp_set(' . $emp_id . ')" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                    <i class="mdi mdi-playlist-check"></i>
+                </button>
+                <button 
+                    type="submit" 
+                    name="delete_employee" 
+                    class="btn btn-danger btn-sm" 
+                    onclick="return confirm(\'Are you sure you want to delete this Employee?\');"
+                    data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+                    <i class="mdi mdi-playlist-remove"></i>
+                </button>
+            </div>
         </form>
     ';
 
     $row['action'] = $actionButtons;
     $row['row_id'] = $i; // Set the unique key as the row ID for DataTables
-    $row['f_name'] = $row['titile'].' '.$row['name_in_full']; 
-    $row['ini_name'] = $row['titile'].' '.$row['name_with_initials'];
+    $row['f_name'] = $row['title'].' '.$row['name_in_full']; 
+    $row['ini_name'] = $row['title'].' '.$row['name_with_initials'];
 
     $data[] = $row;
     $i++;
