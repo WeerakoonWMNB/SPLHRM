@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['query'])) {
     $search = $_POST['query'];
 
     // Fetch employees matching search term
-    $sql = "SELECT emp_id , titile, name_with_initials, nic, epf_no, code FROM employees 
+    $sql = "SELECT emp_id , title, name_with_initials, nic, epf_no, code FROM employees 
     WHERE name_with_initials LIKE '%$search%' OR 
     nic LIKE '%$search%' OR 
     epf_no LIKE '%$search%' OR 
@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['query'])) {
 
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
-                $output .= "<a href='#' class='list-group-item list-group-item-action employee-option' data-id='".$row['emp_id']."'>".$row['titile']." ".$row['name_with_initials']." (".$row['nic']." ".$row['code']." ".$row['epf_no'].")</a>";
+                $output .= "<a href='#' class='list-group-item list-group-item-action employee-option' data-id='".$row['emp_id']."'>".$row['title']." ".$row['name_with_initials']." (".$row['nic']." ".$row['code']." ".$row['epf_no'].")</a>";
             }
         } else {
             $output = "<a href='#' class='list-group-item list-group-item-action disabled'>No results found</a>";
@@ -112,6 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $marital_status = clean_input($_POST['marital']);
         $birthday = clean_input($_POST['birthday']); 
         $appointment_date = clean_input($_POST['appointment']);
+        $lp_date = clean_input($_POST['lp_date']);
         $email = clean_input($_POST['email']);
         $mobile = clean_input($_POST['mobile']);
         $work_phone = clean_input($_POST['work']);
@@ -139,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!in_array($marital_status, ['0', '1'])) $errors[] = "Marital status is required.";
         if (empty($birthday) || !strtotime($birthday)) $errors[] = "Valid birthday date is required.";
         if (empty($appointment_date) || !strtotime($appointment_date)) $errors[] = "Valid appointment date is required.";
+        if (empty($lp_date) || !strtotime($lp_date)) $errors[] = "Valid promoted date is required.";
         if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Valid email is required.";
         if (!empty($mobile) && !preg_match('/^\d{10}$/', $mobile)) $errors[] = "Valid mobile number is required.";
         if (!empty($work_phone) && !preg_match('/^\d{10}$/', $mobile)) $errors[] = "Valid Phone(Work) is required.";
@@ -149,15 +151,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
 
-        $sql = "INSERT INTO employees (code, epf_no, titile, name_with_initials, name_in_full, nic, gender, birthday, appointment_date, designation_id, address_line_1, address_line_2, mobile, work, home, email, emp_cat_id, marital_status, reporting_officer_emp_id, bd_id, created_date, created_by) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO employees (code, epf_no, title, name_with_initials, name_in_full, nic, gender, birthday, appointment_date, lp_date, designation_id, address_line_1, address_line_2, mobile, work, home, email, emp_cat_id, marital_status, reporting_officer_emp_id, bd_id, created_date, created_by) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
 
         if ($stmt) {
-            $stmt->bind_param('ssssssississssssiiiiss', 
+            $stmt->bind_param('ssssssisssissssssiiiiss', 
                 $emp_code, $epf_no, $title, $init_name, $full_name, $nic, $gender, $birthday, 
-                $appointment_date, $emp_designation, $address1, $address2, $mobile, $work_phone, $home_phone, $email, 
+                $appointment_date, $lp_date , $emp_designation, $address1, $address2, $mobile, $work_phone, $home_phone, $email, 
                 $emp_type, $marital_status, $reporting_to, $branch, $datetime, $added_by
             );
 
@@ -193,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $full_name = clean_input($_POST['full_name']);
         $emp_type = clean_input($_POST['emp_type']); 
         $emp_code = clean_input($_POST['emp_code']);
-        $emp_designation = clean_input($_POST['emp_designation']);
+        //$emp_designation = clean_input($_POST['emp_designation']);
         $address1 = clean_input($_POST['address1']);
         $address2 = clean_input($_POST['address2']);
         $epf_no = clean_input($_POST['epf']);
@@ -222,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (in_array($emp_type, ['2', '3']) && (empty($emp_code))) {
             $errors[] = "Valid Employee Code is required.";
         }
-        if (empty($emp_designation)) $errors[] = "Employee Designation is required.";
+        //if (empty($emp_designation)) $errors[] = "Employee Designation is required.";
         if (empty($address1)) $errors[] = "Employee Address is required.";
         if (empty($epf_no)) $errors[] = "Valid EPF number is required.";
         if (empty($nic) || !preg_match('/^[0-9]{9}[vVxX]$|^[0-9]{12}$/', $nic)) $errors[] = "Valid NIC is required.";
@@ -245,7 +247,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $current_values = [
             'bd_id' => null,
             'emp_cat_id' => null,
-            'designation_id' => null,
             'code' => null,
             'epf_no' => null,
             'nic' => null,
@@ -264,8 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $current_stmt->execute();
         $current_stmt->bind_result(
             $current_values['bd_id'], 
-            $current_values['emp_cat_id'], 
-            $current_values['designation_id'], 
+            $current_values['emp_cat_id'],  
             $current_values['code'], 
             $current_values['epf_no'], 
             $current_values['nic'], 
@@ -281,7 +281,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $change_types = [
             'bd_id' => 1,
             'emp_cat_id' => 2,
-            'designation_id' => 3,
             'code' => 4,
             'epf_no' => 5,
             'nic' => 6,
@@ -304,15 +303,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Fetch designation name
-        if (!empty($current_values['designation_id'])) {
-            $designation_query = "SELECT designation FROM designations WHERE desig_id  = ?";
-            $designation_stmt = $conn->prepare($designation_query);
-            $designation_stmt->bind_param('i', $current_values['designation_id']);
-            $designation_stmt->execute();
-            $designation_stmt->bind_result($old_designation_name);
-            $designation_stmt->fetch();
-            $designation_stmt->close();
-        }
+        // if (!empty($current_values['designation_id'])) {
+        //     $designation_query = "SELECT designation FROM designations WHERE desig_id  = ?";
+        //     $designation_stmt = $conn->prepare($designation_query);
+        //     $designation_stmt->bind_param('i', $current_values['designation_id']);
+        //     $designation_stmt->execute();
+        //     $designation_stmt->bind_result($old_designation_name);
+        //     $designation_stmt->fetch();
+        //     $designation_stmt->close();
+        // }
 
         // Fetch old branch name
         $old_bd_name = "Unknown";
@@ -330,7 +329,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fields = [
             'bd_id' => ['new' => $branch, 'old' => $old_bd_name],
             'emp_cat_id' => ['new' => $emp_type, 'old' => $old_cat_name],
-            'designation_id' => ['new' => $emp_designation, 'old' => $old_designation_name],
             'code' => ['new' => $emp_code, 'old' => $current_values['code']],
             'epf_no' => ['new' => $epf_no, 'old' => $current_values['epf_no']],
             'nic' => ['new' => $nic, 'old' => $current_values['nic']],
@@ -349,14 +347,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = "UPDATE employees SET 
                 code = ?, 
                 epf_no = ?, 
-                titile = ?, 
+                title = ?, 
                 name_with_initials = ?, 
                 name_in_full = ?, 
                 nic = ?, 
                 gender = ?, 
                 birthday = ?, 
-                appointment_date = ?, 
-                designation_id = ?, 
+                appointment_date = ?,
                 address_line_1 = ?, 
                 address_line_2 = ?, 
                 mobile = ?, 
@@ -377,8 +374,108 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Bind parameters for update
             $stmt->bind_param('ssssssississssssiiiisii', 
                 $emp_code, $epf_no, $title, $init_name, $full_name, $nic, $gender, $birthday, 
-                $appointment_date, $emp_designation, $address1, $address2, $mobile, $work_phone, $home_phone, $email, 
+                $appointment_date, $address1, $address2, $mobile, $work_phone, $home_phone, $email, 
                 $emp_type, $marital_status, $reporting_to, $branch, $datetime, $updated_by, $edit_id
+            );
+
+            // Execute update
+            if ($stmt->execute()) {
+                $_SESSION['success'] = "Employee updated successfully.";
+                echo json_encode(["status" => "success", "message" => "Employee updated successfully."]);
+            } else {
+                echo json_encode(["status" => "error", "message" => "Error: " . $stmt->error]);
+            }
+        } else {
+            echo json_encode(["status" => "error", "message" => "Error preparing statement."]);
+        }
+
+        $stmt->close();
+        $conn->close();
+    }
+
+
+    if (isset($_POST['edit_id_p']) && !empty($_POST['edit_id_p'])) {
+        
+        // Sanitize and validate input
+        function clean_input($data) {
+            return htmlspecialchars(strip_tags(trim($data)));
+        }
+
+        // Get employee data from POST request
+        $edit_id = clean_input($_POST['edit_id_p']);
+        $emp_designation = clean_input($_POST['emp_designation_p']);
+        //$promote = clean_input($_POST['promote']);
+        $effective_date = clean_input($_POST['effective_date']);
+
+        $updated_by = $_SESSION['uid'];
+        $datetime = date("Y-m-d H:i:s");
+
+        // Validation checks
+        $errors = [];
+
+        if (empty($emp_designation)) $errors[] = "Employee Designation is required.";
+        //if (!in_array($promote, ['0', '1'])) $errors[] = "Valid promote/demote selection is required.";
+        if (empty($effective_date) || !strtotime($effective_date)) $errors[] = "Valid effective date is required.";
+
+        // If errors, return them
+        if (!empty($errors)) {
+            echo json_encode(["status" => "error", "message" => $errors]);
+            exit();
+        }
+
+        $current_designation_id = null;
+        $lp_date = null;
+        $current_query = "SELECT designation_id,lp_date FROM employees WHERE emp_id = ?";
+        $current_stmt = $conn->prepare($current_query);
+
+        if (!$current_stmt) {
+            die(json_encode(["status" => "error", "message" => "Error preparing statement: " . $conn->error]));
+        }
+
+        $current_stmt->bind_param('i', $edit_id);
+        $current_stmt->execute();
+        $current_stmt->bind_result($current_designation_id,$lp_date);
+
+        if (!$current_stmt->fetch()) {
+            $current_designation_id = null; // Ensuring null if no result found
+        }
+        $current_stmt->close();
+
+        // Fetch old names for category and designation
+        $old_designation_name = "Unknown";
+
+        // Fetch designation name
+        if (!empty($current_designation_id)) {
+            $designation_query = "SELECT designation FROM designations WHERE desig_id  = ?";
+            $designation_stmt = $conn->prepare($designation_query);
+            $designation_stmt->bind_param('i', $current_designation_id);
+            $designation_stmt->execute();
+            $designation_stmt->bind_result($old_designation_name);
+            $designation_stmt->fetch();
+            $designation_stmt->close();
+        }
+
+        
+        if ($current_designation_id != $emp_designation) {
+            $old_value = $old_designation_name.' - effective date '.$lp_date;
+            insertEmployeeHistoryLog($edit_id, 3, $old_value);
+        }
+        
+
+        // Prepare SQL statement for update
+        $sql = "UPDATE employees SET 
+                designation_id = ?, 
+                lp_date = ?, 
+                last_updated_date = ?, 
+                updated_by = ?
+                WHERE emp_id = ?";
+
+        $stmt = $conn->prepare($sql);
+
+        if ($stmt) {
+            // Bind parameters for update
+            $stmt->bind_param('issii', 
+                $emp_designation, $effective_date, $datetime, $updated_by, $edit_id
             );
 
             // Execute update
