@@ -1,10 +1,11 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <?php
         include "../../back/credential-check.php";
-        if (!checkAccess([1])) {
-            header("Location: index.php");
+        if (!checkAccess([1,2])) {
+            header("Location: ../general/dashboard.php");
             exit();
         }
         include "../../back/connection/connection.php";

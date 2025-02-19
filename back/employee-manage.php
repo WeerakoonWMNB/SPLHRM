@@ -134,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         if (empty($emp_designation)) $errors[] = "Employee Designation is required.";
         if (empty($address1)) $errors[] = "Employee Address is required.";
-        if (empty($epf_no)) $errors[] = "Valid EPF number is required.";
+        if (empty($epf_no)) $errors[] = "Valid EMP number is required.";
         if (empty($nic) || !preg_match('/^[0-9]{9}[vVxX]$|^[0-9]{12}$/', $nic)) $errors[] = "Valid NIC is required.";
         if (!in_array($gender, ['0', '1'])) $errors[] = "Valid gender selection is required.";
         if (!in_array($marital_status, ['0', '1'])) $errors[] = "Marital status is required.";
@@ -226,7 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         //if (empty($emp_designation)) $errors[] = "Employee Designation is required.";
         if (empty($address1)) $errors[] = "Employee Address is required.";
-        if (empty($epf_no)) $errors[] = "Valid EPF number is required.";
+        if (empty($epf_no)) $errors[] = "Valid EMP number is required.";
         if (empty($nic) || !preg_match('/^[0-9]{9}[vVxX]$|^[0-9]{12}$/', $nic)) $errors[] = "Valid NIC is required.";
         if (!in_array($gender, ['0', '1'])) $errors[] = "Valid gender selection is required.";
         if (!in_array($marital_status, ['0', '1'])) $errors[] = "Marital status is required.";

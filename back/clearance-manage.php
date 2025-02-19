@@ -2,7 +2,7 @@
 session_start();
 require "connection/connection.php";
 require "functions.php";
-
+include "mail-function.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json'); // Set JSON header
@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $step_stmt->close();
                 }
 
-    
+                clearanceRequest($request_id); // Send email notification
                 $_SESSION['success'] = "Clearance added successfully.";
                 echo json_encode(["status" => "success", "message" => "Clearance added successfully."]);
             } else {
@@ -313,6 +313,77 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['filteredEmps'])) {
         }
 
         echo $output;
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['pending'])) {
+
+    function clean_input($data) {
+        return htmlspecialchars(strip_tags(trim($data)));
+    }
+
+    $cl_id = clean_input($_POST['cl_id']);
+    $pending_note = clean_input($_POST['pending_note']);
+    $by = $_SESSION['uid'];
+    $datetime = date("Y-m-d H:i:s");
+    
+        $errors = [];
+    
+        if (empty($cl_id)) $errors[] = "Clearance id required.";
+        if (empty($pending_note)) $errors[] = "Pending note is required.";
+
+        if (!empty($errors)) {
+            echo json_encode(["status" => "error", "message" => $errors]);
+            exit();
+        }
+
+        $sql = "UPDATE cl_requests_steps SET is_complete = 2, pending_note = ?, last_updated_by = ?, last_updated_date = ? WHERE request_id = ? AND step = 0";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sisi", $pending_note, $by, $datetime, $cl_id);
+
+        if ($stmt->execute()) {
+            clearanceRequestPending($cl_id,$pending_note); // Send email notification
+            $_SESSION['success'] = "Request marked as pending.";
+            echo json_encode(["status" => "success", "message" => "Request marked as pending."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Failed to mark as pending."]);
+        }
+        
+
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve'])) {
+
+    function clean_input($data) {
+        return htmlspecialchars(strip_tags(trim($data)));
+    }
+
+    $cl_id = clean_input($_POST['cl_id']);
+    $approve_note = clean_input($_POST['approve_note']);
+    $by = $_SESSION['uid'];
+    $datetime = date("Y-m-d H:i:s");
+    
+        $errors = [];
+    
+        if (empty($cl_id)) $errors[] = "Clearance id required.";
+
+        if (!empty($errors)) {
+            echo json_encode(["status" => "error", "message" => $errors]);
+            exit();
+        }
+
+        $sql = "UPDATE cl_requests_steps SET is_complete = 1, complete_note = ?, last_updated_by = ?, last_updated_date = ? WHERE request_id = ? AND step = 0 AND is_complete != 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sisi", $approve_note, $by, $datetime, $cl_id);
+
+        if ($stmt->execute()) {
+            clearanceRequestAccept($cl_id,$approve_note); // Send email notification
+            $_SESSION['success'] = "Request marked as approved.";
+            echo json_encode(["status" => "success", "message" => "Request marked as approved."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Failed to mark as approved."]);
+        }
+        
+
 }
 
 ?>

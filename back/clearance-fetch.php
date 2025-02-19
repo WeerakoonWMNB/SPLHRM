@@ -7,13 +7,20 @@ $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 1;
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
 $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
 $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : "";
+$user_level = $_SESSION['ulvl'];
+$dept = $_SESSION['bd_id'];
+
 
 // Prepare search condition
 $searchQuery = "";
 $params = [];
 
+if ($user_level != 1 && $user_level != 2) {
+    $searchQuery .= " AND employees.bd_id IN ('$bd_id') ";
+}
+
 if (!empty($searchValue)) {
-    $searchQuery = " AND (cl_requests.cl_req_id LIKE ? 
+    $searchQuery .= " AND (cl_requests.cl_req_id LIKE ? 
                         OR employees.code LIKE ? 
                         OR employees.epf_no LIKE ? 
                         OR employees.name_in_full LIKE ? 
@@ -24,7 +31,7 @@ if (!empty($searchValue)) {
 }
 
 // Total records count (without filtering)
-$totalRecordsQuery = "SELECT COUNT(*) AS total FROM cl_requests WHERE status = 1";
+$totalRecordsQuery = "SELECT COUNT(*) AS total FROM cl_requests WHERE status = 1 ";
 $totalRecordsResult = $conn->query($totalRecordsQuery);
 $totalRecords = $totalRecordsResult->fetch_assoc()['total'];
 
@@ -50,6 +57,7 @@ $dataQuery = "SELECT cl_requests.*,
                      cl_requests_steps.is_complete AS step_complete, 
                      cl_requests_steps.step,
                      cl_requests_steps.pending_note,
+                     cl_requests_steps.complete_note,
                      cl_requests_steps.created_date,
                      cl_requests_steps.max_dates,
                      (SELECT bd_name 
@@ -95,7 +103,7 @@ while ($row = $dataResult->fetch_assoc()) {
         <form method="POST" action="../../back/clearance-manage.php">
             <input type="hidden" name="row_id" value="' . $cl_req_id . '">
             <div class="d-flex gap-2">
-                <a href="clearance-hr-approve.php" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View">
+                <a href="clearance-hr-approve.php?id='.base64_encode($cl_req_id).'" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View">
                     <i class="mdi mdi-eye"></i>
                 </a>';
 
@@ -124,6 +132,23 @@ while ($row = $dataResult->fetch_assoc()) {
     $row['action'] = $actionButtons;
     $row['row_id'] = $i++;
     $row['ini_name'] = htmlspecialchars($row['title'] . ' ' . $row['name_with_initials'], ENT_QUOTES, 'UTF-8');
+    $note = '';
+
+    if (!empty($row['pending_note'])) {
+        $note .= '* ' . $row['pending_note'];
+    }
+
+    if (!empty($row['complete_note'])) {
+        if (!empty($note)) {
+            $note .= '<br>'; // Add a break only if there's already content
+        }
+        $note .= '* ' . $row['complete_note'];
+    }
+
+
+    $note = trim($note); // Remove any extra spaces
+
+    $row['notes'] = $note;
 
     // Progress Bar Calculation
     $progressQuery = "SELECT 
@@ -137,6 +162,10 @@ while ($row = $dataResult->fetch_assoc()) {
     $stmtProgress->fetch();
     $stmtProgress->close();
 
+    if ($row['is_complete'] == '0' && ($row['step_complete'] == '1' && $row['step'] == "0")) {
+        $completion_percentage = 10;
+    }
+
     $row['progress'] = '<div class="progress">
                             <div class="progress-bar bg-success" role="progressbar" style="width: ' . ($completion_percentage ?: 0) . '%" aria-valuenow="' . ($completion_percentage ?: 0) . '" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>';
@@ -145,9 +174,27 @@ while ($row = $dataResult->fetch_assoc()) {
     $referenceDate = !empty($row['last_completed_date']) ? $row['last_completed_date'] : $row['created_date'];
     $daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
 
-    $delay_status = '<div class="d-flex gap-2"><span class="status-dot ' . ($daysGap > $row['max_dates'] ? 'red' : 'green') . '"></span> ' . $cl_req_id . '</div>';
-    
+    $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot green"></span> </div>';
+
+    if ($row['step_complete'] == '2') {
+        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> </div>';
+    }
+
+    if ($daysGap > $row['max_dates'] && $row['step_complete'] == '2') {
+        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot red"></span> </div>';
+    }
+
+    if ($daysGap <= $row['max_dates'] && $row['step_complete'] == '2') {
+        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot green"></span> </div>';
+    }
+
+    if ($daysGap > $row['max_dates'] && $row['step_complete'] != '2') {
+        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot red"></span> </div>';
+    }
+
+
     $row['req_id'] = $delay_status;
+    
     $data[] = $row;
 }
 
