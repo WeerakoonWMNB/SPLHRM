@@ -4,7 +4,7 @@
 
 <?php
         include "../../back/credential-check.php";
-        if (!checkAccess([1])) {
+        if (!checkAccess([1,2,3])) {
             header("Location: ../general/dashboard.php");
             exit();
         }
@@ -54,9 +54,9 @@
                                     <th>Clearance ID </th>
                                     <th>Name</th>
                                     <th>Code</th>
-                                    <th>EPF No</th>
+                                    <th>EMP No</th>
                                     <th>Resignation Date</th>
-                                    <th>Note</th>
+                                    <th>Notes</th>
                                     <th>Current Dept</th>
                                     <th>Progress</th>
                                     <th>Actions</th>
@@ -159,7 +159,7 @@ $(document).ready(function () {
             { "data": "code" },
             { "data": "epf_no" },
             { "data": "resignation_date" },
-            { "data": "pending_note" },
+            { "data": "notes" },
             { "data": "department" },
             { "data": "progress" },
             { "data": "action" }
