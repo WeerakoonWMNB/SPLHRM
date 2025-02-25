@@ -88,12 +88,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 //insert into steps table
-                $step_sql = "INSERT INTO cl_requests_steps (request_id, bd_code, created_by, created_date) VALUES (?, ?, ?, ?)";
+                $step_sql = "INSERT INTO cl_requests_steps (request_id, bd_code, max_dates, created_by, created_date) VALUES (?, ?, ?, ?, ?)";
                 $step_stmt = $conn->prepare($step_sql);
-
+                $max_dates = 2; // Default 2 days for HRD
                 if ($step_stmt) {
                     $bd_code = 'HRD'; // Define the string variable before binding
-                    $step_stmt->bind_param('isis', $request_id, $bd_code, $added_by, $datetime);
+                    $step_stmt->bind_param('isiis', $request_id, $bd_code, $max_dates, $added_by, $datetime);
                     $step_stmt->execute();
                     $step_stmt->close();
                 }
@@ -386,4 +386,240 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve'])) {
 
 }
 
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action']) && $_POST['action'] === 'allocate') {
+
+    $cl_id = isset($_POST['cl_id']) ? intval($_POST['cl_id']) : 0;
+    $departments = $_POST['selectedDepartments'] ?? [];
+    $sequences = $_POST['selectedSequence'] ?? [];
+    $preparers = $_POST['selectedPreparer'] ?? [];
+    $checkers = $_POST['selectedChecker'] ?? [];
+    $approvers = $_POST['selectedApprover'] ?? [];
+    $created_by = $_SESSION['uid']; // Replace with actual user session ID
+    $created_date = date('Y-m-d H:i:s');
+
+    if ($cl_id === 0 || empty($departments) || empty($sequences) || empty($approvers)) {
+        echo json_encode(["status" => "error", "message" => "Invalid input data."]);
+        exit;
+    }
+
+     // Ensure no empty values inside the arrays
+     if (count(array_filter($departments)) !== count($departments) 
+     || count(array_filter($sequences)) !== count($sequences)
+     || count(array_filter($approvers)) !== count($approvers)
+     ) {
+         echo json_encode(["status" => "error", "message" => "One or more fields are empty."]);
+         exit;
+     }
+
+    // Ensure all arrays have the same length
+    if (count($departments) !== count($sequences) || 
+        count($departments) !== count($preparers) || 
+        count($departments) !== count($checkers) || 
+        count($departments) !== count($approvers)) {
+        echo json_encode(["status" => "error", "message" => "Mismatched input data."]);
+        exit;
+    }
+
+    // Start MySQL Transaction
+    mysqli_begin_transaction($conn);
+
+    try {
+        // Get existing records
+        $existingRecords = [];
+        $query = "SELECT bd_code, step FROM cl_requests_steps WHERE request_id = ? AND is_complete = 0";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "i", $cl_id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            $existingRecords[$row['bd_code']] = $row['step'];
+        }
+        mysqli_stmt_close($stmt);
+
+        // Prepare new records mapping
+        $newRecords = [];
+        foreach ($departments as $key => $bd_code) {
+            $newRecords[$bd_code] = [
+                'step' => intval($sequences[$key]),
+                'preparer' => intval($preparers[$key] ?? 0),
+                'checker' => intval($checkers[$key] ?? 0),
+                'approver' => intval($approvers[$key] ?? 0)
+            ];
+        }
+        
+        $toUpdate = array_intersect_key($newRecords, $existingRecords); // Common records
+        $toInsert = array_diff_key($newRecords, $existingRecords); // New records
+        $toDelete = array_diff_key($existingRecords, $newRecords); // Records to delete
+
+        // **Update Existing Records**
+        foreach ($toUpdate as $bd_code => $data) {
+            $step = $data['step'];
+            $preparer = $data['preparer'];
+            $checker = $data['checker'];
+            $approver = $data['approver'];
+
+            $query = "UPDATE cl_requests_steps 
+                      SET step = ?, last_updated_by = ?, last_updated_date = ?, 
+                          assigned_preparer_user_id = ?, assigned_checker_user_id = ?, assigned_approver_user_id = ? 
+                      WHERE request_id = ? AND bd_code = ? AND is_complete != '1' AND step != 0";
+
+            $stmt = mysqli_prepare($conn, $query);
+            mysqli_stmt_bind_param($stmt, "iisiiiis", $step, $created_by, $created_date, $preparer, $checker, $approver, $cl_id, $bd_code);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+            
+        }
+
+        // **Insert New Records**
+        foreach ($toInsert as $bd_code => $data) {
+            $step = $data['step'];
+            $preparer = $data['preparer'];
+            $checker = $data['checker'];
+            $approver = $data['approver'];
+
+            // Fetch max_dates based on bd_code and emp_cat_id
+            $max_dates_query = "SELECT seiling_dates_for_backoffice, ceiling_dates_for_marketing,
+                (SELECT emp_cat_id FROM employees WHERE emp_id = (SELECT emp_id FROM cl_requests WHERE cl_req_id = ?)) as emp_cat_id
+                FROM branch_departments WHERE bd_code = ?";
+            $stmt = mysqli_prepare($conn, $max_dates_query);
+            mysqli_stmt_bind_param($stmt, "is", $cl_id, $bd_code);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            $max_dates_ar = mysqli_fetch_assoc($result);
+            mysqli_stmt_close($stmt);
+
+            $max_dates = $max_dates_ar['seiling_dates_for_backoffice'];
+            if ($max_dates_ar['emp_cat_id'] != '1') {
+                $max_dates = $max_dates_ar['ceiling_dates_for_marketing'];
+            }
+
+            $query = "INSERT INTO cl_requests_steps 
+                      (request_id, step, bd_code, max_dates, created_date, created_by, 
+                       assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            $stmt = mysqli_prepare($conn, $query);
+            mysqli_stmt_bind_param($stmt, "iisisiiii", $cl_id, $step, $bd_code, $max_dates, $created_date, $created_by, $preparer, $checker, $approver);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+        }
+
+        // **Delete Unmatched Records**
+        if (!empty($toDelete)) {
+            $placeholders = implode(',', array_fill(0, count($toDelete), '?'));
+            $query = "DELETE FROM cl_requests_steps WHERE request_id = ? AND bd_code IN ($placeholders) AND is_complete = 0 AND step != 0";
+
+            $stmt = mysqli_prepare($conn, $query);
+            $types = str_repeat('s', count($toDelete) + 1);
+            mysqli_stmt_bind_param($stmt, $types, ...array_merge([$cl_id], array_keys($toDelete)));
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+        }
+
+        mysqli_commit($conn);
+
+        //select next user to be attended
+        $query = "SELECT assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id, prepared_by, checked_by, approved_by 
+        FROM cl_requests_steps WHERE request_id = ? AND step !='0' AND is_complete !='1' ORDER BY step ASC LIMIT 1";
+
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("i", $cl_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $row = $result->fetch_assoc();
+        $next_user = null;
+
+        if (!empty($row['assigned_preparer_user_id']) && empty($row['prepared_by'])) {
+            $next_user = $row['assigned_preparer_user_id'];
+        } else if (!empty($row['assigned_checker_user_id']) && empty($row['checked_by'])) {
+            $next_user = $row['assigned_checker_user_id'];
+        } else if (!empty($row['assigned_approver_user_id']) && empty($row['approved_by'])) {
+            $next_user = $row['assigned_approver_user_id'];
+        }
+
+        if ($next_user) {
+            $user = "SELECT username FROM users WHERE user_id = ?";
+            $stmt = $conn->prepare($user);
+            $stmt->bind_param("i", $next_user);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+            $next_user = $user['username'];
+            
+            clearanceRequestStepNotice($cl_id,$next_user); // Send email notification
+        }
+
+        $_SESSION['success'] = "Departments allocated successfully.";
+        echo json_encode(["status" => "success", "message" => "Departments allocated successfully."]);
+    } catch (Exception $e) {
+        mysqli_rollback($conn);
+        echo json_encode(["status" => "error", "message" => "Database error: " . $e->getMessage()]);
+    }
+}
+
+
+if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['cl_id_for_fetch']) ) {
+// Get cl_id from the request
+$cl_id = isset($_GET['cl_id_for_fetch']) ? intval($_GET['cl_id_for_fetch']) : 0;
+
+// Fetch records by cl_id
+$query = "SELECT assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id, bd_code, step, is_complete 
+FROM cl_requests_steps WHERE request_id = ? AND step !='0' ORDER BY step ASC";
+
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $cl_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$records = [];
+while ($row = $result->fetch_assoc()) {
+    $records[] = [
+        'is_complete' => $row['is_complete'],
+        'department_id' => $row['bd_code'],
+        'sequence' => $row['step'],
+        'assigned_preparer_user_id' => $row['assigned_preparer_user_id'],
+        'assigned_checker_user_id' => $row['assigned_checker_user_id'],
+        'assigned_approver_user_id' => $row['assigned_approver_user_id'],
+    ];
+}
+
+echo json_encode($records);
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['bd_id'])) {
+
+    $bd_id = $_GET['bd_id'];
+
+    // Prepare the SQL statement to prevent SQL injection
+    $query = "SELECT * FROM users
+                WHERE users.is_active = 1 AND FIND_IN_SET(?, users.bd_id) > 0";
+
+    if ($stmt = $conn->prepare($query)) {
+        $stmt->bind_param("s", $bd_id); // "s" means string
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $emps = [];
+        while ($row = $result->fetch_assoc()) {
+            $emps[] = $row;
+        }
+
+        // Close the statement
+        $stmt->close();
+
+        // Return JSON response
+        header("Content-Type: application/json");
+        echo json_encode($emps);
+    } else {
+        // Handle SQL error
+        echo json_encode(["error" => "Query preparation failed"]);
+    }
+
+    // Close database connection
+    $conn->close();
+}
+
 ?>
+

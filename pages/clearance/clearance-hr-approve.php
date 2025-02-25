@@ -154,6 +154,7 @@
                         <div class="card">
                             <div class="card-body">
                             <h4 class="card-title">Clearance Request ID #<?= $cl_id ?>  <?= $delay_status ?></h4>
+                            <input type="hidden" id="cl_id_for_fetch" value="<?= $cl_id ?>">
                             <div class="media">
                                 
                                 <div class="media-body">
@@ -272,7 +273,53 @@
                             </div>
                         </div>
                         </div>
-                <?php    } 
+                <?php } 
+                else if (
+                    (($clearance['step'] == '0' && $clearance['step_complete'] == '1') && ($_SESSION['ulvl']=='1' || $_SESSION['ulvl']=='2'))
+                    || ($_SESSION['ulvl']=='1' || $_SESSION['ulvl']=='2')
+                    ){
+                    ?>
+                    <div class="col-md-12 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                            <h4 class="card-title">Department Allocation</h4>
+                            <div class="media">
+                                
+                                <div class="media-body">
+                                <button type="button" id="addRow" class="btn btn-info btn-sm mt-2 mb-2">Add Row</button>
+                                <form action="../../back/clearance-manage.php" method="post" id="department_alocation_form">
+                                    <input type="hidden" name="cl_id" id="cl_id" value="<?= $cl_id ?>">
+                                    <table width="100%" class="table table-bordered">
+                                        <th>#</th>
+                                        <th>Department</th>
+                                        <th>Order</th>
+                                        <th>Preparer</th>
+                                        <th>Checker</th>
+                                        <th>Approver</th>
+                                        <th>Action</th>
+                                        <tbody id="department_allocate_table">
+                                            
+                                        </tbody>
+                                    </table>
+                                        
+                                
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <button type="button" name="allocate" id="allocate" class="btn btn-success btn-sm">Allocate</button>
+                                        </div>
+                                        <a href="clearance-list.php" class="btn btn-info btn-sm">Back</a>
+                                    </div>
+
+                                    
+                                </form>
+                                </div>
+
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                <?php }
                 else {
                     echo '<div class="d-flex justify-content-end"><a href="clearance-list.php" class="btn btn-info btn-sm float-right">Back</a></div>';
                 }
@@ -392,8 +439,287 @@
        });
         
     });
-</script>
 
+    
+</script>
+<script>
+$(document).ready(function () {
+    let rowCount = 0;
+let departments = [];
+let cl_id_for_fetch = $("#cl_id_for_fetch").val();
+
+// Fetch departments via AJAX
+$.ajax({
+    url: "../../back/fetch_departments.php",
+    type: "GET",
+    dataType: "json",
+    success: function (data) {
+        departments = data;
+        fetchExistingRecords(); // Fetch existing records once departments are loaded
+    }
+});
+
+// Function to fetch and populate existing records
+function fetchExistingRecords() {
+    $.ajax({
+        url: "../../back/clearance-manage.php",
+        type: "GET",
+        data: { cl_id_for_fetch: cl_id_for_fetch },
+        dataType: "json",
+        success: function (data) {
+            data.forEach(async (record) => {
+                rowCount++;
+
+                let selectedDepartments = getSelectedValues(".department");
+                let selectedSequences = getSelectedValues(".sequence");
+
+                let departmentOptions = getDepartmentOptions(selectedDepartments, record.department_id);
+                let sequenceOptions = getSequenceOptions(selectedSequences, record.sequence);
+                
+                // Fetch employees for the selected department
+                let employees = await getEmployees(record.department_id);
+                console.log(record.assigned_preparer_user_id);
+                
+                let preparerOptions = getEmployeeOptions(employees, record.assigned_preparer_user_id);
+                let checkerOptions = getEmployeeOptions(employees, record.assigned_checker_user_id);
+                let approverOptions = getEmployeeOptions(employees, record.assigned_approver_user_id);
+
+                let disable = record.is_complete != '0' ? "disabled" : "";
+
+                let newRow = `
+                    <tr>
+                        <td class="row-number">${rowCount}</td>
+                        <td>
+                            <select class="department form-control" name="selectedDepartments[]" ${disable}>${departmentOptions}</select>
+                        </td>
+                        <td>
+                            <select class="sequence form-control" name="selectedSequence[]" ${disable}>${sequenceOptions}</select>
+                        </td>
+                        <td>
+                            <select class="preparer form-control" name="selectedPreparer[]" ${disable}>${preparerOptions}</select>
+                        </td>
+                        <td>
+                            <select class="checker form-control" name="selectedChecker[]" ${disable}>${checkerOptions}</select>
+                        </td>
+                        <td>
+                            <select class="approver form-control" name="selectedApprover[]" ${disable}>${approverOptions}</select>
+                        </td>
+                        <td>
+                            <button type="button" class="deleteRow btn btn-danger btn-sm" ${disable}><i class="mdi mdi-delete-forever"></i></button>
+                        </td>
+                    </tr>`;
+
+                $("#department_allocate_table").append(newRow);
+                updateDropdowns();
+            });
+        }
+    });
+}
+
+// Function to get selected values
+function getSelectedValues(selector) {
+    let selectedValues = [];
+    $(selector).each(function () {
+        let val = $(this).val();
+        if (val) selectedValues.push(val);
+    });
+    return selectedValues;
+}
+
+// Function to generate department dropdown options while preserving selected values
+function getDepartmentOptions(selectedDepartments, currentVal) {
+    let options = `<option value="">Select Department</option>`;
+    departments.forEach(dept => {
+        let disabled = selectedDepartments.includes(dept.bd_code) && dept.bd_code !== currentVal ? "disabled" : "";
+        let selected = dept.bd_code === currentVal ? "selected" : "";
+        options += `<option value="${dept.bd_code}" ${disabled} ${selected}>${dept.bd_name}</option>`;
+    });
+    return options;
+}
+
+// Function to generate sequence dropdown options while preserving selected values
+function getSequenceOptions(selectedSequences, currentVal) {
+    let options = `<option value="">Select Sequence</option>`;
+    for (let i = 1; i <= rowCount; i++) {
+        let disabled = selectedSequences.includes(i.toString()) && i.toString() != currentVal ? "disabled" : "";
+        let selected = i.toString() == currentVal ? "selected" : "";
+        options += `<option value="${i}" ${disabled} ${selected}>${i}</option>`;
+    }
+    return options;
+}
+
+// Function to fetch employees of a department
+async function getEmployees(bd_id) {
+    try {
+        let response = await $.ajax({
+            url: "../../back/clearance-manage.php",
+            type: "GET",
+            data: { bd_id: bd_id },
+            dataType: "json",
+        });
+        return response;
+    } catch (error) {
+        console.error("Error fetching employees", error);
+        return [];
+    }
+}
+
+// Function to generate employee dropdown options
+function getEmployeeOptions(employees, selectedEmployee) {
+    let options = `<option value="">Select Employee</option>`;
+    employees.forEach(emp => {
+        let selected = emp.user_id == selectedEmployee ? "selected" : "";
+        options += `<option value="${emp.user_id}" ${selected}> ${emp.name}</option>`;
+    });
+    return options;
+}
+
+// Function to add a new row
+$("#addRow").click(async function () {
+    rowCount++;
+
+    let selectedDepartments = getSelectedValues(".department");
+    let selectedSequences = getSelectedValues(".sequence");
+
+    let departmentOptions = getDepartmentOptions(selectedDepartments, "");
+    let sequenceOptions = getSequenceOptions(selectedSequences, "");
+    
+    let preparerOptions = `<option value="">Select Employee</option>`;
+    let checkerOptions = `<option value="">Select Employee</option>`;
+    let approverOptions = `<option value="">Select Employee</option>`;
+
+    let newRow = `
+        <tr>
+            <td class="row-number">${rowCount}</td>
+            <td>
+                <select class="department form-control" name="selectedDepartments[]">${departmentOptions}</select>
+            </td>
+            <td>
+                <select class="sequence form-control" name="selectedSequence[]">${sequenceOptions}</select>
+            </td>
+            <td>
+                <select class="preparer form-control" name="selectedPreparer[]">${preparerOptions}</select>
+            </td>
+            <td>
+                <select class="checker form-control" name="selectedChecker[]">${checkerOptions}</select>
+            </td>
+            <td>
+                <select class="approver form-control" name="selectedApprover[]">${approverOptions}</select>
+            </td>
+            <td>
+                <button type="button" class="deleteRow btn btn-danger btn-sm"><i class="mdi mdi-delete-forever"></i></button>
+            </td>
+        </tr>`;
+
+    $("#department_allocate_table").append(newRow);
+    updateDropdowns();
+});
+
+// Update dropdowns when department changes
+$(document).on("change", ".department", async function () {
+    let row = $(this).closest("tr");
+    let departmentId = $(this).val();
+    
+    if (departmentId) {
+        let employees = await getEmployees(departmentId);
+        
+        row.find(".preparer").html(getEmployeeOptions(employees, ""));
+        row.find(".checker").html(getEmployeeOptions(employees, ""));
+        row.find(".approver").html(getEmployeeOptions(employees, ""));
+    } else {
+        row.find(".preparer, .checker, .approver").html(`<option value="">Select Employee</option>`);
+    }
+    
+    updateDropdowns();
+});
+
+// Function to update department and sequence dropdowns dynamically
+function updateDropdowns() {
+    let selectedDepartments = getSelectedValues(".department");
+    let selectedSequences = getSelectedValues(".sequence");
+
+    $(".department").each(function () {
+        let currentVal = $(this).val();
+        $(this).html(getDepartmentOptions(selectedDepartments, currentVal));
+    });
+
+    $(".sequence").each(function () {
+        let currentVal = $(this).val();
+        $(this).html(getSequenceOptions(selectedSequences, currentVal));
+    });
+
+    updateRowNumbers();
+}
+
+
+    // Restrict duplicate sequence selection and preserve selected values
+    $(document).on("change", ".sequence", function () {
+        updateDropdowns();
+    });
+
+    // Delete row and update numbering
+    $(document).on("click", ".deleteRow", function () {
+        $(this).closest("tr").remove();
+        rowCount--;
+        updateRowNumbers();
+        updateDropdowns();
+    });
+
+    // Function to update row numbers
+    function updateRowNumbers() {
+        let count = 1;
+        $(".row-number").each(function () {
+            $(this).text(count);
+            count++;
+        });
+    }
+});
+
+
+$(document).ready(function () {
+    $("#allocate").click(function () {
+        let formData = $("#department_alocation_form").serialize();
+        $("#allocate").prop("disabled", true);
+
+        $.ajax({
+            url: "../../back/clearance-manage.php",
+            type: "POST",
+            data: formData + "&action=allocate",
+            dataType: "json",
+            success: function (response) {
+                if (response.status === "success") {
+                    //alert(response.message);
+                    location.reload(); // Refresh the page after successful submission
+                } else {
+                    //alert(response.message);
+                    $("#allocate").prop("disabled", false);
+                    const alertBox = document.getElementById('customAlert');
+                        alertBox.innerHTML  =  response.message;
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+                }
+            },
+            error: function () {
+                $("#allocate").prop("disabled", false);
+                
+                const alertBox = document.getElementById('customAlert');
+                        alertBox.innerHTML  =  "An error occurred. Please try again.";
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+            }
+        });
+    });
+});
+
+</script>
 </body>
 
 </html>
