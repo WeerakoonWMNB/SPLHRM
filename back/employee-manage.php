@@ -6,7 +6,7 @@ require "functions.php";
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['company_code'])) {
     $company_code = intval($_POST['company_code']);
     
-    $sql = "SELECT bd_id , bd_name FROM branch_departments WHERE company_code = ?";
+    $sql = "SELECT bd_id , bd_name FROM branch_departments WHERE company_code = ? GROUP BY bd_id, is_branch ORDER BY is_branch ASC, bd_name ASC";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $company_code);
     $stmt->execute();
@@ -176,7 +176,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
         $conn->close();
     }
-
 
 
     //employee edit

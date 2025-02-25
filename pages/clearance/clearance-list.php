@@ -148,6 +148,7 @@ $(document).ready(function () {
         "processing": true,
         "serverSide": true,
         "scrollX": true,
+        "order": [], // Disable default sorting
         "ajax": {
             "url": "../../back/clearance-fetch.php",
             "type": "POST"

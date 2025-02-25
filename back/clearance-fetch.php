@@ -81,6 +81,7 @@ $dataQuery = "SELECT cl_requests.*,
                   WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
               )
               WHERE cl_requests.status = 1 $searchQuery 
+              ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
 
 $stmt = $conn->prepare($dataQuery);
