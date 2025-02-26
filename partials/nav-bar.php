@@ -90,6 +90,7 @@
             <ul class="nav flex-column sub-menu">
               <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/summary.php"> Summary</a></li>
               <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/clearance-list.php"> Clearance List</a></li>
+              <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/clearance-allocated.php"> Clearance to Attend</a></li>
             </ul>
           </div>
         </li>
