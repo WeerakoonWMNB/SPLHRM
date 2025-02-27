@@ -11,6 +11,8 @@
         include "../../back/connection/connection.php";
 
         $cl_id = null;
+        $prepare_check_approve = null;
+        $cl_step_id = null;
         if (isset($_GET['id'])) {
             if (!empty($_GET['id'])) {
                 $cl_id = base64_decode($_GET['id']);
@@ -30,7 +32,14 @@
                      cl_requests_steps.created_date,
                      cl_requests_steps.max_dates,
                      cl_requests_steps.bd_code,
-                     cl_requests_steps.cl_step_id ,
+                     cl_requests_steps.cl_step_id,
+                     cl_requests_steps.assigned_preparer_user_id,
+                     cl_requests_steps.assigned_checker_user_id,
+                     cl_requests_steps.assigned_approver_user_id,
+                     cl_requests_steps.prepared_by,
+                     cl_requests_steps.checked_by,
+                     cl_requests_steps.approved_by,
+                     cl_requests_steps.prepare_check_approve,
                      branch_departments.bd_name,
                      designations.designation,
                      cl_requests.created_date as request_date,
@@ -76,6 +85,7 @@
                 }   
 
                 $clearance = $clearance->fetch_assoc();
+                $prepare_check_approve = $clearance['prepare_check_approve'];
 
                 $referenceDate = !empty($clearance['last_completed_date']) ? $clearance['last_completed_date'] : $clearance['created_date'];
                 $daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
@@ -258,6 +268,12 @@
                     }
 
                     function generateTable($conn, $d_code, $category, $prefix, $item_type, $cl_step_id) {
+                        global $prepare_check_approve;
+                        $dis = '';
+                        
+                        if ($prepare_check_approve != '0' && $prepare_check_approve != '1') {
+                            $dis = 'disabled';
+                        }
                         $items = getItems($conn, $d_code, $item_type);
                         $savedItems = getSavedItems($conn, $item_type, $cl_step_id);
 
@@ -288,7 +304,7 @@
                                 $remarks = isset($savedItems[$itemId]) ? $savedItems[$itemId]['remark'] : "";
                                 
                                 echo "<tr>";
-                                echo "<td><input type='checkbox' class='{$prefix}-check' name='{$prefix}_check[]' value='{$itemId}' $checked></td>";
+                                echo "<td><input type='checkbox' class='{$prefix}-check' name='{$prefix}_check[]' value='{$itemId}' $checked $dis></td>";
                                 echo "<td>{$item['item_name']}</td>";
                                 echo "<td><input type='number' class='form-control {$prefix}-quantity' name='{$prefix}_quantity[{$itemId}]' min='1' step='1' value='$quantity'></td>";
                                 echo "<td><input type='number' class='form-control {$prefix}-amount' name='{$prefix}_amount[{$itemId}]' min='0' step='0.01' value='$amount' required></td>";
@@ -332,6 +348,11 @@
                     }
 
                     function generatePhysicalTable($conn, $d_code, $category, $prefix, $item_type, $cl_step_id) {
+                        global $prepare_check_approve;
+                        $dis = '';
+                        if ($prepare_check_approve != '0' && $prepare_check_approve != '1') {
+                            $dis = 'disabled';
+                        }
                         $items = getPhysicalItems($conn, $d_code, $item_type);
                         $savedItems = getSavedPhysicalItems($conn, $item_type, $cl_step_id);
 
@@ -358,7 +379,7 @@
                                 $remarks = isset($savedItems[$itemId]) ? $savedItems[$itemId]['remark'] : "";
 
                                 echo "<tr>";
-                                echo "<td><input type='checkbox' class='{$prefix}-check' name='{$prefix}_check[]' value='{$itemId}' $checked></td>";
+                                echo "<td><input type='checkbox' class='{$prefix}-check' name='{$prefix}_check[]' value='{$itemId}' $checked $dis></td>";
                                 echo "<td>{$item['item_name']}</td>";
                                 echo "<td><input type='number' class='form-control {$prefix}-quantity' name='{$prefix}_quantity[{$itemId}]' min='1' step='1' value='$quantity'></td>";
                                 echo "<td>
@@ -397,8 +418,43 @@
                     
                     <div class="d-flex justify-content-between">
                         <div>
-                            <button type="button" name="submit" id="submit" class="btn btn-success btn-sm">Submit</button>
-                            <button type="button" id="pending" class="btn btn-warning btn-sm">Pending</button>
+                            <?php
+                                $disabled = '';
+                                if($clearance['assigned_preparer_user_id'] != $user_id && $clearance['assigned_checker_user_id'] != $user_id && $clearance['assigned_approver_user_id'] != $user_id) {
+                                    $disabled = 'disabled';
+                                }
+                                if ($clearance['prepare_check_approve']=='1' && 
+                                (empty($clearance['assigned_checker_user_id']) && $clearance['assigned_approver_user_id'] != $user_id)) {
+                                    $disabled = 'disabled';
+                                }
+                                if ($clearance['prepare_check_approve']=='2' && ($clearance['assigned_approver_user_id'] != $user_id)) {
+                                    $disabled = 'disabled';
+                                }
+                                if ($clearance['prepare_check_approve']=='3') {
+                                    $disabled = 'disabled';
+                                }
+
+                                if ($clearance['prepare_check_approve']=='0') {
+                                    if ($clearance['assigned_preparer_user_id'] == $user_id || 
+                                    (empty($clearance['assigned_preparer_user_id']) && $clearance['assigned_checker_user_id'] == $user_id) ||
+                                    ( empty($clearance['assigned_preparer_user_id']) && empty($clearance['assigned_checker_user_id']) && $clearance['assigned_approver_user_id'] == $user_id)) {
+                                        echo '<button type="button" name="submit" id="submit" class="btn btn-success btn-sm" '. $disabled .' >Submit</button>';
+                                    }
+                                }
+                                if ($clearance['prepare_check_approve']=='1') {
+                                    if ($clearance['assigned_checker_user_id'] == $user_id || 
+                                    (empty($clearance['assigned_checker_user_id']) && $clearance['assigned_approver_user_id'] == $user_id)) {
+                                        echo '<button type="button" name="submit" id="submit" class="btn btn-success btn-sm me-1" '. $disabled .' >Submit</button>';
+                                        echo '<button type="button" name="che" id="che" class="btn btn-success btn-sm" '. $disabled .' >Checked</button>';
+                                    }
+                                }
+                                if ($clearance['prepare_check_approve']=='2') {
+                                    if ($clearance['assigned_approver_user_id'] == $user_id) {
+                                        echo '<button type="button" name="approve" id="approve" class="btn btn-success btn-sm" '. $disabled .' >Approve</button>';
+                                    }
+                                }
+                            ?>
+                            <button type="button" id="pending" class="btn btn-warning btn-sm" <?= $disabled ?> >Pending</button>
                         </div>
                         <a href="clearance-allocated.php" class="btn btn-info btn-sm">Back</a>
                     </div>
@@ -502,6 +558,7 @@
         $(document).ready(function () {
             $("#submit").on("click", function (event) {
                 event.preventDefault(); // Prevent form submission in case it's inside a form
+                $("#submit").prop("disabled", true);
 
                 let formData = {
                     submit: true,  
@@ -573,9 +630,19 @@
                     dataType: "json",
                     success: function (response) {
                         if (response.error) {
-                            alert(response.error);
+                            //alert(response.error);
+                            $("#submit").prop("disabled", false);
+                            const alertBox = document.getElementById('customAlert');
+                            alertBox.textContent = response.error;
+                            alertBox.style.display = 'block';
+
+                            // Hide the alert after 3 seconds
+                            setTimeout(() => {
+                                alertBox.style.display = 'none';
+                            }, 3000);
                         } else {
-                            alert(response.message);
+                            //alert(response.message);
+                            
                             location.reload(); // Reload page on success
                         }
                     },
@@ -599,6 +666,91 @@
 
 });
 
+$('#approve').click(function () {
+    $("#approve").prop("disabled", true);
+    let approve_note = document.getElementById('note').value;
+    let cl_step_id = document.getElementById('cl_step_id').value;
+    let cl_id = document.getElementById('cl_id').value;
+
+    $.ajax({
+        url: "../../back/clearance-allocated-manage.php",
+        type: "POST",
+        data: {approve_note: approve_note, cl_step_id: cl_step_id, approve: 'approve', cl_id: cl_id},
+        dataType: 'json',
+        success: function (response) {
+            if (response.status === 'success') {
+                
+                location.reload();
+            } else {
+                //alert("Error: " + response.message);
+                $("#approve").prop("disabled", false);
+                const alertBox = document.getElementById('customAlert');
+                alertBox.innerHTML  =  response.message.join('<br>');
+                alertBox.style.display = 'block';
+
+                // Hide the alert after 3 seconds
+                setTimeout(() => {
+                    alertBox.style.display = 'none';
+                }, 3000);
+            }
+        },
+        error: function () {
+            //alert('An error occurred. Please try again.');
+            $("#approve").prop("disabled", false);
+            const alertBox = document.getElementById('customAlert');
+            alertBox.textContent = 'An error occurred. Please try again.';
+            alertBox.style.display = 'block';
+
+            // Hide the alert after 3 seconds
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 3000);
+        }
+    });
+});
+
+$('#che').click(function () {
+    $("#che").prop("disabled", true);
+    let note = document.getElementById('note').value;
+    let cl_step_id = document.getElementById('cl_step_id').value;
+    let cl_id = document.getElementById('cl_id').value;
+
+    $.ajax({
+        url: "../../back/clearance-allocated-manage.php",
+        type: "POST",
+        data: {note: note, cl_step_id: cl_step_id, che: 'che', cl_id: cl_id},
+        dataType: 'json',
+        success: function (response) {
+            if (response.status === 'success') {
+                
+                location.reload();
+            } else {
+                //alert("Error: " + response.message);
+                $("#che").prop("disabled", false);
+                const alertBox = document.getElementById('customAlert');
+                alertBox.innerHTML  =  response.message.join('<br>');
+                alertBox.style.display = 'block';
+
+                // Hide the alert after 3 seconds
+                setTimeout(() => {
+                    alertBox.style.display = 'none';
+                }, 3000);
+            }
+        },
+        error: function () {
+            //alert('An error occurred. Please try again.');
+            $("#che").prop("disabled", false);
+            const alertBox = document.getElementById('customAlert');
+            alertBox.textContent = 'An error occurred. Please try again.';
+            alertBox.style.display = 'block';
+
+            // Hide the alert after 3 seconds
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 3000);
+        }
+    });
+});
   </script>
 
   

@@ -118,8 +118,183 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
         }
     }
 
+    // update clearance step
+    $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 1, prepared_by = ?, prepared_date = ?, last_updated_date = ?, last_updated_by = ? WHERE cl_step_id = ? AND prepare_check_approve = 0";
+    $stmt = $conn->prepare($sql);   
+    $stmt->bind_param("issii", $by, $datetime, $datetime, $by, $cl_step_id);
+    $stmt->execute();
+    $stmt->close();
+
+    //select next user to be attended
+    $query = "SELECT assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id, prepared_by, checked_by, approved_by 
+    FROM cl_requests_steps WHERE request_id = ? AND step !='0' AND is_complete !='1' ORDER BY step ASC LIMIT 1";
+
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $cl_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $row = $result->fetch_assoc();
+    $next_user = null;
+
+    if (!empty($row['assigned_preparer_user_id']) && empty($row['prepared_by'])) {
+        $next_user = $row['assigned_preparer_user_id'];
+    } else if (!empty($row['assigned_checker_user_id']) && empty($row['checked_by'])) {
+        $next_user = $row['assigned_checker_user_id'];
+    } else if (!empty($row['assigned_approver_user_id']) && empty($row['approved_by'])) {
+        $next_user = $row['assigned_approver_user_id'];
+    }
+
+    if ($next_user) {
+        $user = "SELECT username FROM users WHERE user_id = ?";
+        $stmt = $conn->prepare($user);
+        $stmt->bind_param("i", $next_user);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $next_user = $user['username'];
+        
+        clearanceRequestStepNotice($cl_id,$next_user); // Send email notification
+    }
+
+    $_SESSION['success'] = "Successfully Saved.";
     echo json_encode($response);
     exit;
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve'])) {
+
+    function clean_input($data) {
+        return htmlspecialchars(strip_tags(trim($data)));
+    }
+
+    $cl_step_id = clean_input($_POST['cl_step_id']);
+    $cl_id = clean_input($_POST['cl_id']);
+    $approve_note = clean_input($_POST['approve_note']);
+    $by = $_SESSION['uid'];
+    $datetime = date("Y-m-d H:i:s");
+    
+        $errors = [];
+    
+        if (empty($cl_id)) $errors[] = "Clearance id required.";
+
+        if (!empty($errors)) {
+            echo json_encode(["status" => "error", "message" => $errors]);
+            exit();
+        }
+
+        $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 3, is_complete = 1, complete_date = ?, approved_by = ?, approved_date = ?, is_complete = 1, complete_note = ?, last_updated_by = ?, last_updated_date = ? WHERE cl_step_id = ? AND is_complete != 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sissisi", $datetime, $by, $datetime, $approve_note, $by, $datetime, $cl_step_id);
+
+        if ($stmt->execute()) {
+            //select next user to be attended
+            $query = "SELECT assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id, prepared_by, checked_by, approved_by 
+            FROM cl_requests_steps WHERE request_id = ? AND step !='0' AND is_complete !='1' ORDER BY step ASC LIMIT 1";
+
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $cl_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $row = $result->fetch_assoc();
+            $next_user = null;
+
+            if (!empty($row['assigned_preparer_user_id']) && empty($row['prepared_by'])) {
+                $next_user = $row['assigned_preparer_user_id'];
+            } else if (!empty($row['assigned_checker_user_id']) && empty($row['checked_by'])) {
+                $next_user = $row['assigned_checker_user_id'];
+            } else if (!empty($row['assigned_approver_user_id']) && empty($row['approved_by'])) {
+                $next_user = $row['assigned_approver_user_id'];
+            }
+
+            if ($next_user) {
+                $user = "SELECT username FROM users WHERE user_id = ?";
+                $stmt = $conn->prepare($user);
+                $stmt->bind_param("i", $next_user);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $user = $result->fetch_assoc();
+                $next_user = $user['username'];
+                
+                clearanceRequestStepNotice($cl_id,$next_user); // Send email notification
+            }
+
+            $_SESSION['success'] = "Request marked as approved.";
+            echo json_encode(["status" => "success", "message" => "Request marked as approved."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Failed to mark as approved."]);
+        }
+        
+
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['che'])) {
+
+    function clean_input($data) {
+        return htmlspecialchars(strip_tags(trim($data)));
+    }
+
+    $cl_step_id = clean_input($_POST['cl_step_id']);
+    $cl_id = clean_input($_POST['cl_id']);
+    $approve_note = clean_input($_POST['note']);
+    $by = $_SESSION['uid'];
+    $datetime = date("Y-m-d H:i:s");
+    
+        $errors = [];
+    
+        if (empty($cl_step_id)) $errors[] = "Clearance id required.";
+
+        if (!empty($errors)) {
+            echo json_encode(["status" => "error", "message" => $errors]);
+            exit();
+        }
+
+        $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 2, checked_by = ?, checked_date = ?, complete_note = ?, last_updated_by = ?, last_updated_date = ? 
+        WHERE cl_step_id = ? AND is_complete != 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("issisi", $by, $datetime, $approve_note, $by, $datetime, $cl_step_id);
+
+        if ($stmt->execute()) {
+            //select next user to be attended
+            $query = "SELECT assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id, prepared_by, checked_by, approved_by 
+            FROM cl_requests_steps WHERE request_id = ? AND step !='0' AND is_complete !='1' ORDER BY step ASC LIMIT 1";
+
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $cl_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $row = $result->fetch_assoc();
+            $next_user = null;
+
+            if (!empty($row['assigned_preparer_user_id']) && empty($row['prepared_by'])) {
+                $next_user = $row['assigned_preparer_user_id'];
+            } else if (!empty($row['assigned_checker_user_id']) && empty($row['checked_by'])) {
+                $next_user = $row['assigned_checker_user_id'];
+            } else if (!empty($row['assigned_approver_user_id']) && empty($row['approved_by'])) {
+                $next_user = $row['assigned_approver_user_id'];
+            }
+
+            if ($next_user) {
+                $user = "SELECT username FROM users WHERE user_id = ?";
+                $stmt = $conn->prepare($user);
+                $stmt->bind_param("i", $next_user);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $user = $result->fetch_assoc();
+                $next_user = $user['username'];
+                
+                clearanceRequestStepNotice($cl_id,$next_user); // Send email notification
+            }
+
+            $_SESSION['success'] = "Request marked as checked.";
+            echo json_encode(["status" => "success", "message" => "Request marked as checked."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Failed to mark as checked."]);
+        }
+        
+
 }
 
 
