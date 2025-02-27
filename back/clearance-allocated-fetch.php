@@ -9,10 +9,11 @@ $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
 $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : "";
 $user_level = $_SESSION['ulvl'];
 $dept = $_SESSION['bd_id'];
+$user_id = $_SESSION['uid'];
 
 
 // Prepare search condition
-$searchQuery = "";
+$searchQuery = " AND cl_requests.is_complete = 0 ";
 $params = [];
 
 if ($user_level != 1 && $user_level != 2) {
@@ -81,7 +82,14 @@ $dataQuery = "SELECT cl_requests.*,
                   WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
                   AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
               )
-              WHERE cl_requests.status = 1 $searchQuery 
+              WHERE cl_requests.status = 1 $searchQuery AND
+                (
+                    (cl_requests_steps.assigned_preparer_user_id != 0 AND cl_requests_steps.prepared_by IS NULL AND cl_requests_steps.assigned_preparer_user_id = $user_id) 
+                    OR
+                    (cl_requests_steps.assigned_checker_user_id != 0 AND cl_requests_steps.checked_by IS NULL AND cl_requests_steps.assigned_checker_user_id = $user_id)
+                    OR
+                    (cl_requests_steps.assigned_approver_user_id != 0 AND cl_requests_steps.approved_by IS NULL AND cl_requests_steps.assigned_approver_user_id = $user_id)
+                )
               ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
 
@@ -102,32 +110,12 @@ while ($row = $dataResult->fetch_assoc()) {
 
     // Generate action buttons
     $actionButtons = '
-        <form method="POST" action="../../back/clearance-manage.php">
+        <form method="POST" action="#">
             <input type="hidden" name="row_id" value="' . $cl_req_id . '">
             <div class="d-flex gap-2">
-                <a href="clearance-hr-approve.php?id='.base64_encode($cl_req_id).'" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View">
+                <a href="clearance-allocated-action.php?id='.base64_encode($cl_req_id).'" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View">
                     <i class="mdi mdi-eye"></i>
                 </a>';
-
-    if ($row['step_complete'] == '1' || $row['step'] > 0) {
-        $actionButtons .= '<button type="button" class="btn btn-warning btn-sm" title="Edit" disabled>
-                            <i class="mdi mdi-playlist-check"></i>
-                        </button>';
-    } else {
-        $actionButtons .= '<button type="button" class="btn btn-warning btn-sm" onclick="data_set(' . $cl_req_id . ')" title="Edit">
-                            <i class="mdi mdi-playlist-check"></i>
-                        </button>';
-    }
-
-    if ($row['is_complete'] == '1' || ($row['step_complete'] != '1' && $row['step'] == "0")) {
-        $actionButtons .= '<button type="submit" name="delete_data" class="btn btn-danger btn-sm" onclick="return confirm(\'Are you sure?\');" title="Delete">
-                            <i class="mdi mdi-playlist-remove"></i>
-                        </button>';
-    } else {
-        $actionButtons .= '<button type="button" class="btn btn-danger btn-sm" title="Delete" disabled>
-                            <i class="mdi mdi-playlist-remove"></i>
-                        </button>';
-    }
 
     $actionButtons .= '</div></form>';
 
