@@ -32,7 +32,8 @@
                      designations.designation,
                      cl_requests.created_date as request_date,
                      users.name AS request_by,
-                     uploads.location AS url,                     
+                     letter.location AS url,
+                     cvr.location AS cvr_url,                     
                      (SELECT bd_name 
                         FROM branch_departments
                         INNER JOIN cl_requests_steps ON cl_requests_steps.bd_code = branch_departments.bd_code
@@ -56,7 +57,8 @@
               INNER JOIN branch_departments ON employees.bd_id = branch_departments.bd_id
               INNER JOIN designations ON employees.designation_id = designations.desig_id 
               INNER JOIN users ON users.user_id = cl_requests.created_by
-              LEFT JOIN uploads ON uploads.request_id = cl_requests.cl_req_id AND uploads.document_type = '1'
+              LEFT JOIN uploads letter ON letter.request_id = cl_requests.cl_req_id AND letter.document_type = '1'
+              LEFT JOIN uploads cvr ON cvr.request_id = cl_requests.cl_req_id AND cvr.document_type = '2'
               WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1");
 
                 if ($clearance->num_rows != 1) {
@@ -228,8 +230,32 @@
                                                 }
                                                 ?>
                                             </td>
-                                            <td></td>
-                                            <td></td>
+                                            <td><b>Customer Visit Report : </b></td>
+                                            <td>
+                                            <?php
+                                                if (!empty($clearance['cvr_url'])) {
+                                                    $url = $clearance['cvr_url'];
+                                                    $fileExtension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+
+                                                    if (in_array($fileExtension, ['jpg', 'jpeg', 'png'])) {
+                                                        // Display Image with improved size
+                                                        echo '<div id="previewContainer1" style="max-width: 500px; max-height: 600px; overflow: hidden;">';
+                                                        echo '<img src="' . htmlspecialchars($url) . '" style="width: 100%; height: auto; display: block; border: 1px solid #ddd; border-radius: 8px; padding: 5px;">';
+                                                        echo '</div>';
+                                                    } elseif ($fileExtension === 'pdf') {
+                                                        // Display PDF Link
+                                                        echo '<div id="previewContainer1">';
+                                                        echo '<a href="' . htmlspecialchars($url) . '" target="_blank" style="font-weight: bold; color: blue; text-decoration: underline;">View Customer Visit Report(PDF)</a>';
+                                                        echo '</div>';
+                                                    } else {
+                                                        // Unsupported Format
+                                                        echo '<div id="previewContainer1"><p>Unsupported file format.</p></div>';
+                                                    }
+                                                } else {
+                                                    echo '<div id="previewContainer1"><p>No file uploaded.</p></div>';
+                                                }
+                                                ?>
+                                            </td>
                                         </tr>
 
                                     </table>

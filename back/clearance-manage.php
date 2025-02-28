@@ -12,9 +12,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function clean_input($data) {
             return htmlspecialchars(strip_tags(trim($data)));
         }
+
+        if (!isset($_POST['rsv'])) {
+            echo json_encode(["status" => "error", "message" => ["Service letter recommendation is required."]]);
+            exit();
+        }
     
         $employee = clean_input($_POST['employee']);
         $resignation_date = clean_input($_POST['resignation_date']);
+        $rsv = intval($_POST['rsv']);
         $added_by = $_SESSION['uid'];
         $datetime = date("Y-m-d H:i:s");
     
@@ -56,6 +62,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
+        $file_path_cvr = null; // Default null, will store path if valid file uploaded
+    
+        if (!empty($_FILES['customervisitreport']['name'])) {
+            $file = $_FILES['customervisitreport'];
+            $file_name = time() . "_" . basename($file['name']); // Unique filename
+            $file_tmp = $file['tmp_name'];
+            $file_size = $file['size'];
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+            $allowed_exts = ['pdf', 'jpg', 'jpeg', 'png'];
+    
+            // Validate file type
+            if (!in_array($file_ext, $allowed_exts)) {
+                $errors[] = "Invalid file format. Only PDF, JPG, JPEG, PNG allowed.";
+            }
+    
+            // Validate file size (Max: 5MB)
+            if ($file_size > 5 * 1024 * 1024) {
+                $errors[] = "File size exceeds 5MB limit.";
+            }
+    
+            // Move file to uploads directory if no errors
+            if (empty($errors)) {
+                $upload_dir = "../uploads/";
+                $file_path_cvr1 = "../../uploads/" . $file_name;
+                $file_path_cvr = $upload_dir . $file_name;
+    
+                if (!move_uploaded_file($file_tmp, $file_path_cvr)) {
+                    $errors[] = "Failed to upload file.";
+                }
+            }
+        }
         
         // Stop execution if there are errors
         if (!empty($errors)) {
@@ -64,11 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     
         // **Insert into cl_requests table**
-        $sql = "INSERT INTO cl_requests (emp_id, resignation_date, created_date, created_by) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO cl_requests (emp_id, resignation_date, service_letter_recommendation, created_date, created_by) VALUES (?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
     
         if ($stmt) {
-            $stmt->bind_param('issi', $employee, $resignation_date, $datetime, $added_by);
+            $stmt->bind_param('isisi', $employee, $resignation_date, $rsv, $datetime, $added_by);
     
             if ($stmt->execute()) {
                 $request_id = $stmt->insert_id; // Get last inserted ID
@@ -81,6 +118,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
                     if ($upload_stmt) {
                         $upload_stmt->bind_param('siss', $file_path1, $request_id, $added_by, $datetime);
+                        $upload_stmt->execute();
+                        $upload_stmt->close();
+                    }
+                    
+                }
+
+                if ($file_path_cvr) {
+                    
+                    $upload_sql = "INSERT INTO uploads (document_type, location, request_id, created_by, created_date) VALUES (2, ?, ?, ?, ?)";
+                    $upload_stmt = $conn->prepare($upload_sql);
+    
+                    if ($upload_stmt) {
+                        $upload_stmt->bind_param('siss', $file_path_cvr1, $request_id, $added_by, $datetime);
                         $upload_stmt->execute();
                         $upload_stmt->close();
                     }
@@ -118,10 +168,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function clean_input($data) {
             return htmlspecialchars(strip_tags(trim($data)));
         }
-    
+
+        if (!isset($_POST['rsv'])) {
+            echo json_encode(["status" => "error", "message" => ["Service letter recommendation is required."]]);
+            exit();
+        }
+        
         $edit_id = intval($_POST['edit_id']);
         $employee = clean_input($_POST['employee']);
         $resignation_date = clean_input($_POST['resignation_date']);
+        $rsv = intval($_POST['rsv']);
         $added_by = $_SESSION['uid'];
         $datetime = date("Y-m-d H:i:s");
     
@@ -176,6 +232,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+
+        //------------customer visit report upload----------------
+        $file_path_cvr = null; // Default null, will store path if a valid file is uploaded
+        $existing_file_cvr = null;
+        $stmt = $conn->prepare("SELECT location FROM uploads WHERE request_id = ? AND document_type = 2");  //2 for customer visit report
+        $stmt->bind_param("i", $edit_id);
+        $stmt->execute();
+        $stmt->bind_result($existing_file_cvr);
+        $stmt->fetch();
+        $stmt->close();
+
+        // **Handle file upload if a new file is provided**
+        if (!empty($_FILES['customervisitreport']['name'])) {
+            $file = $_FILES['customervisitreport'];
+            $file_name = time() . "_" . basename($file['name']); // Unique filename
+            $file_tmp = $file['tmp_name'];
+            $file_size = $file['size'];
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+            $allowed_exts = ['pdf', 'jpg', 'jpeg', 'png'];
+    
+            // Validate file type
+            if (!in_array($file_ext, $allowed_exts)) {
+                $errors[] = "Invalid file format. Only PDF, JPG, JPEG, PNG allowed.";
+            }
+    
+            // Validate file size (Max: 5MB)
+            if ($file_size > 5 * 1024 * 1024) {
+                $errors[] = "File size exceeds 5MB limit.";
+            }
+    
+            // Remove existing file before uploading a new one
+            if ($existing_file_cvr && file_exists(substr($existing_file_cvr,3))) {
+                unlink(substr($existing_file_cvr,3));
+            }
+    
+            // Move new file if no errors
+            if (empty($errors)) {
+                $file_path_cvr1 = "../../uploads/" . $file_name; // Path for DB
+                $file_path_cvr = $upload_dir . $file_name; // Actual server path
+    
+                if (!move_uploaded_file($file_tmp, $file_path_cvr)) {
+                    $errors[] = "Failed to upload file.";
+                }
+            }
+        }
     
         // **Stop execution if there are errors**
         if (!empty($errors)) {
@@ -184,11 +285,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     
         // **Update cl_requests table**
-        $sql = "UPDATE cl_requests SET emp_id = ?, resignation_date = ? WHERE cl_req_id = ?";
+        $sql = "UPDATE cl_requests SET emp_id = ?, resignation_date = ?, service_letter_recommendation = ? WHERE cl_req_id = ?";
         $stmt = $conn->prepare($sql);
-    
+        
         if ($stmt) {
-            $stmt->bind_param('isi', $employee, $resignation_date, $edit_id);
+            $stmt->bind_param('isii', $employee, $resignation_date, $rsv, $edit_id);
     
             if ($stmt->execute()) {
                 
@@ -220,14 +321,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
                     $check_stmt->close();
                 }
+
+                // **Update or Insert into uploads table**
+                if ($file_path_cvr) {
+                    // Check if a record already exists for this request
+                    $check_stmt = $conn->prepare("SELECT uploads_id FROM uploads WHERE request_id = ? AND document_type = 2");
+                    $check_stmt->bind_param("i", $edit_id);
+                    $check_stmt->execute();
+                    $check_stmt->store_result();
+                    
+                    if ($check_stmt->num_rows > 0) {
+                        // **Update existing upload record**
+                        $upload_sql = "UPDATE uploads SET location = ? WHERE request_id = ? AND document_type = 2";
+                        $upload_stmt = $conn->prepare($upload_sql);
+                        $upload_stmt->bind_param('si', $file_path_cvr1, $edit_id);
+                    } else {
+                        // **Insert new upload record**
+                        $upload_sql = "INSERT INTO uploads (document_type, location, request_id, created_by, created_date) VALUES (2, ?, ?, ?, ?)";
+                        $upload_stmt = $conn->prepare($upload_sql);
+                        $upload_stmt->bind_param('siss', $file_path_cvr1, $edit_id, $added_by, $datetime);
+                    }
+    
+                    if ($upload_stmt->execute()) {
+                        $upload_stmt->close();
+                    } else {
+                        $errors[] = "Error updating upload record.";
+                    }
+    
+                    $check_stmt->close();
+                }
     
                 $_SESSION['success'] = "Clearance updated successfully.";
                 echo json_encode(["status" => "success", "message" => "Clearance updated successfully."]);
             } else {
-                echo json_encode(["status" => "error", "message" => "Error: " . $stmt->error]);
+                echo json_encode(["status" => "error", "message" => ["Error: " . $stmt->error]]);
             }
         } else {
-            echo json_encode(["status" => "error", "message" => "Error preparing update statement."]);
+            echo json_encode(["status" => "error", "message" => ["Error preparing update statement."]]);
         }
     
         $stmt->close();
@@ -239,10 +369,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['search_id'])) {
     $row_id = intval($_POST['search_id']);
 
-    $stmt = $conn->prepare("SELECT cl_requests.*, employees.name_with_initials, employees.code, employees.epf_no, employees.title, uploads.location 
+    $stmt = $conn->prepare("SELECT cl_requests.*, employees.name_with_initials, employees.code, employees.epf_no, employees.title, 
+                            letter.location as letter_location, cvr.location as cvr_location
                         FROM cl_requests 
                         INNER JOIN employees ON cl_requests.emp_id = employees.emp_id AND cl_requests.status = 1 
-                        LEFT JOIN uploads ON uploads.request_id = cl_requests.cl_req_id AND uploads.document_type = 1
+                        LEFT JOIN uploads letter ON letter.request_id = cl_requests.cl_req_id AND letter.document_type = 1
+                        LEFT JOIN uploads cvr ON cvr.request_id = cl_requests.cl_req_id AND cvr.document_type = 2
                         WHERE cl_requests.cl_req_id = ?");
     $stmt->bind_param("i", $row_id);
 
@@ -561,31 +693,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action']) && $_POST['
 
 
 if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['cl_id_for_fetch']) ) {
-// Get cl_id from the request
-$cl_id = isset($_GET['cl_id_for_fetch']) ? intval($_GET['cl_id_for_fetch']) : 0;
+    // Get cl_id from the request
+    $cl_id = isset($_GET['cl_id_for_fetch']) ? intval($_GET['cl_id_for_fetch']) : 0;
 
-// Fetch records by cl_id
-$query = "SELECT assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id, bd_code, step, is_complete 
-FROM cl_requests_steps WHERE request_id = ? AND step !='0' ORDER BY step ASC";
+    // Fetch records by cl_id
+    $query = "SELECT assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id, bd_code, step, is_complete 
+    FROM cl_requests_steps WHERE request_id = ? AND step !='0' ORDER BY step ASC";
 
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $cl_id);
-$stmt->execute();
-$result = $stmt->get_result();
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $cl_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-$records = [];
-while ($row = $result->fetch_assoc()) {
-    $records[] = [
-        'is_complete' => $row['is_complete'],
-        'department_id' => $row['bd_code'],
-        'sequence' => $row['step'],
-        'assigned_preparer_user_id' => $row['assigned_preparer_user_id'],
-        'assigned_checker_user_id' => $row['assigned_checker_user_id'],
-        'assigned_approver_user_id' => $row['assigned_approver_user_id'],
-    ];
-}
+    $records = [];
+    while ($row = $result->fetch_assoc()) {
+        $records[] = [
+            'is_complete' => $row['is_complete'],
+            'department_id' => $row['bd_code'],
+            'sequence' => $row['step'],
+            'assigned_preparer_user_id' => $row['assigned_preparer_user_id'],
+            'assigned_checker_user_id' => $row['assigned_checker_user_id'],
+            'assigned_approver_user_id' => $row['assigned_approver_user_id'],
+        ];
+    }
 
-echo json_encode($records);
+    echo json_encode($records);
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['bd_id'])) {

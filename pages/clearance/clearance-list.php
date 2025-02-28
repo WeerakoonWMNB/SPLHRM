@@ -120,6 +120,27 @@
                             </div>
                         </div>
 
+                        <div class="row mb-3">
+                            <label for="customerVisitReport" class="col-sm-3 col-form-label">Customer Visit Report</label>
+                            <div class="col-sm-9">
+                                <input type="file" class="form-control" id="customervisitreport" name="customervisitreport" accept=".pdf, .jpg, .jpeg, .png" >
+                                <div id="previewContainer1" class="mt-2"></div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="inputPassword3" class="col-sm-3 col-form-label">Recommend for Service Letter</label>
+                            <div class="col-sm-9">
+                                <label class="form-check-label mt-2 me-2">
+                                <input type="radio" class="form-check-input" name="rsv" id="rsvn" value="0" required>
+                                    No
+                                </label>
+                                <label class="form-check-label mt-2">
+                                <input type="radio" class="form-check-input" name="rsv" id="rsvy" value="1">
+                                    Yes
+                                </label>
+                            </div>
+                        </div>
                         
                     </form>
                 </div>
@@ -181,11 +202,16 @@ function data_set(Id) {
             if (response.success) {
                 // Populate the form fields with the fetched data
                 $('.modal-title').html('Edit Clearance');
-                $('#edit_id').val(response.data.emp_id);
+                $('#edit_id').val(response.data.cl_req_id);
                 $('#resignation_date').val(response.data.resignation_date);
+                $("input[name='rsv'][value='" + response.data.service_letter_recommendation + "']").prop("checked", true);
 
-                if (response.data?.location) {
-                    previewFile(response.data.location);
+                if (response.data?.letter_location) {
+                    previewFile(response.data.letter_location);
+                }
+
+                if (response.data?.cvr_location) {
+                    previewFile1(response.data.cvr_location);
                 }
                 
                 $('#searchEmployee').val(response.data.title+' '+response.data.name_with_initials);
@@ -214,8 +240,12 @@ function add() {
         $('#edit_id').val('');
         $('#resignation_date').val('');
         $('#resignationLetter').val('');
+        $('#customervisitreport').val('');
         $('#searchEmployee').val('');
         $('#reporting').val('');
+        $('#previewContainer1').html('');
+        $('#previewContainer').html('');
+        $("input[name='rsv']").prop("checked", false);
 }
 
 
@@ -265,7 +295,7 @@ $(document).ready(function(){
         $('#submitBtn').click(function () {
             let form = document.getElementById("myform"); // Select form
             let formData = new FormData(form); // Create FormData manually
-
+            $("#submitBtn").prop("disabled", true);
             $.ajax({
                 url: $('#myform').attr('action'),
                 type: $('#myform').attr('method'),
@@ -279,6 +309,7 @@ $(document).ready(function(){
                          location.reload();
                     } else {
                         //alert("Error: " + response.message);
+                        $("#submitBtn").prop("disabled", false);
                         const alertBox = document.getElementById('customAlert');
                         alertBox.innerHTML  =  response.message.join('<br>');
                         alertBox.style.display = 'block';
@@ -291,6 +322,7 @@ $(document).ready(function(){
                 },
                 error: function () {
                     //alert('An error occurred. Please try again.');
+                    $("#submitBtn").prop("disabled", false);
                     const alertBox = document.getElementById('customAlert');
                     alertBox.textContent = 'An error occurred. Please try again.';
                     alertBox.style.display = 'block';
@@ -336,6 +368,38 @@ $(document).ready(function(){
             link.href = url;
             link.target = '_blank';
             link.textContent = 'View Resignation Letter (PDF)';
+            previewContainer.appendChild(link);
+        } else {
+            previewContainer.innerHTML = '<p>Unsupported file format.</p>';
+        }
+    }
+
+    function previewFile1(url) {
+        const fileInput = document.getElementById('customervisitreport');
+        const previewContainer = document.getElementById('previewContainer1');
+        previewContainer.innerHTML = ''; // Clear previous preview
+
+            displayPreview1(url);
+        
+    }
+
+    function displayPreview1(url) {
+        const previewContainer = document.getElementById('previewContainer1');
+        previewContainer.innerHTML = ''; // Clear previous preview
+
+        if (url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.png')) {
+            // Show image preview
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            previewContainer.appendChild(img);
+        } else if (url.endsWith('.pdf')) {
+            // Show PDF link
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.textContent = 'View Customer Visit Report(PDF)';
             previewContainer.appendChild(link);
         } else {
             previewContainer.innerHTML = '<p>Unsupported file format.</p>';
