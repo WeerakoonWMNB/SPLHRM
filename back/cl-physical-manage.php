@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_id']) && !empty(
 if (isset($_POST['edit_id']) && empty($_POST['edit_id'])) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-        $item_name = isset($_POST['item_name']) ? trim(filter_var($_POST['item_name'], FILTER_SANITIZE_STRING)) : '';
+        $item_name = isset($_POST['item_name']) ? trim(filter_var($_POST['item_name'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : '';
         $department = isset($_POST['department']) ? filter_var($_POST['department'], FILTER_VALIDATE_INT) : null;
         $item_type = isset($_POST['item_type']) ? filter_var($_POST['item_type'], FILTER_VALIDATE_INT) : 0;
 

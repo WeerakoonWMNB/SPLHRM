@@ -5,7 +5,7 @@ require "connection/connection.php";
 if (isset($_POST['edit_id']) && !empty($_POST['edit_id'])) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $edit_id = isset($_POST['edit_id']) ? filter_var($_POST['edit_id'], FILTER_VALIDATE_INT) : null;
-        $item_name = isset($_POST['item_name']) ? trim(filter_var($_POST['item_name'], FILTER_SANITIZE_STRING)) : '';
+        $item_name = isset($_POST['item_name']) ? trim(filter_var($_POST['item_name'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : '';
         $department = isset($_POST['department']) ? filter_var($_POST['department'], FILTER_VALIDATE_INT) : null;
         $p_type = isset($_POST['p_type']) ? filter_var($_POST['p_type'], FILTER_VALIDATE_INT) : null;
 
@@ -66,7 +66,7 @@ if (isset($_POST['edit_id']) && !empty($_POST['edit_id'])) {
 if (isset($_POST['edit_id']) && empty($_POST['edit_id'])) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-        $item_name = isset($_POST['item_name']) ? trim(filter_var($_POST['item_name'], FILTER_SANITIZE_STRING)) : '';
+        $item_name = isset($_POST['item_name']) ? trim(filter_var($_POST['item_name'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : '';
         $department = isset($_POST['department']) ? filter_var($_POST['department'], FILTER_VALIDATE_INT) : null;
         $p_type = isset($_POST['p_type']) ? filter_var($_POST['p_type'], FILTER_VALIDATE_INT) : null;
 
