@@ -13,12 +13,14 @@
         $cl_id = null;
         $prepare_check_approve = null;
         $cl_step_id = null;
+        $user_level = $_SESSION['ulvl'];
+
         if (isset($_GET['id'])) {
             if (!empty($_GET['id'])) {
                 $cl_id = base64_decode($_GET['id']);
                 $user_id = $_SESSION['uid'];
 
-                $clearance = $conn->query("SELECT cl_requests.resignation_date,
+                $query = "SELECT cl_requests.resignation_date,
                      cl_requests.is_complete, 
                      employees.name_with_initials, 
                      employees.code, 
@@ -65,20 +67,26 @@
                   SELECT MIN(step) FROM cl_requests_steps 
                   WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
                   AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
+                  AND cl_requests_steps.step != '0'
               )
               INNER JOIN branch_departments ON employees.bd_id = branch_departments.bd_id
               INNER JOIN designations ON employees.designation_id = designations.desig_id 
               INNER JOIN users ON users.user_id = cl_requests.created_by
               LEFT JOIN uploads ON uploads.request_id = cl_requests.cl_req_id AND uploads.document_type = '1'
-              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1 AND cl_requests.is_complete = 0
-              AND
-                (
-                    (cl_requests_steps.assigned_preparer_user_id != 0 AND cl_requests_steps.prepared_by IS NULL AND cl_requests_steps.assigned_preparer_user_id = $user_id) 
-                    OR
-                    (cl_requests_steps.assigned_checker_user_id != 0 AND cl_requests_steps.checked_by IS NULL AND cl_requests_steps.assigned_checker_user_id = $user_id)
-                    OR
-                    (cl_requests_steps.assigned_approver_user_id != 0 AND cl_requests_steps.approved_by IS NULL AND cl_requests_steps.assigned_approver_user_id = $user_id)
-                )");
+              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1 AND cl_requests.is_complete = 0";
+
+              if ($user_level != 1 && $user_level != 2) {
+                $query .= " AND
+                    (
+                        (cl_requests_steps.assigned_preparer_user_id != 0 AND cl_requests_steps.prepared_by IS NULL AND cl_requests_steps.assigned_preparer_user_id = $user_id) 
+                        OR
+                        (cl_requests_steps.assigned_checker_user_id != 0 AND cl_requests_steps.checked_by IS NULL AND cl_requests_steps.assigned_checker_user_id = $user_id)
+                        OR
+                        (cl_requests_steps.assigned_approver_user_id != 0 AND cl_requests_steps.approved_by IS NULL AND cl_requests_steps.assigned_approver_user_id = $user_id)
+                    )";
+                }
+
+                $clearance = $conn->query($query);
 
                 if ($clearance->num_rows != 1) {
                     header("Location: clearance-allocated.php");

@@ -41,7 +41,7 @@
                                     <th>Name </th>
                                     <th>Full Name</th>
                                     <th>Code</th>
-                                    <th>EPF No.</th>
+                                    <th>EMP ID</th>
                                     <th>NIC</th>
                                     <th>Department</th>
                                     <th>Actions</th>
@@ -113,7 +113,15 @@
                                     <div class="row mb-3">
                                         <label for="inputEmail3" class="col-sm-3 col-form-label">Title *</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="title" name="title" placeholder="Mr." required>
+                                            <select class="form-control" id="title" name ="title" required>
+                                            <option value=''>Select</option>
+                                            <option value='Mr.'>Mr.</option>
+                                            <option value='Mrs.'>Mrs.</option>
+                                            <option value='Miss.'>Miss.</option>
+                                            <option value='Ms.'>Ms.</option>
+                                            <option value='Dr.'>Dr.</option>
+                                            <option value='Ven.'>Ven.</option>
+                                        </select>
                                         </div>
                                     </div>
                                                         
@@ -166,18 +174,24 @@
                                         </div>
                                     </div>
 
+                                    <div class="row mb-3">
+                                        <label for="inputPassword3" class="col-sm-3 col-form-label">EMP ID *</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="employee_id" name="employee_id" placeholder="2516" required>
+                                        </div>
+                                    </div>
 
                                     <div class="row mb-3">
-                                        <label for="inputPassword3" class="col-sm-3 col-form-label" id="emp_code_lable">Emp Code </label>
+                                        <label for="inputPassword3" class="col-sm-3 col-form-label" id="emp_code_lable">Marketer Code </label>
                                         <div class="col-sm-9">
                                             <input type="text" class="form-control" id="emp_code" name="emp_code" placeholder="DKD1-7985P-5652">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label for="inputPassword3" class="col-sm-3 col-form-label">EPF No *</label>
+                                        <label for="inputPassword3" class="col-sm-3 col-form-label">EPF No </label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="epf" name="epf" placeholder="2516" required>
+                                            <input type="text" class="form-control" id="epf" name="epf" placeholder="MHMUM00127800000001313">
                                         </div>
                                     </div>
 
@@ -259,9 +273,9 @@
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label for="inputPassword3" class="col-sm-3 col-form-label">Phone (Mobile) </label>
+                                        <label for="inputPassword3" class="col-sm-3 col-form-label">Phone (Mobile) *</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" minlength="10" maxlength="10" id="mobile" name="mobile" placeholder="0715689542" >
+                                            <input type="text" class="form-control" minlength="10" maxlength="10" id="mobile" name="mobile" placeholder="0715689542" required>
                                         </div>
                                     </div>
 
@@ -288,6 +302,41 @@
                                             <select class="form-control mt-2" id="reporting" name="reporting" style="display: none;">
                                                 <option value="">Select</option>
                                             </select>
+                                        </div>
+                                    </div>
+                                <hr>
+                                    <div class="row mb-3">
+                                        <label for="bankBranch" class="col-sm-3 col-form-label">Bank Branch</label>
+                                        <div class="col-sm-9 position-relative">
+                                            <input type="text" id="bankBranch" class="form-control" placeholder="Search Bank and Branch">
+                                            <div id="bankBranchList" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                                            
+                                            <select class="form-control mt-2" id="bankBranchId" name="bankBranchId" style="display: none;">
+                                                <option value="">Select</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label for="account_number" class="col-sm-3 col-form-label">Account Number</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" minlength="5" id="account_number" name="account_number" placeholder="0002215456" >
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label for="nicCopy" class="col-sm-3 col-form-label">NIC Copy</label>
+                                        <div class="col-sm-9">
+                                            <input type="file" class="form-control" id="nicCopy" name="nicCopy" accept=".pdf, .jpg, .jpeg, .png" >
+                                            <div id="previewContainer" class="mt-2"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label for="passbookCopy" class="col-sm-3 col-form-label">Passbook Copy</label>
+                                        <div class="col-sm-9">
+                                            <input type="file" class="form-control" id="passbookCopy" name="passbookCopy" accept=".pdf, .jpg, .jpeg, .png" >
+                                            <div id="previewContainer1" class="mt-2"></div>
                                         </div>
                                     </div>
 
@@ -395,7 +444,7 @@ $(document).ready(function () {
             { "data": "ini_name" },
             { "data": "f_name" },
             { "data": "code" },
-            { "data": "epf_no" },
+            { "data": "employee_id" },
             { "data": "nic" },
             { "data": "bd_name" },
             { "data": "action" }
@@ -442,6 +491,7 @@ function emp_set(empId) {
                 $('#init_name').val(response.data.name_with_initials);
                 $('#full_name').val(response.data.name_in_full);
                 $('#emp_type').val(response.data.emp_cat_id); 
+                $('#employee_id').val(response.data.employee_id); 
                 $('#emp_code').val(response.data.code);
                 $('#designationDropdown').html('<option value="'+response.data.designation_id+'" selected>'+response.data.designation+'</option>');
                 $('#searchDesignation').val(response.data.designation);
@@ -461,7 +511,17 @@ function emp_set(empId) {
                 $('#work').val(response.data.work);
                 $('#home').val(response.data.home);
                 $('#searchEmployee').val(response.data.reporting);
+                $('#bankBranch').val(response.data.bank_branch_name);
                 $('#reporting').html('<option value="'+response.data.reporting_officer_emp_id+'" selected>'+response.data.reporting+'</option>');
+                $('#account_number').val(response.data.account_number);
+                $('#bankBranchId').html('<option value="'+response.data.code+'" selected>'+response.data.bank_branch_name+'</option>');
+                if (response.data?.nic_location) {
+                    previewFile(response.data.nic_location);
+                }
+
+                if (response.data?.passbook_location) {
+                    previewFile1(response.data.passbook_location);
+                }
                 $('#myModal').modal('show');
             } else {              
                 const alertBox = document.getElementById('customAlert');
@@ -521,6 +581,7 @@ function add_employee() {
                 $('#full_name').val('');
                 $('#emp_type').val(''); 
                 $('#emp_code').val('');
+                $('#employee_id').val('');
                 $('#designationDropdown').val('');
                 $('#searchDesignation').val('');
                 $('#searchDesignation').attr('readonly', false);
@@ -540,6 +601,13 @@ function add_employee() {
                 $('#home').val('');
                 $('#searchEmployee').val('');
                 $('#reporting').val('');
+                $('#bankBranch').val('');
+                $('#bankBranchId').val('');
+                $('#account_number').val('');
+                $('#nicCopy').val('');
+                $('#passbookCopy').val('');
+                $('#previewContainer1').html('');
+                $('#previewContainer').html('');
 }
 
 // Fetch branches based on selected company
@@ -667,6 +735,48 @@ $(document).click(function(e) {
     }
 });
 
+$("#bankBranch").on("keyup", function() {
+        let searchText = $(this).val();
+        if(searchText.length > 2) { // Trigger search on 2+ characters
+            $.ajax({
+                url: "../../back/bank-branch.php", 
+                method: "POST",
+                data: {query: searchText},
+                dataType: "html", // Expecting an HTML response
+                success: function(response) {
+                    $("#bankBranchList").html(response).show();
+                }
+            });
+        } else {
+            $("#bankBranchList").hide();
+        }
+    });
+
+    // Handle click on suggestion
+    $(document).on("click", ".bank-option", function(){
+        let Name = $(this).text();
+        let Id = $(this).data("id");
+
+        $("#bankBranch").val(Name); // Set input field
+        $("#bankBranchList").hide(); // Hide suggestion box
+        
+        // Add selected employee to dropdown and select it
+        $("#bankBranchId").html(`<option value="${Id}" selected>${Name}</option>`);
+    });
+
+    $(document).click(function(e) {
+        if (!$(e.target).closest("#bankBranch, #bankBranchList").length) {
+            $("#bankBranchList").hide();
+        }
+    });
+
+    // Hide the suggestion list when clicking outside
+    $(document).click(function(e) {
+        if (!$(e.target).closest("#searchEmployee, #employeeList").length) {
+            $("#employeeList").hide();
+        }
+    });
+
 
 });
 
@@ -722,10 +832,15 @@ $(document).click(function(e) {
     //submit form
     $(document).ready(function () {
         $('#submitBtn').click(function () {
+            let form = document.getElementById("myform"); // Select form
+            let formData = new FormData(form); // Create FormData manually
+            $("#submitBtn").prop("disabled", true);
             $.ajax({
                 url: $('#myform').attr('action'),
                 type: $('#myform').attr('method'),
-                data: $('#myform').serialize(),
+                data: formData,
+                contentType: false,  // Prevent jQuery from setting content type
+                processData: false,  // Prevent jQuery from processing data
                 dataType: 'json',
                 success: function (response) {
                     if (response.status === 'success') {
@@ -733,6 +848,7 @@ $(document).click(function(e) {
                          location.reload();
                     } else {
                         //alert("Error: " + response.message);
+                        $("#submitBtn").prop("disabled", false);
                         const alertBox = document.getElementById('customAlert');
                         alertBox.innerHTML  =  response.message.join('<br>');
                         alertBox.style.display = 'block';
@@ -745,6 +861,7 @@ $(document).click(function(e) {
                 },
                 error: function () {
                     //alert('An error occurred. Please try again.');
+                    $("#submitBtn").prop("disabled", false);
                     const alertBox = document.getElementById('customAlert');
                     alertBox.textContent = 'An error occurred. Please try again.';
                     alertBox.style.display = 'block';
@@ -758,7 +875,7 @@ $(document).click(function(e) {
         });
 
         $('#submitBtnP').click(function () {
-
+            $("#submitBtnP").prop("disabled", true);
             $.ajax({
                 url: $('#myformP').attr('action'),
                 type: $('#myformP').attr('method'),
@@ -770,6 +887,7 @@ $(document).click(function(e) {
                          location.reload();
                     } else {
                         //alert("Error: " + response.message);
+                        $("#submitBtnP").prop("disabled", false);
                         const alertBox = document.getElementById('customAlert');
                         alertBox.innerHTML  =  response.message.join('<br>');
                         alertBox.style.display = 'block';
@@ -782,6 +900,7 @@ $(document).click(function(e) {
                 },
                 error: function () {
                     //alert('An error occurred. Please try again.');
+                    $("#submitBtnP").prop("disabled", false);
                     const alertBox = document.getElementById('customAlert');
                     alertBox.textContent = 'An error occurred. Please try again.';
                     alertBox.style.display = 'block';
@@ -797,6 +916,70 @@ $(document).click(function(e) {
     });
 
     
+</script>
+<script>
+    function previewFile(url) {
+        const previewContainer = document.getElementById('previewContainer');
+        previewContainer.innerHTML = ''; // Clear previous preview
+
+            displayPreview(url);
+        
+    }
+
+    function displayPreview(url) {
+        const previewContainer = document.getElementById('previewContainer');
+        previewContainer.innerHTML = ''; // Clear previous preview
+
+        if (url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.png')) {
+            // Show image preview
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            previewContainer.appendChild(img);
+        } else if (url.endsWith('.pdf')) {
+            // Show PDF link
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.textContent = 'View NIC Copy(PDF)';
+            previewContainer.appendChild(link);
+        } else {
+            previewContainer.innerHTML = '<p>Unsupported file format.</p>';
+        }
+    }
+
+    function previewFile1(url) {
+        const previewContainer = document.getElementById('previewContainer1');
+        previewContainer.innerHTML = ''; // Clear previous preview
+
+            displayPreview1(url);
+        
+    }
+
+    function displayPreview1(url) {
+        const previewContainer = document.getElementById('previewContainer1');
+        previewContainer.innerHTML = ''; // Clear previous preview
+
+        if (url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.png')) {
+            // Show image preview
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            previewContainer.appendChild(img);
+        } else if (url.endsWith('.pdf')) {
+            // Show PDF link
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.textContent = 'View passbook Copy(PDF)';
+            previewContainer.appendChild(link);
+        } else {
+            previewContainer.innerHTML = '<p>Unsupported file format.</p>';
+        }
+    }
+
 </script>
 </body>
 

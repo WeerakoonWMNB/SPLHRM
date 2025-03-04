@@ -75,7 +75,7 @@ $dataQuery = "SELECT cl_requests.*,
                         LIMIT 1) AS last_completed_date
               FROM cl_requests 
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
-              INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id 
+              LEFT JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id 
               AND cl_requests_steps.step = (
                   SELECT MIN(step) FROM cl_requests_steps 
                   WHERE cl_requests_steps.request_id = cl_requests.cl_req_id

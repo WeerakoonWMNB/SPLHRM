@@ -51,8 +51,9 @@
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
               INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id
               AND cl_requests_steps.step = (
-                  SELECT MAX(step) FROM cl_requests_steps 
+                  SELECT MIN(step) FROM cl_requests_steps 
                   WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
+                  AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
               )
               INNER JOIN branch_departments ON employees.bd_id = branch_departments.bd_id
               INNER JOIN designations ON employees.designation_id = designations.desig_id 
@@ -281,7 +282,7 @@
                                         <textarea class="form-control" id="note" name="note" rows="3" placeholder="Please write note here.."></textarea>
                                     </div>
 
-                                    <input type="hidden" name="cl_id" id="cl_id" value="<?= $cl_id ?>">
+                                    <input type="text" name="cl_id" id="cl_id" value="<?= $cl_id ?>">
                                     
                                     <div class="d-flex justify-content-between">
                                         <div>

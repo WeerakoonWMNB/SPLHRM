@@ -25,7 +25,8 @@ $filteredRecordsResult = $conn->query($filteredRecordsQuery);
 $filteredRecords = $filteredRecordsResult->fetch_assoc()['total'];
 
 // Fetch employee data with pagination and search
-$dataQuery = "SELECT employees.*,branch_departments.bd_name FROM employees INNER JOIN branch_departments ON employees.bd_id = branch_departments.bd_id AND employees.status=1 " . $searchQuery . " LIMIT $start, $length";
+$dataQuery = "SELECT employees.*,branch_departments.bd_name FROM employees 
+INNER JOIN branch_departments ON employees.bd_id = branch_departments.bd_id AND employees.status=1 " . $searchQuery . " LIMIT $start, $length";
 $dataResult = $conn->query($dataQuery);
 
 $data = [];

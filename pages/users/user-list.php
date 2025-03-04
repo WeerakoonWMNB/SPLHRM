@@ -188,7 +188,7 @@
                                 <input type="text" id="searchEmployee" class="form-control" placeholder="Search Employee">
                                 <div id="employeeList" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                                 
-                                <select class="form-control mt-2" id="emp" name="emp" style="display: block;">
+                                <select class="form-control mt-2" id="emp" name="emp" style="display: none;">
                                     <option value="">Select</option>
                                 </select>
                             </div>
