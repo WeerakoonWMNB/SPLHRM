@@ -53,7 +53,7 @@ $stmt->close();
 $dataQuery = "SELECT cl_requests.*, 
                      employees.name_with_initials, 
                      employees.code, 
-                     employees.epf_no, 
+                     employees.employee_id, 
                      employees.title, 
                      cl_requests_steps.is_complete AS step_complete, 
                      cl_requests_steps.step,

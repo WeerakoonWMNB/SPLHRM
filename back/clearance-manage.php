@@ -416,12 +416,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['filteredEmps'])) {
     $bd_id = $_SESSION['bd_id'];
 
     // Base query
-    $sql = "SELECT employees.emp_id, employees.title, employees.name_with_initials, employees.nic, employees.epf_no, employees.code 
+    $sql = "SELECT employees.emp_id, employees.title, employees.name_with_initials, employees.nic, employees.employee_id, employees.code 
     FROM employees 
     LEFT JOIN cl_requests ON employees.emp_id = cl_requests.emp_id
     WHERE (employees.name_with_initials LIKE '%$search%' 
     OR employees.nic LIKE '%$search%' 
-    OR employees.epf_no LIKE '%$search%' 
+    OR employees.employee_id LIKE '%$search%' 
     OR employees.code LIKE '%$search%' 
     OR employees.name_in_full LIKE '%$search%') AND (cl_requests.status=0 OR cl_requests.status IS NULL) ";
 
@@ -438,7 +438,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['filteredEmps'])) {
 
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
-                $output .= "<a href='#' class='list-group-item list-group-item-action employee-option' data-id='".$row['emp_id']."'>".$row['title']." ".$row['name_with_initials']." (".$row['nic']." ".$row['code']." ".$row['epf_no'].")</a>";
+                $output .= "<a href='#' class='list-group-item list-group-item-action employee-option' data-id='".$row['emp_id']."'>".$row['title']." ".$row['name_with_initials']." (".$row['nic']." ".$row['code']." ".$row['employee_id'].")</a>";
             }
         } else {
             $output = "<a href='#' class='list-group-item list-group-item-action disabled'>No results found</a>";

@@ -128,14 +128,14 @@
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">Name with Initials *</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="init_name" name="init_name" placeholder="A K Dissanayake" required>
+                                            <input type="text" class="form-control" autocomplete='off' id="init_name" name="init_name" placeholder="A K Dissanayake" required>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">Full Name *</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Amith Kumara Dissanayake" required>
+                                            <input type="text" class="form-control" autocomplete='off' id="full_name" name="full_name" placeholder="Amith Kumara Dissanayake" required>
                                         </div>
                                     </div>
 
@@ -168,7 +168,7 @@
                                             <input type="text" id="searchDesignation" class="form-control" placeholder="Search Designation">
                                             <div id="designationList" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                                             
-                                            <select class="form-control mt-2" id="designationDropdown" name="emp_designation" style="display: none;">
+                                            <select class="form-control mt-2" autocomplete='off' id="designationDropdown" name="emp_designation" style="display: none;">
                                                 <option value="">Select</option>
                                             </select>
                                         </div>
@@ -177,28 +177,28 @@
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">EMP ID *</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="employee_id" name="employee_id" placeholder="2516" required>
+                                            <input type="text" class="form-control" autocomplete='off' id="employee_id" name="employee_id" placeholder="2516" required>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label" id="emp_code_lable">Marketer Code </label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="emp_code" name="emp_code" placeholder="DKD1-7985P-5652">
+                                            <input type="text" class="form-control" autocomplete='off' id="emp_code" name="emp_code" placeholder="DKD1-7985P-5652">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">EPF No </label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="epf" name="epf" placeholder="MHMUM00127800000001313">
+                                            <input type="text" class="form-control" autocomplete='off' id="epf" name="epf" placeholder="MHMUM00127800000001313">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">NIC *</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="nic" name="nic" placeholder="875615320V" required>
+                                            <input type="text" class="form-control" autocomplete='off' id="nic" name="nic" placeholder="875615320V" required>
                                         </div>
                                     </div>
 
@@ -254,49 +254,49 @@
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">Address Line 1 *</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="address1" name="address1" placeholder="Alfred Place"  required>
+                                            <input type="text" class="form-control" autocomplete='off' id="address1" name="address1" placeholder="Alfred Place"  required>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">Address Line 2</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="address2" name="address2" placeholder="Colombo 03" >
+                                            <input type="text" class="form-control" autocomplete='off' id="address2" name="address2" placeholder="Colombo 03" >
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">E-Mail </label>
                                         <div class="col-sm-9">
-                                            <input type="email" class="form-control" id="email" name="email" placeholder="someone@gmail.com" >
+                                            <input type="email" class="form-control" autocomplete='off' id="email" name="email" placeholder="someone@gmail.com" >
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">Phone (Mobile) *</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" minlength="10" maxlength="10" id="mobile" name="mobile" placeholder="0715689542" required>
+                                            <input type="text" class="form-control" autocomplete='off' minlength="10" maxlength="10" id="mobile" name="mobile" placeholder="0715689542" required>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">Phone (Work) </label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" minlength="10" maxlength="10" id="work" name="work" placeholder="0112565326" >
+                                            <input type="text" class="form-control" autocomplete='off' minlength="10" maxlength="10" id="work" name="work" placeholder="0112565326" >
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">Phone (Home) </label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" minlength="10" maxlength="10" id="home" name="home" placeholder="0112215456" >
+                                            <input type="text" class="form-control" autocomplete='off' minlength="10" maxlength="10" id="home" name="home" placeholder="0112215456" >
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label for="reporting" class="col-sm-3 col-form-label">Reporting Officer</label>
                                         <div class="col-sm-9 position-relative">
-                                            <input type="text" id="searchEmployee" class="form-control" placeholder="Search Reporting Officer">
+                                            <input type="text" id="searchEmployee" autocomplete='off' class="form-control" placeholder="Search Reporting Officer">
                                             <div id="employeeList" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                                             
                                             <select class="form-control mt-2" id="reporting" name="reporting" style="display: none;">
@@ -308,7 +308,7 @@
                                     <div class="row mb-3">
                                         <label for="bankBranch" class="col-sm-3 col-form-label">Bank Branch</label>
                                         <div class="col-sm-9 position-relative">
-                                            <input type="text" id="bankBranch" class="form-control" placeholder="Search Bank and Branch">
+                                            <input type="text" id="bankBranch" autocomplete='off' class="form-control" placeholder="Search Bank and Branch">
                                             <div id="bankBranchList" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                                             
                                             <select class="form-control mt-2" id="bankBranchId" name="bankBranchId" style="display: none;">
@@ -320,7 +320,7 @@
                                     <div class="row mb-3">
                                         <label for="account_number" class="col-sm-3 col-form-label">Account Number</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" minlength="5" id="account_number" name="account_number" placeholder="0002215456" >
+                                            <input type="text" class="form-control" autocomplete='off' minlength="5" id="account_number" name="account_number" placeholder="0002215456" >
                                         </div>
                                     </div>
 

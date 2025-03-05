@@ -5,7 +5,6 @@ require "connection/connection.php";
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_id']) && !empty($_POST['edit_id'])) {
     $edit_id = filter_var($_POST['edit_id'], FILTER_VALIDATE_INT);
     $item_name = isset($_POST['item_name']) ? htmlspecialchars(trim($_POST['item_name'])) : '';
-    $item_type = isset($_POST['item_type']) ? filter_var($_POST['item_type'], FILTER_VALIDATE_INT) : 0;
     $department = filter_var($_POST['department'], FILTER_VALIDATE_INT);
 
     // Check if inputs are valid
@@ -16,9 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_id']) && !empty(
     }
 
     if ($edit_id) {
-        $sql = "UPDATE cl_physical_items SET item_name = ?, bd_id = ?, item_type = ? WHERE cl_physical_item_id = ?";
-        $params = [$item_name, $department, $item_type , $edit_id];
-        $types = 'siii';
+        $sql = "UPDATE cl_physical_items SET item_name = ?, bd_id = ? WHERE cl_physical_item_id = ?";
+        $params = [$item_name, $department, $edit_id];
+        $types = 'sii';
 
         $stmt = $conn->prepare($sql);
 
@@ -50,21 +49,20 @@ if (isset($_POST['edit_id']) && empty($_POST['edit_id'])) {
 
         $item_name = isset($_POST['item_name']) ? trim(filter_var($_POST['item_name'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : '';
         $department = isset($_POST['department']) ? filter_var($_POST['department'], FILTER_VALIDATE_INT) : null;
-        $item_type = isset($_POST['item_type']) ? filter_var($_POST['item_type'], FILTER_VALIDATE_INT) : 0;
 
         // Check if any value is empty or null
-        if (empty($item_name) || is_null($department) || empty($item_type)) {
+        if (empty($item_name) || is_null($department)) {
                 $_SESSION['error'] = "Invalid inputs found.";
                 header("Location: ../pages/settings/cl-physical-list.php");
                 exit();
         }
     
-        $sql = "INSERT INTO cl_physical_items (item_name , bd_id, item_type) 
-        VALUES (?, ?, ?)";
+        $sql = "INSERT INTO cl_physical_items (item_name , bd_id) 
+        VALUES (?, ?)";
         $stmt = $conn->prepare($sql);
     
         if ($stmt) {
-            $stmt->bind_param('sii', $item_name, $department, $item_type);
+            $stmt->bind_param('si', $item_name, $department);
     
             if ($stmt->execute()) {
                 

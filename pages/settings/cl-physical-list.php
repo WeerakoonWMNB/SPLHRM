@@ -47,7 +47,6 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Item Name</th>
-                                            <th>Type</th>
                                             <th>Branch/Department Name</th>
                                             <th>Action</th>
                                         </tr>
@@ -61,13 +60,6 @@
                                                 <tr>
                                                     <td><?= $i ?></td>
                                                     <td><?= $branch['item_name'] ?> </td>
-                                                    <td><?php if ($branch['item_type'] == 1) {
-                                                        echo "Receive";
-                                                    }
-                                                    if ($branch['item_type'] == 2) {
-                                                        echo "Issue";
-                                                    }
-                                                      ?></td>
                                                     <td><?php if ($branch['bd_id'] == 9999999) {
                                                         echo "All Branches";
                                                     } 
@@ -151,17 +143,6 @@
                         </div>
 
                         <div class="row mb-3">
-                            <label for="inputEmail3" class="col-sm-3 col-form-label">Item Type *</label>
-                            <div class="col-sm-9">
-                            <select class="form-control" id="item_type" name ="item_type" required>
-                                <option value=''>Select</option>
-                                <option value="1">Receive</option>  
-                                <option value="2">Issue</option>
-                            </select>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
                             <label for="inputEmail3" class="col-sm-3 col-form-label">Item Name *</label>
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="item_name" name="item_name" placeholder="Payment for company T-Shirt" required>
@@ -208,7 +189,6 @@
                 $('#edit_id').val(response.data.cl_physical_item_id);
                 $('#department').val(response.data.bd_id);
                 $('#item_name').val(response.data.item_name);
-                $('#item_type').val(response.data.item_type);
                 $('#myModal').modal('show');
             } else {              
                 const alertBox = document.getElementById('customAlert');
