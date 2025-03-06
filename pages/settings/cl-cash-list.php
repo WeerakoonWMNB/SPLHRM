@@ -47,7 +47,6 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Item Name</th>
-                                            <th>Type</th>
                                             <th>Branch/Department Name</th>
                                             <th>Action</th>
                                         </tr>
@@ -61,16 +60,7 @@
                                                 <tr>
                                                     <td><?= $i ?></td>
                                                     <td><?= $branch['item_name'] ?> </td>
-                                                    <td><?php if ($branch['item_type'] == 1) {
-                                                        echo "Payble";
-                                                    }
-                                                    if ($branch['item_type'] == 2) {
-                                                        echo "Deduction";
-                                                    }
-                                                    if ($branch['item_type'] == 3) {
-                                                        echo "Hold";
-                                                    }
-                                                      ?></td>
+                                                    
                                                     <td><?php if ($branch['bd_id'] == 9999999) {
                                                         echo "All Branches";
                                                     } 
@@ -154,19 +144,6 @@
                         </div>
 
                         <div class="row mb-3">
-                            <label for="inputEmail3" class="col-sm-3 col-form-label">Payment Type *</label>
-                            <div class="col-sm-9">
-
-                            <select class="form-control" id="p_type" name ="p_type" required>
-                                <option value=''>Select</option>
-                                <option value="1">Payble</option>  
-                                <option value="2">Deduction</option>
-                                <option value="3">Hold</option>
-                            </select>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
                             <label for="inputEmail3" class="col-sm-3 col-form-label">Item Name *</label>
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="item_name" name="item_name" placeholder="Payment for company T-Shirt" required>
@@ -211,8 +188,6 @@
                 // Populate the form fields with the fetched data
                 $('.modal-title').html('Edit Monetery Items');
                 $('#edit_id').val(response.data.cl_amount_item_id);
-                $('#p_type').val(response.data.item_type);
-                $('#p_type').attr('readonly', true);
                 $('#department').val(response.data.bd_id);
                 $('#item_name').val(response.data.item_name);
                 $('#myModal').modal('show');
@@ -237,8 +212,6 @@ function add_branch() {
                 $('.modal-title').html('Add Monetery Items');
                 $('#edit_id').val('');
                 $('#department').val('');
-                $('#p_type').attr('readonly', false);
-                $('#p_type').val('');
                 $('#item_name').val('');
 }
   </script>

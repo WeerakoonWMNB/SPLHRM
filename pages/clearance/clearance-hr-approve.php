@@ -19,7 +19,7 @@
                      cl_requests.is_complete, 
                      employees.name_with_initials, 
                      employees.code, 
-                     employees.epf_no, 
+                     employees.employee_id, 
                      employees.title, 
                      employees.nic,
                      employees.appointment_date,
@@ -53,6 +53,13 @@
               AND cl_requests_steps.step = (
                   SELECT MAX(step) FROM cl_requests_steps 
                   WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
+                  AND 
+                  (
+                    (cl_requests_steps.step != 0 AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2))
+                    OR 
+                    (cl_requests_steps.step = 0)
+                    
+                  )
               )
               INNER JOIN branch_departments ON employees.bd_id = branch_departments.bd_id
               INNER JOIN designations ON employees.designation_id = designations.desig_id 
@@ -170,7 +177,7 @@
                                         </tr>
                                         <tr>
                                             <td><b>Employee No/Code : </b></td>
-                                            <td><?= $clearance['epf_no'] ?> 
+                                            <td><?= $clearance['employee_id'] ?> 
                                             <?php if (!empty($clearance['code'])) {
                                                 echo ' / '.$clearance['code'];
                                             } ?></td>
@@ -230,30 +237,30 @@
                                                 }
                                                 ?>
                                             </td>
-                                            <td><b>Customer Visit Report : </b></td>
+                                            <td></td>
                                             <td>
                                             <?php
-                                                if (!empty($clearance['cvr_url'])) {
-                                                    $url = $clearance['cvr_url'];
-                                                    $fileExtension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+                                                // if (!empty($clearance['cvr_url'])) {
+                                                //     $url = $clearance['cvr_url'];
+                                                //     $fileExtension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
 
-                                                    if (in_array($fileExtension, ['jpg', 'jpeg', 'png'])) {
-                                                        // Display Image with improved size
-                                                        echo '<div id="previewContainer1" style="max-width: 500px; max-height: 600px; overflow: hidden;">';
-                                                        echo '<img src="' . htmlspecialchars($url) . '" style="width: 100%; height: auto; display: block; border: 1px solid #ddd; border-radius: 8px; padding: 5px;">';
-                                                        echo '</div>';
-                                                    } elseif ($fileExtension === 'pdf') {
-                                                        // Display PDF Link
-                                                        echo '<div id="previewContainer1">';
-                                                        echo '<a href="' . htmlspecialchars($url) . '" target="_blank" style="font-weight: bold; color: blue; text-decoration: underline;">View Customer Visit Report(PDF)</a>';
-                                                        echo '</div>';
-                                                    } else {
-                                                        // Unsupported Format
-                                                        echo '<div id="previewContainer1"><p>Unsupported file format.</p></div>';
-                                                    }
-                                                } else {
-                                                    echo '<div id="previewContainer1"><p>No file uploaded.</p></div>';
-                                                }
+                                                //     if (in_array($fileExtension, ['jpg', 'jpeg', 'png'])) {
+                                                //         // Display Image with improved size
+                                                //         echo '<div id="previewContainer1" style="max-width: 500px; max-height: 600px; overflow: hidden;">';
+                                                //         echo '<img src="' . htmlspecialchars($url) . '" style="width: 100%; height: auto; display: block; border: 1px solid #ddd; border-radius: 8px; padding: 5px;">';
+                                                //         echo '</div>';
+                                                //     } elseif ($fileExtension === 'pdf') {
+                                                //         // Display PDF Link
+                                                //         echo '<div id="previewContainer1">';
+                                                //         echo '<a href="' . htmlspecialchars($url) . '" target="_blank" style="font-weight: bold; color: blue; text-decoration: underline;">View Customer Visit Report(PDF)</a>';
+                                                //         echo '</div>';
+                                                //     } else {
+                                                //         // Unsupported Format
+                                                //         echo '<div id="previewContainer1"><p>Unsupported file format.</p></div>';
+                                                //     }
+                                                // } else {
+                                                //     echo '<div id="previewContainer1"><p>No file uploaded.</p></div>';
+                                                // }
                                                 ?>
                                             </td>
                                         </tr>

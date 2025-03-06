@@ -16,9 +16,6 @@ $user_id = $_SESSION['uid'];
 $searchQuery = " AND cl_requests.is_complete = 0 ";
 $params = [];
 
-if ($user_level != 1 && $user_level != 2) {
-    $searchQuery .= " AND employees.bd_id IN ('$bd_id') ";
-}
 
 if (!empty($searchValue)) {
     $searchQuery .= " AND (cl_requests.cl_req_id LIKE ? 
@@ -53,7 +50,7 @@ $stmt->close();
 $dataQuery = "SELECT cl_requests.*, 
                      employees.name_with_initials, 
                      employees.code, 
-                     employees.epf_no, 
+                     employees.employee_id, 
                      employees.title, 
                      cl_requests_steps.is_complete AS step_complete, 
                      cl_requests_steps.step,
@@ -81,16 +78,22 @@ $dataQuery = "SELECT cl_requests.*,
                   SELECT MIN(step) FROM cl_requests_steps 
                   WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
                   AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
+                  AND cl_requests_steps.step != '0'
               )
-              WHERE cl_requests.status = 1 $searchQuery AND
-                (
-                    (cl_requests_steps.assigned_preparer_user_id != 0 AND cl_requests_steps.prepared_by IS NULL AND cl_requests_steps.assigned_preparer_user_id = $user_id) 
-                    OR
-                    (cl_requests_steps.assigned_checker_user_id != 0 AND cl_requests_steps.checked_by IS NULL AND cl_requests_steps.assigned_checker_user_id = $user_id)
-                    OR
-                    (cl_requests_steps.assigned_approver_user_id != 0 AND cl_requests_steps.approved_by IS NULL AND cl_requests_steps.assigned_approver_user_id = $user_id)
-                )
-              ORDER BY cl_requests.cl_req_id DESC
+              WHERE cl_requests.status = 1 $searchQuery ";
+
+              if ($user_level != 1 && $user_level != 2) {
+                $dataQuery .= " AND
+                    (
+                        (cl_requests_steps.assigned_preparer_user_id != 0 AND cl_requests_steps.prepared_by IS NULL AND cl_requests_steps.assigned_preparer_user_id = $user_id) 
+                        OR
+                        (cl_requests_steps.assigned_checker_user_id != 0 AND cl_requests_steps.checked_by IS NULL AND cl_requests_steps.assigned_checker_user_id = $user_id)
+                        OR
+                        (cl_requests_steps.assigned_approver_user_id != 0 AND cl_requests_steps.approved_by IS NULL AND cl_requests_steps.assigned_approver_user_id = $user_id)
+                    )";
+                }
+
+              $dataQuery .= " ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
 
 $stmt = $conn->prepare($dataQuery);

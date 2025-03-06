@@ -16,7 +16,7 @@ $searchQuery = "";
 $params = [];
 
 if ($user_level != 1 && $user_level != 2) {
-    $searchQuery .= " AND employees.bd_id IN ('$bd_id') ";
+    $searchQuery .= " AND employees.bd_id IN ('$dept') ";
 }
 
 if (!empty($searchValue)) {
@@ -75,12 +75,17 @@ $dataQuery = "SELECT cl_requests.*,
                         LIMIT 1) AS last_completed_date
               FROM cl_requests 
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
-              INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id 
+              LEFT JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id 
               AND cl_requests_steps.step = (
-                  SELECT MIN(step) FROM cl_requests_steps 
+                  SELECT MAX(step) FROM cl_requests_steps 
                   WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
-                  AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
-              )
+                  AND 
+                    (
+                        (cl_requests_steps.step != 0 AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2))
+                        OR 
+                        (cl_requests_steps.step = 0)
+                    )
+                  )
               WHERE cl_requests.status = 1 $searchQuery 
               ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
@@ -108,6 +113,16 @@ while ($row = $dataResult->fetch_assoc()) {
                 <a href="clearance-hr-approve.php?id='.base64_encode($cl_req_id).'" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View">
                     <i class="mdi mdi-eye"></i>
                 </a>';
+    if ($row['is_complete'] == '1') {
+        $actionButtons .= '<a href="clearance-item-summary.php?id='.base64_encode($cl_req_id).'" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="summary">
+                    <i class="mdi mdi-format-list-bulleted"></i>
+                </a>';
+    } 
+    else {
+        $actionButtons .= '<button type="button" class="btn btn-success btn-sm" title="summary" disabled>
+                            <i class="mdi mdi-format-list-bulleted"></i>
+                        </button>';
+    }           
 
     if ($row['step_complete'] == '1' || $row['step'] > 0) {
         $actionButtons .= '<button type="button" class="btn btn-warning btn-sm" title="Edit" disabled>

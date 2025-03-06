@@ -7,10 +7,9 @@ if (isset($_POST['edit_id']) && !empty($_POST['edit_id'])) {
         $edit_id = isset($_POST['edit_id']) ? filter_var($_POST['edit_id'], FILTER_VALIDATE_INT) : null;
         $item_name = isset($_POST['item_name']) ? trim(filter_var($_POST['item_name'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : '';
         $department = isset($_POST['department']) ? filter_var($_POST['department'], FILTER_VALIDATE_INT) : null;
-        $p_type = isset($_POST['p_type']) ? filter_var($_POST['p_type'], FILTER_VALIDATE_INT) : null;
 
         // Check if any value is empty or null
-        if (empty($item_name) || is_null($department) || is_null($p_type)) {
+        if (empty($item_name) || is_null($department)) {
                 $_SESSION['error'] = "Invalid inputs found.";
                 header("Location: ../pages/settings/cl-cash-list.php");
                 exit();
@@ -18,9 +17,9 @@ if (isset($_POST['edit_id']) && !empty($_POST['edit_id'])) {
 
     
         if ($edit_id) {
-            $sql = "UPDATE cl_amount_items SET item_name = ?, item_type = ?, bd_id = ?";
-            $params = [$item_name, $p_type, $department];
-            $types = 'sii';
+            $sql = "UPDATE cl_amount_items SET item_name = ?, bd_id = ?";
+            $params = [$item_name, $department];
+            $types = 'si';
     
     
             $sql .= " WHERE cl_amount_item_id = ?";
@@ -68,21 +67,20 @@ if (isset($_POST['edit_id']) && empty($_POST['edit_id'])) {
 
         $item_name = isset($_POST['item_name']) ? trim(filter_var($_POST['item_name'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : '';
         $department = isset($_POST['department']) ? filter_var($_POST['department'], FILTER_VALIDATE_INT) : null;
-        $p_type = isset($_POST['p_type']) ? filter_var($_POST['p_type'], FILTER_VALIDATE_INT) : null;
 
         // Check if any value is empty or null
-        if (empty($item_name) || is_null($department) || is_null($p_type)) {
+        if (empty($item_name) || is_null($department)) {
                 $_SESSION['error'] = "Invalid inputs found.";
                 header("Location: ../pages/settings/cl-cash-list.php");
                 exit();
         }
     
-        $sql = "INSERT INTO cl_amount_items (item_name , item_type, bd_id) 
-        VALUES (?, ?, ?)";
+        $sql = "INSERT INTO cl_amount_items (item_name , bd_id) 
+        VALUES (?, ?)";
         $stmt = $conn->prepare($sql);
     
         if ($stmt) {
-            $stmt->bind_param('sii', $item_name, $p_type, $department);
+            $stmt->bind_param('si', $item_name, $department);
     
             if ($stmt->execute()) {
                 

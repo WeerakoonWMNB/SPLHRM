@@ -96,7 +96,7 @@ $(document).ready(function () {
             { "data": "req_id" },
             { "data": "ini_name" },
             { "data": "code" },
-            { "data": "epf_no" },
+            { "data": "employee_id" },
             { "data": "resignation_date" },
             { "data": "notes" },
             { "data": "department" },
