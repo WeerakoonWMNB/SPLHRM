@@ -244,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             $result = $stmt->get_result();
             $row = $result->fetch_assoc();
-            $system_generated_id = $row['permanent_sequence'];
+            $system_generated_id = $row['permanent_sequence'].'P';
             $stmt->close();
         }
         else {
@@ -254,7 +254,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             $result = $stmt->get_result();
             $row = $result->fetch_assoc();
-            $system_generated_id = $row['fl_sequence'];
+            $system_generated_id = $row['fl_sequence'].'F';
             $stmt->close();
         }
 
