@@ -16,9 +16,6 @@ $user_id = $_SESSION['uid'];
 $searchQuery = " AND cl_requests.is_complete = 0 ";
 $params = [];
 
-if ($user_level != 1 && $user_level != 2) {
-    $searchQuery .= " AND employees.bd_id IN ('$bd_id') ";
-}
 
 if (!empty($searchValue)) {
     $searchQuery .= " AND (cl_requests.cl_req_id LIKE ? 

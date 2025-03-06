@@ -161,6 +161,75 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
+    
+    if (isset($_FILES['customervisitreport'])) {
+        $file_path_cvr = null; // Default null, will store path if valid file uploaded
+    
+            $file = $_FILES['customervisitreport'];
+            $file_name = time() . "_" . basename($file['name']); // Unique filename
+            $file_tmp = $file['tmp_name'];
+            $file_size = $file['size'];
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+            $allowed_exts = ['pdf', 'jpg', 'jpeg', 'png'];
+    
+            // Validate file type
+            if (!in_array($file_ext, $allowed_exts)) {
+                $errors[] = "Invalid file format. Only PDF, JPG, JPEG, PNG allowed.";
+            }
+    
+            // Validate file size (Max: 5MB)
+            if ($file_size > 5 * 1024 * 1024) {
+                $errors[] = "File size exceeds 5MB limit.";
+            }
+    
+            // Move file to uploads directory if no errors
+            if (empty($errors)) {
+                $upload_dir = "../uploads/";
+                $file_path_cvr1 = "../../uploads/" . $file_name;
+                $file_path_cvr = $upload_dir . $file_name;
+    
+                if (move_uploaded_file($file_tmp, $file_path_cvr)) {
+
+                    $existing_file_cvr = null;
+                    $stmt = $conn->prepare("SELECT location FROM uploads WHERE request_id = ? AND document_type = 2");  //2 for customer visit report
+                    $stmt->bind_param("i", $cl_id);
+                    $stmt->execute();
+                    $stmt->bind_result($existing_file_cvr);
+                    $stmt->fetch();
+                    $stmt->close();
+
+                    if ($existing_file_cvr && file_exists(substr($existing_file_cvr,3))) {
+                        unlink(substr($existing_file_cvr,3));
+                    }
+
+                    $check_stmt = $conn->prepare("SELECT uploads_id FROM uploads WHERE request_id = ? AND document_type = 2");
+                    $check_stmt->bind_param("i", $cl_id);
+                    $check_stmt->execute();
+                    $check_stmt->store_result();
+                    
+                    if ($check_stmt->num_rows > 0) {
+                        // **Update existing upload record**
+                        $upload_sql = "UPDATE uploads SET location = ? WHERE request_id = ? AND document_type = 2";
+                        $upload_stmt = $conn->prepare($upload_sql);
+                        $upload_stmt->bind_param('si', $file_path_cvr1, $cl_id);
+                    } else {
+                        // **Insert new upload record**
+                        $upload_sql = "INSERT INTO uploads (document_type, location, request_id, created_by, created_date) VALUES (2, ?, ?, ?, ?)";
+                        $upload_stmt = $conn->prepare($upload_sql);
+                        $upload_stmt->bind_param('siss', $file_path_cvr1, $cl_id, $by, $datetime);
+                    }
+    
+                    if ($upload_stmt->execute()) {
+                        $upload_stmt->close();
+                    } 
+    
+                    $check_stmt->close();
+                }
+            }
+        
+    } 
+
+
     // Update clearance step
     $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 1, prepared_by = ?, prepared_date = ?, last_updated_date = ?, last_updated_by = ? WHERE cl_step_id = ? AND prepare_check_approve = 0";
     $stmt = $conn->prepare($sql);   

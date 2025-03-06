@@ -120,7 +120,7 @@
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        <div class="row mb-3" style="display:none;">
                             <label for="customerVisitReport" class="col-sm-3 col-form-label">Customer Visit Report</label>
                             <div class="col-sm-9">
                                 <input type="file" class="form-control" id="customervisitreport" name="customervisitreport" accept=".pdf, .jpg, .jpeg, .png" >

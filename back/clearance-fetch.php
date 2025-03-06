@@ -16,7 +16,7 @@ $searchQuery = "";
 $params = [];
 
 if ($user_level != 1 && $user_level != 2) {
-    $searchQuery .= " AND employees.bd_id IN ('$bd_id') ";
+    $searchQuery .= " AND employees.bd_id IN ('$dept') ";
 }
 
 if (!empty($searchValue)) {

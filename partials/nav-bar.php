@@ -89,7 +89,13 @@
           <div class="collapse" id="clearance">
             <ul class="nav flex-column sub-menu">
               <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/summary.php"> Summary</a></li>
+              <?php
+                if (checkAccess([1,2])) {
+              ?>
               <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/clearance-list.php"> Clearance List</a></li>
+              <?php
+                }
+              ?>  
               <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/clearance-allocated.php"> Clearance to Attend</a></li>
             </ul>
           </div>

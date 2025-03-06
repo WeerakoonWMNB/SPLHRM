@@ -34,6 +34,11 @@
                      users.name AS request_by,
                      letter.location AS url,
                      cvr.location AS cvr_url,
+                     bb.bank_name,
+                     bb.bank_code,
+                     bb.branch_name,
+                     bb.branch_code,
+                     employees.account_number,
                     (SELECT complete_date 
                         FROM cl_requests_steps
                         WHERE cl_requests_steps.is_complete = 1 
@@ -59,6 +64,7 @@
               INNER JOIN users ON users.user_id = cl_requests.created_by
               LEFT JOIN uploads letter ON letter.request_id = cl_requests.cl_req_id AND letter.document_type = '1'
               LEFT JOIN uploads cvr ON cvr.request_id = cl_requests.cl_req_id AND cvr.document_type = '2'
+              LEFT JOIN bank_branch bb ON bb.bank_code = employees.bank_code AND bb.branch_code = employees.branch_code
               WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1");
 
                 if ($clearance->num_rows != 1) {
@@ -151,6 +157,18 @@
                                             <td><?= $clearance['request_date'] ?></td>
                                             <td><b>Requested By : </b></td>
                                             <td><?= $clearance['request_by'] ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Bank Name : </b></td>
+                                            <td><?= $clearance['bank_name'] ?> <?php if($clearance['bank_code']) { echo ' - ('. $clearance['bank_code'] .')'; } ?> </td>
+                                            <td><b>Branch Name : </b></td>
+                                            <td><?= $clearance['branch_name'] ?> <?php if($clearance['branch_code']) { echo ' - ('. $clearance['branch_code'] .')'; } ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Acc. No : </b></td>
+                                            <td><?= $clearance['account_number'] ?></td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
                                     </table>
                                     
