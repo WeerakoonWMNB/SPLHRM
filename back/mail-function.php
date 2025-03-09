@@ -6,7 +6,7 @@ function clearanceRequest($cl_id) {
     
     include 'connection/connection.php';
 
-    $sql = "SELECT employees.title, employees.name_with_initials, employees.employee_id, employees.code, cl_requests.resignation_date,
+    $sql = "SELECT employees.title, employees.name_with_initials, employees.system_emp_no, employees.code, cl_requests.resignation_date,
     cl_requests.cl_req_id, users.name AS created_by, branch_departments.bd_name, branch_departments.bd_code
     FROM cl_requests
     INNER JOIN employees ON employees.emp_id = cl_requests.emp_id
@@ -89,7 +89,7 @@ function clearanceRequest($cl_id) {
                                 <tbody>
                                   <tr><td><strong>Clearance ID:</strong> #'.$row['cl_req_id'].' </td></tr>
                                   <tr><td><strong>Employee Name:</strong> '.$row['title'].' '.$row['name_with_initials'].'</td></tr>
-                                  <tr><td><strong>Employee No/Code:</strong> '.$row['employee_id'].'/'.$row['code'].'</td></tr>
+                                  <tr><td><strong>Employee ID:</strong> '.$row['system_emp_no'].'</td></tr>
                                   <tr><td><strong>Department/Branch:</strong> '.$row['bd_name'].'</td></tr>
                                   <tr><td><strong>Resign Date:</strong> '.$row['resignation_date'].'</td></tr>
                                   <tr><td><strong>Requested By:</strong> '.$row['created_by'].'</td></tr>
@@ -167,7 +167,7 @@ function clearanceRequestPending($cl_id,$pending_note) {
     
     include 'connection/connection.php';
 
-    $sql = "SELECT employees.title, employees.name_with_initials, employees.employee_id, employees.code, cl_requests.resignation_date,
+    $sql = "SELECT employees.title, employees.name_with_initials, employees.system_emp_no, employees.code, cl_requests.resignation_date,
     cl_requests.cl_req_id, users.name AS created_by, branch_departments.bd_name, branch_departments.bd_code
     FROM cl_requests
     INNER JOIN employees ON employees.emp_id = cl_requests.emp_id
@@ -250,7 +250,7 @@ function clearanceRequestPending($cl_id,$pending_note) {
                                 <tbody>
                                   <tr><td><strong>Clearance ID:</strong> #'.$row['cl_req_id'].' </td></tr>
                                   <tr><td><strong>Employee Name:</strong> '.$row['title'].' '.$row['name_with_initials'].'</td></tr>
-                                  <tr><td><strong>Employee No/Code:</strong> '.$row['employee_id'].'/'.$row['code'].'</td></tr>
+                                  <tr><td><strong>Employee ID:</strong> '.$row['system_emp_no'].'</td></tr>
                                   <tr><td><strong>Department/Branch:</strong> '.$row['bd_name'].'</td></tr>
                                   <tr><td><strong>Resign Date:</strong> '.$row['resignation_date'].'</td></tr>
                                   <tr><td><strong>Requested By:</strong> '.$row['created_by'].'</td></tr>
@@ -328,7 +328,7 @@ function clearanceRequestAccept($cl_id,$accept_note) {
     
     include 'connection/connection.php';
 
-    $sql = "SELECT employees.title, employees.name_with_initials, employees.employee_id, employees.code, cl_requests.resignation_date,
+    $sql = "SELECT employees.title, employees.name_with_initials, employees.system_emp_no, employees.code, cl_requests.resignation_date,
     cl_requests.cl_req_id, users.name AS created_by, branch_departments.bd_name, branch_departments.bd_code
     FROM cl_requests
     INNER JOIN employees ON employees.emp_id = cl_requests.emp_id
@@ -411,7 +411,7 @@ function clearanceRequestAccept($cl_id,$accept_note) {
                                 <tbody>
                                   <tr><td><strong>Clearance ID:</strong> #'.$row['cl_req_id'].' </td></tr>
                                   <tr><td><strong>Employee Name:</strong> '.$row['title'].' '.$row['name_with_initials'].'</td></tr>
-                                  <tr><td><strong>Employee No/Code:</strong> '.$row['employee_id'].'/'.$row['code'].'</td></tr>
+                                  <tr><td><strong>Employee ID:</strong> '.$row['system_emp_no'].'/'.$row['code'].'</td></tr>
                                   <tr><td><strong>Department/Branch:</strong> '.$row['bd_name'].'</td></tr>
                                   <tr><td><strong>Resign Date:</strong> '.$row['resignation_date'].'</td></tr>
                                   <tr><td><strong>Requested By:</strong> '.$row['created_by'].'</td></tr>
@@ -489,7 +489,7 @@ function clearanceRequestStepNotice($cl_id,$email) {
     
     include 'connection/connection.php';
 
-    $sql = "SELECT employees.title, employees.name_with_initials, employees.employee_id, employees.code, cl_requests.resignation_date,
+    $sql = "SELECT employees.title, employees.name_with_initials, employees.system_emp_no, employees.code, cl_requests.resignation_date,
     cl_requests.cl_req_id, users.name AS created_by, branch_departments.bd_name, branch_departments.bd_code
     FROM cl_requests
     INNER JOIN employees ON employees.emp_id = cl_requests.emp_id
@@ -572,7 +572,7 @@ function clearanceRequestStepNotice($cl_id,$email) {
                                 <tbody>
                                   <tr><td><strong>Clearance ID:</strong> #'.$row['cl_req_id'].' </td></tr>
                                   <tr><td><strong>Employee Name:</strong> '.$row['title'].' '.$row['name_with_initials'].'</td></tr>
-                                  <tr><td><strong>Employee No/Code:</strong> '.$row['employee_id'].'/'.$row['code'].'</td></tr>
+                                  <tr><td><strong>Employee ID:</strong> '.$row['system_emp_no'].'</td></tr>
                                   <tr><td><strong>Department/Branch:</strong> '.$row['bd_name'].'</td></tr>
                                   <tr><td><strong>Resign Date:</strong> '.$row['resignation_date'].'</td></tr>
                                   <tr><td><strong>Requested By:</strong> '.$row['created_by'].'</td></tr>
@@ -648,7 +648,7 @@ function clearanceRequestStepNotice($cl_id,$email) {
 function clearanceRequestCompleteNotice($cl_id) {
   include 'connection/connection.php';
 
-  $sql = "SELECT employees.title, employees.name_with_initials, employees.employee_id, employees.code, cl_requests.resignation_date,
+  $sql = "SELECT employees.title, employees.name_with_initials, employees.system_emp_no, employees.code, cl_requests.resignation_date,
   cl_requests.cl_req_id, users.name AS created_by, branch_departments.bd_name, branch_departments.bd_code
   FROM cl_requests
   INNER JOIN employees ON employees.emp_id = cl_requests.emp_id
@@ -731,7 +731,7 @@ function clearanceRequestCompleteNotice($cl_id) {
                               <tbody>
                                 <tr><td><strong>Clearance ID:</strong> #'.$row['cl_req_id'].' </td></tr>
                                 <tr><td><strong>Employee Name:</strong> '.$row['title'].' '.$row['name_with_initials'].'</td></tr>
-                                <tr><td><strong>Employee No/Code:</strong> '.$row['employee_id'].'/'.$row['code'].'</td></tr>
+                                <tr><td><strong>Employee ID:</strong> '.$row['system_emp_no'].'</td></tr>
                                 <tr><td><strong>Department/Branch:</strong> '.$row['bd_name'].'</td></tr>
                                 <tr><td><strong>Resign Date:</strong> '.$row['resignation_date'].'</td></tr>
                                 <tr><td><strong>Requested By:</strong> '.$row['created_by'].'</td></tr>

@@ -53,8 +53,8 @@
                                     <th>#</th>
                                     <th>Clearance ID </th>
                                     <th>Name</th>
-                                    <th>Code</th>
-                                    <th>EMP No</th>
+                                    <!-- <th>Code</th> -->
+                                    <th>EMP ID</th>
                                     <th>Resignation Date</th>
                                     <th>Notes</th>
                                     <th>Current Dept</th>
@@ -113,9 +113,9 @@
                         </div>
 
                         <div class="row mb-3">
-                            <label for="resignationLetter" class="col-sm-3 col-form-label">Resignation Letter</label>
+                            <label for="resignationLetter" class="col-sm-3 col-form-label">Resignation Letter *</label>
                             <div class="col-sm-9">
-                                <input type="file" class="form-control" id="resignationLetter" name="resignationLetter" accept=".pdf, .jpg, .jpeg, .png" >
+                                <input type="file" class="form-control" id="resignationLetter" name="resignationLetter" accept=".pdf, .jpg, .jpeg, .png" required>
                                 <div id="previewContainer" class="mt-2"></div>
                             </div>
                         </div>
@@ -129,7 +129,7 @@
                         </div>
 
                         <div class="row mb-3">
-                            <label for="inputPassword3" class="col-sm-3 col-form-label">Recommend for Service Letter</label>
+                            <label for="inputPassword3" class="col-sm-3 col-form-label">Recommend for Service Letter *</label>
                             <div class="col-sm-9">
                                 <label class="form-check-label mt-2 me-2">
                                 <input type="radio" class="form-check-input" name="rsv" id="rsvn" value="0" required>
@@ -178,8 +178,8 @@ $(document).ready(function () {
             { "data": "row_id" },
             { "data": "req_id" },
             { "data": "ini_name" },
-            { "data": "code" },
-            { "data": "epf_no" },
+            // { "data": "code" },
+            { "data": "system_emp_no" },
             { "data": "resignation_date" },
             { "data": "notes" },
             { "data": "department" },

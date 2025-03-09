@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
         if (empty($employee)) $errors[] = "Employee is required.";
         if (empty($resignation_date)) $errors[] = "Resignation date is required.";
+        if (empty($_FILES['resignationLetter']['name'])) $errors[] = "Resignation Letter is required.";
     
         // **Handle File Upload Validation First**
         $file_path = null; // Default null, will store path if valid file uploaded
