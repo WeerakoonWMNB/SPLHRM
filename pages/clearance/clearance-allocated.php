@@ -51,8 +51,8 @@
                                     <th>#</th>
                                     <th>Clearance ID </th>
                                     <th>Name</th>
-                                    <th>Code</th>
-                                    <th>EMP No</th>
+                                    <!-- <th>Code</th> -->
+                                    <th>EMP ID</th>
                                     <th>Resignation Date</th>
                                     <th>Notes</th>
                                     <th>Current Dept</th>
@@ -95,8 +95,8 @@ $(document).ready(function () {
             { "data": "row_id" },
             { "data": "req_id" },
             { "data": "ini_name" },
-            { "data": "code" },
-            { "data": "employee_id" },
+            // { "data": "code" },
+            { "data": "system_emp_no" },
             { "data": "resignation_date" },
             { "data": "notes" },
             { "data": "department" },

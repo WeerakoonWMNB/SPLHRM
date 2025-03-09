@@ -40,7 +40,7 @@
                                     <th>#</th>
                                     <th>Name </th>
                                     <th>Full Name</th>
-                                    <th>Code</th>
+                                    <!-- <th>Code</th> -->
                                     <th>EMP ID</th>
                                     <th>NIC</th>
                                     <th>Department</th>
@@ -177,11 +177,11 @@
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">EMP ID *</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" autocomplete='off' id="employee_id" name="employee_id" placeholder="2516" required>
+                                            <input type="text" class="form-control" autocomplete='off' id="employee_id" name="employee_id" placeholder="2516" readonly>
                                         </div>
                                     </div>
 
-                                    <div class="row mb-3">
+                                    <div class="row mb-3" style="display:none;">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label" id="emp_code_lable">Marketer Code </label>
                                         <div class="col-sm-9">
                                             <input type="text" class="form-control" autocomplete='off' id="emp_code" name="emp_code" placeholder="DKD1-7985P-5652">
@@ -244,10 +244,10 @@
                                         </div>
                                     </div>
 
-                                    <div class="row mb-3">
+                                    <div class="row mb-3" style="display:none;">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label">Last Promoted Date *</label>
                                         <div class="col-sm-9">
-                                            <input type="date" class="form-control" id="lp_date" name="lp_date"  required>
+                                            <input type="date" class="form-control" id="lp_date" name="lp_date">
                                         </div>
                                     </div>
 
@@ -293,7 +293,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="row mb-3">
+                                    <div class="row mb-3" style="display:none;">
                                         <label for="reporting" class="col-sm-3 col-form-label">Reporting Officer</label>
                                         <div class="col-sm-9 position-relative">
                                             <input type="text" id="searchEmployee" autocomplete='off' class="form-control" placeholder="Search Reporting Officer">
@@ -443,8 +443,8 @@ $(document).ready(function () {
             { "data": "row_id" },
             { "data": "ini_name" },
             { "data": "f_name" },
-            { "data": "code" },
-            { "data": "employee_id" },
+            // { "data": "code" },
+            { "data": "system_emp_no" },
             { "data": "nic" },
             { "data": "bd_name" },
             { "data": "action" }
@@ -491,7 +491,7 @@ function emp_set(empId) {
                 $('#init_name').val(response.data.name_with_initials);
                 $('#full_name').val(response.data.name_in_full);
                 $('#emp_type').val(response.data.emp_cat_id); 
-                $('#employee_id').val(response.data.employee_id); 
+                $('#employee_id').val(response.data.system_emp_no); 
                 $('#emp_code').val(response.data.code);
                 $('#designationDropdown').html('<option value="'+response.data.designation_id+'" selected>'+response.data.designation+'</option>');
                 $('#searchDesignation').val(response.data.designation);
@@ -816,17 +816,17 @@ $("#bankBranch").on("keyup", function() {
         }
     });
 
-    $(document).on("change", "#emp_type", function () {
-        let employeeData = $(this).val();
+    // $(document).on("change", "#emp_type", function () {
+    //     let employeeData = $(this).val();
         
-    if (employeeData == "2" || employeeData == "3") {
-            $('#emp_code_lable').html('Emp Code *');
-            $("input[name='emp_code']").prop("required", true);
-        } else {
-            $('#emp_code_lable').html('Emp Code');
-            $("input[name='emp_code']").prop("required", false);
-        }
-    });
+    // if (employeeData == "2" || employeeData == "3") {
+    //         $('#emp_code_lable').html('Emp Code *');
+    //         $("input[name='emp_code']").prop("required", true);
+    //     } else {
+    //         $('#emp_code_lable').html('Emp Code');
+    //         $("input[name='emp_code']").prop("required", false);
+    //     }
+    // });
 
 
     //submit form

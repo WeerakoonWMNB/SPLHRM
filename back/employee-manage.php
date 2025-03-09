@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $work_phone = clean_input($_POST['work']);
         $home_phone = clean_input($_POST['home']);
         $reporting_to = clean_input($_POST['reporting'] ?? null);
-        $employee_id = clean_input($_POST['employee_id']);
+        $employee_id = null;
         $company_code = clean_input($_POST['company']);
         $bankBranchId = clean_input($_POST['bankBranchId'] ?? null);
         $account_number = clean_input($_POST['account_number']);
@@ -138,18 +138,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($init_name)) $errors[] = "Initial name is required.";
         if (empty($full_name)) $errors[] = "Full name is required.";
         if (empty($emp_type)) $errors[] = "Employee type is required.";
-        if (in_array($emp_type, ['2', '3']) && (empty($emp_code))) {
-            $errors[] = "Valid Employee Marketer Code is required.";
-        }
+        // if (in_array($emp_type, ['2', '3']) && (empty($emp_code))) {
+        //     $errors[] = "Valid Employee Marketer Code is required.";
+        // }
         if (empty($emp_designation)) $errors[] = "Employee Designation is required.";
         if (empty($address1)) $errors[] = "Employee Address is required.";
-        if (empty($employee_id)) $errors[] = "Valid EMP ID is required.";
+        //if (empty($employee_id)) $errors[] = "Valid EMP ID is required.";
         if (empty($nic) || !preg_match('/^[0-9]{9}[vVxX]$|^[0-9]{12}$/', $nic)) $errors[] = "Valid NIC is required.";
         if (!in_array($gender, ['0', '1'])) $errors[] = "Valid gender selection is required.";
         if (!in_array($marital_status, ['0', '1'])) $errors[] = "Marital status is required.";
         if (empty($birthday) || !strtotime($birthday)) $errors[] = "Valid birthday date is required.";
         if (empty($appointment_date) || !strtotime($appointment_date)) $errors[] = "Valid appointment date is required.";
-        if (empty($lp_date) || !strtotime($lp_date)) $errors[] = "Valid promoted date is required.";
+        //if (empty($lp_date) || !strtotime($lp_date)) $errors[] = "Valid promoted date is required.";
         if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Valid email is required.";
         if (empty($mobile) || !preg_match('/^\d{10}$/', $mobile)) $errors[] = "Valid mobile number is required.";
         if (!empty($work_phone) && !preg_match('/^\d{10}$/', $mobile)) $errors[] = "Valid Phone(Work) is required.";
@@ -352,7 +352,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $address1 = clean_input($_POST['address1']);
         $address2 = clean_input($_POST['address2']);
         $epf_no = clean_input($_POST['epf']);
-        $employee_id = clean_input($_POST['employee_id']);
+        $employee_id = null;
         $nic = clean_input($_POST['nic']);
         $gender = clean_input($_POST['gender']);
         $marital_status = clean_input($_POST['marital']);
@@ -381,12 +381,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($init_name)) $errors[] = "Initial name is required.";
         if (empty($full_name)) $errors[] = "Full name is required.";
         if (empty($emp_type)) $errors[] = "Employee type is required.";
-        if (in_array($emp_type, ['2', '3']) && (empty($emp_code))) {
-            $errors[] = "Valid Employee Code is required.";
-        }
+        // if (in_array($emp_type, ['2', '3']) && (empty($emp_code))) {
+        //     $errors[] = "Valid Employee Code is required.";
+        // }
         //if (empty($emp_designation)) $errors[] = "Employee Designation is required.";
         if (empty($address1)) $errors[] = "Employee Address is required.";
-        if (empty($employee_id)) $errors[] = "Valid EMP ID is required.";
+        //if (empty($employee_id)) $errors[] = "Valid EMP ID is required.";
         if (empty($nic) || !preg_match('/^[0-9]{9}[vVxX]$|^[0-9]{12}$/', $nic)) $errors[] = "Valid NIC is required.";
         if (!in_array($gender, ['0', '1'])) $errors[] = "Valid gender selection is required.";
         if (!in_array($marital_status, ['0', '1'])) $errors[] = "Marital status is required.";
