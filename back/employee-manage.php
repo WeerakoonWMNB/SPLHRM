@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $marital_status = clean_input($_POST['marital']);
         $birthday = clean_input($_POST['birthday']); 
         $appointment_date = clean_input($_POST['appointment']);
-        $lp_date = clean_input($_POST['lp_date']);
+        $lp_date = !empty($_POST['lp_date']) ? $_POST['lp_date'] : NULL;
         $email = clean_input($_POST['email']);
         $mobile = clean_input($_POST['mobile']);
         $work_phone = clean_input($_POST['work']);
