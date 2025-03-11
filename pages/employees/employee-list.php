@@ -165,7 +165,7 @@
                                     <div class="row mb-3">
                                         <label for="emp_designation" class="col-sm-3 col-form-label">Emp Designation *</label>
                                         <div class="col-sm-9 position-relative">
-                                            <input type="text" id="searchDesignation" class="form-control" placeholder="Search Designation">
+                                            <input type="text" id="searchDesignation" class="form-control" autocomplete='off' placeholder="Search Designation">
                                             <div id="designationList" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                                             
                                             <select class="form-control mt-2" autocomplete='off' id="designationDropdown" name="emp_designation" style="display: none;">
