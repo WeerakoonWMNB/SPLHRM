@@ -21,7 +21,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $item_id = $item['cl_amount_item_id'];
             $quantity = !empty($item['quantity']) ? $item['quantity'] : 1;
             $amount = is_numeric($item['amount']) && $item['amount'] >= 0 ? $item['amount'] : 0.00;
-            $issued_date = !empty($issued_date) ? "'$issued_date'" : "NULL";
+            $issued_date = $item['issued_date'];
+            if (!empty($issued_date)) {
+                $date = DateTime::createFromFormat('Y-m-d', $issued_date);
+                $is_valid_date = $date && $date->format('Y-m-d') === $issued_date;
+                $issued_date = $is_valid_date ? "'$issued_date'" : "NULL";
+            } else {
+                $issued_date = "NULL";
+            }
+
             $remark = $item['remark'];
             $type = $item['item_type'];
             $return_status = $item['return_status'];
