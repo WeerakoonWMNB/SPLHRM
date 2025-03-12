@@ -141,11 +141,19 @@
                 
             }
             else {
+                ob_start();
                 header("Location: clearance-allocated.php");
+                exit;
+                ob_end_flush();
+
             }
         }
         else {
+            ob_start();
             header("Location: clearance-allocated.php");
+            exit;
+            ob_end_flush();
+
         }
         
 ?>
