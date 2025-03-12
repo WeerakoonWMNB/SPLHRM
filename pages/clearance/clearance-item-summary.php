@@ -5,8 +5,8 @@
 <?php
         include "../../back/credential-check.php";
         if (!checkAccess([1,2])) {
-            header("Location: ../general/dashboard.php");
-            exit();
+            echo "<script>window.location.href = '../general/dashboard.php';</script>";
+                    exit;
         }
         include "../../back/connection/connection.php";
 
@@ -68,18 +68,24 @@
               WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1");
 
                 if ($clearance->num_rows != 1) {
-                    header("Location: clearance-list.php");
+                    //header("Location: clearance-list.php");
+                    echo "<script>window.location.href = 'clearance-list.php';</script>";
+                    exit;
                 }   
 
                 $clearance = $clearance->fetch_assoc();
 
             }
             else {
-                header("Location: clearance-list.php");
+                //header("Location: clearance-list.php");
+                echo "<script>window.location.href = 'clearance-list.php';</script>";
+                    exit;
             }
         }
         else {
-            header("Location: clearance-list.php");
+            //header("Location: clearance-list.php");
+            echo "<script>window.location.href = 'clearance-list.php';</script>";
+                    exit;
         }
 ?>
 
