@@ -7,13 +7,4 @@ $conn = mysqli_connect("localhost", "root", "", "clearance");
 $now = new DateTime('now', new DateTimeZone('Asia/Colombo'));
 $datetime = $now->format('Y-m-d H:i:s');
 
-if ($conn->connect_error) {
-
-    die("Connection failed: " . $conn->connect_error);
-  
-  }else{
-      
-      $conn->query("SET SESSION sql_mode = ''");
-      
-  }
 ?>
