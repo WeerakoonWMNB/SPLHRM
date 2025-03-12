@@ -5,8 +5,9 @@
 <?php
         include "../../back/credential-check.php";
         if (!checkAccess([1,2,3])) {
-            header("Location: ../general/dashboard.php");
-            exit();
+            //header("Location: ../general/dashboard.php");
+            echo "<script>window.location.href = '../general/dashboard.php';</script>";
+            exit;
         }
         include "../../back/connection/connection.php";
 
@@ -91,7 +92,9 @@
                 $clearance = $conn->query($query);
 
                 if ($clearance->num_rows != 1) {
-                    header("Location: clearance-allocated.php");
+                    //header("Location: clearance-allocated.php");
+                    echo "<script>window.location.href = 'clearance-allocated.php';</script>";
+                    exit;
                 }   
 
                 $clearance = $clearance->fetch_assoc();
@@ -141,18 +144,14 @@
                 
             }
             else {
-                ob_start();
-                header("Location: clearance-allocated.php");
-                exit;
-                ob_end_flush();
+                echo "<script>window.location.href = 'clearance-allocated.php';</script>";
+                    exit;
 
             }
         }
         else {
-            ob_start();
-            header("Location: clearance-allocated.php");
-            exit;
-            ob_end_flush();
+            echo "<script>window.location.href = 'clearance-allocated.php';</script>";
+                    exit;
 
         }
         

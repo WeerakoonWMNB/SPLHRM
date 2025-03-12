@@ -1,7 +1,8 @@
 <?php
 if (!isset($_SESSION['uid'])) {
-    header("Location: ../../index.php");
-    exit();
+    //header("Location: ../../index.php");
+    echo "<script>window.location.href = '../../index.php';</script>";
+    exit;
 }
 
 function checkAccess($allowedLevels) {
