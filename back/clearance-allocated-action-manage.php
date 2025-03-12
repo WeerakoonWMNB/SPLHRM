@@ -103,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $destination = '../'.$destination;
                         } 
                     }
-                $conn->query("INSERT INTO cl_request_step_amunt_items (cl_amount_item_id, request_id, step_id, item_type, quantity, amount, issued_date, return_status, remark, created_by, created_date, document_path) VALUES ('$item_id', '$cl_id', '$cl_step_id', '$type', '$quantity', '$amount', '$issued_date', '$return_status', '$remark', '$by', '$datetime', '$destination')");
+                $conn->query("INSERT INTO cl_request_step_amunt_items (cl_amount_item_id, request_id, step_id, item_type, quantity, amount, issued_date, return_status, remark, created_by, created_date, document_path) VALUES ('$item_id', '$cl_id', '$cl_step_id', '$type', '$quantity', '$amount', $issued_date, '$return_status', '$remark', '$by', '$datetime', '$destination')");
             }
         }
         // Delete unmatched monetery records
