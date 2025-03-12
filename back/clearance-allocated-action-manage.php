@@ -69,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         } 
                     }
                     $update_query = "UPDATE cl_request_step_amunt_items SET quantity = '$quantity', amount = '$amount', 
-                                    issued_date = '$issued_date', item_type = '$type',";
+                                    issued_date = $issued_date, item_type = '$type',";
 
                                     if (!empty($destination)) {
                                         $update_query .= "document_path = '$destination',";
