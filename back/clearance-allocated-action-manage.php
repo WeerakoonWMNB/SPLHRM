@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $item_id = $item['cl_amount_item_id'];
             $quantity = !empty($item['quantity']) ? $item['quantity'] : 1;
             $amount = is_numeric($item['amount']) && $item['amount'] >= 0 ? $item['amount'] : 0.00;
-            $issued_date = $item['issued_date'];
+            $issued_date = !empty($item['issued_date']) ? $item['issued_date'] : NULL;
             $remark = $item['remark'];
             $type = $item['item_type'];
             $return_status = $item['return_status'];
