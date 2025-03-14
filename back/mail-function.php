@@ -79,7 +79,7 @@ function clearanceRequest($cl_id) {
                   <tr>
                     <td class="wrapper" style="padding: 24px;">
                       <p>Dear Team,</p>
-                      <p>This is an automated notification. A new clearance request has been submitted for the following employee:</p>
+                      <p>A new clearance request has been submitted for the following employee:</p>
                       
                       <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="width: 100%;">
                         <tbody>
@@ -136,7 +136,7 @@ function clearanceRequest($cl_id) {
       </body>
     </html>';
 
-    //$mailid = ['nishshankaw@sadaharitha.com'];
+    
     // Branch code to search
     $branch_code = $row['bd_code']; 
 
@@ -155,6 +155,11 @@ function clearanceRequest($cl_id) {
     $mailid = [];
     while ($row1 = $result->fetch_assoc()) {
         $mailid[] = $row1['username'];
+    }
+
+    if ($_SERVER['HTTP_HOST'] === 'hrinfo.sadaharitha.com'){
+      //HR Mail
+      $mailid[] = 'amalr@sadaharitha.com';
     }
 
     $mailheading = 'Clearance Request Notification (#'.$row['cl_req_id'].')';
@@ -240,7 +245,7 @@ function clearanceRequestPending($cl_id,$pending_note) {
                   <tr>
                     <td class="wrapper" style="padding: 24px;">
                       <p>Dear Team,</p>
-                      <p>This is an automated notification. A clearance request has been moved to pending stage for the following employee:</p>
+                      <p> A clearance request has been moved to pending stage for the following employee:</p>
                       
                       <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="width: 100%;">
                         <tbody>
@@ -316,6 +321,11 @@ function clearanceRequestPending($cl_id,$pending_note) {
     $mailid = [];
     while ($row1 = $result->fetch_assoc()) {
         $mailid[] = $row1['username'];
+    }
+
+    if ($_SERVER['HTTP_HOST'] === 'hrinfo.sadaharitha.com'){
+      //HR Mail
+      $mailid[] = 'amalr@sadaharitha.com';
     }
 
     $mailheading = 'Clearance Request Pending Notification (#'.$row['cl_req_id'].')';
@@ -401,7 +411,7 @@ function clearanceRequestAccept($cl_id,$accept_note) {
                   <tr>
                     <td class="wrapper" style="padding: 24px;">
                       <p>Dear Team,</p>
-                      <p>This is an automated notification. A clearance request has been accepted and HR department will continue clearence process for the following employee:</p>
+                      <p>A clearance request has been accepted and HR department will continue clearence process for the following employee:</p>
                       
                       <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="width: 100%;">
                         <tbody>
@@ -562,7 +572,7 @@ function clearanceRequestStepNotice($cl_id,$email) {
                   <tr>
                     <td class="wrapper" style="padding: 24px;">
                       <p>Dear Team,</p>
-                      <p>This is an automated notification. A clearance request has been allocated to you for the following employee:</p>
+                      <p>A clearance request has been allocated to you for the following employee:</p>
                       
                       <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="width: 100%;">
                         <tbody>
@@ -721,7 +731,7 @@ function clearanceRequestCompleteNotice($cl_id) {
                 <tr>
                   <td class="wrapper" style="padding: 24px;">
                     <p>Dear Team,</p>
-                    <p>This is an automated notification. Departments clearance process has been completed for the following employee:</p>
+                    <p>Departments clearance process has been completed for the following employee:</p>
                     
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="width: 100%;">
                       <tbody>
@@ -778,6 +788,10 @@ function clearanceRequestCompleteNotice($cl_id) {
   </html>';
 
   $mailid = ['nishshankaw@sadaharitha.com'];
+  if ($_SERVER['HTTP_HOST'] === 'hrinfo.sadaharitha.com'){
+    //HR Mail
+    $mailid[] = 'amalr@sadaharitha.com';
+  }
   // Branch code to search
   //$branch_code = $row['bd_code']; 
 

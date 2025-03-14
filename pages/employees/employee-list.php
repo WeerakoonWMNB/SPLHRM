@@ -38,9 +38,9 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Name </th>
+                                    <!-- <th>Name </th> -->
                                     <th>Full Name</th>
-                                    <!-- <th>Code</th> -->
+                                    <th>Code</th>
                                     <th>EMP ID</th>
                                     <th>NIC</th>
                                     <th>Department</th>
@@ -181,7 +181,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="row mb-3" style="display:none;">
+                                    <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-3 col-form-label" id="emp_code_lable">Marketer Code </label>
                                         <div class="col-sm-9">
                                             <input type="text" class="form-control" autocomplete='off' id="emp_code" name="emp_code" placeholder="DKD1-7985P-5652">
@@ -441,9 +441,9 @@ $(document).ready(function () {
         },
         "columns": [
             { "data": "row_id" },
-            { "data": "ini_name" },
+            // { "data": "ini_name" },
             { "data": "f_name" },
-            // { "data": "code" },
+            { "data": "code" },
             { "data": "system_emp_no" },
             { "data": "nic" },
             { "data": "bd_name" },

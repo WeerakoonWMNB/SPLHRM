@@ -17,10 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(["status" => "error", "message" => ["Service letter recommendation is required."]]);
             exit();
         }
+
+        if (!isset($_POST['rejoin'])) {
+            echo json_encode(["status" => "error", "message" => ["Rejoin status is required."]]);
+            exit();
+        }
     
         $employee = clean_input($_POST['employee']);
         $resignation_date = clean_input($_POST['resignation_date']);
         $rsv = intval($_POST['rsv']);
+        $rejoin = intval($_POST['rejoin']);
         $added_by = $_SESSION['uid'];
         $datetime = date("Y-m-d H:i:s");
     
@@ -102,11 +108,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     
         // **Insert into cl_requests table**
-        $sql = "INSERT INTO cl_requests (emp_id, resignation_date, service_letter_recommendation, created_date, created_by) VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO cl_requests (emp_id, resignation_date, service_letter_recommendation, rejoin_or_not, created_date, created_by) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
     
         if ($stmt) {
-            $stmt->bind_param('isisi', $employee, $resignation_date, $rsv, $datetime, $added_by);
+            $stmt->bind_param('isiisi', $employee, $resignation_date, $rsv, $rejoin, $datetime, $added_by);
     
             if ($stmt->execute()) {
                 $request_id = $stmt->insert_id; // Get last inserted ID
@@ -174,11 +180,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(["status" => "error", "message" => ["Service letter recommendation is required."]]);
             exit();
         }
+
+        if (!isset($_POST['rejoin'])) {
+            echo json_encode(["status" => "error", "message" => ["Rejoin status is required."]]);
+            exit();
+        }
         
         $edit_id = intval($_POST['edit_id']);
         $employee = clean_input($_POST['employee']);
         $resignation_date = clean_input($_POST['resignation_date']);
         $rsv = intval($_POST['rsv']);
+        $rejoin = intval($_POST['rejoin']);
         $added_by = $_SESSION['uid'];
         $datetime = date("Y-m-d H:i:s");
     
@@ -286,11 +298,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     
         // **Update cl_requests table**
-        $sql = "UPDATE cl_requests SET emp_id = ?, resignation_date = ?, service_letter_recommendation = ? WHERE cl_req_id = ?";
+        $sql = "UPDATE cl_requests SET emp_id = ?, resignation_date = ?, service_letter_recommendation = ?, rejoin_or_not = ? WHERE cl_req_id = ?";
         $stmt = $conn->prepare($sql);
         
         if ($stmt) {
-            $stmt->bind_param('isii', $employee, $resignation_date, $rsv, $edit_id);
+            $stmt->bind_param('isiii', $employee, $resignation_date, $rsv, $rejoin, $edit_id);
     
             if ($stmt->execute()) {
                 
@@ -417,12 +429,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['filteredEmps'])) {
     $bd_id = $_SESSION['bd_id'];
 
     // Base query
-    $sql = "SELECT employees.emp_id, employees.title, employees.name_with_initials, employees.nic, employees.employee_id, employees.code 
+    $sql = "SELECT employees.emp_id, employees.title, employees.name_with_initials, employees.nic, employees.system_emp_no, employees.code 
     FROM employees 
     LEFT JOIN cl_requests ON employees.emp_id = cl_requests.emp_id
     WHERE (employees.name_with_initials LIKE '%$search%' 
     OR employees.nic LIKE '%$search%' 
-    OR employees.employee_id LIKE '%$search%' 
+    OR employees.system_emp_no LIKE '%$search%' 
     OR employees.code LIKE '%$search%' 
     OR employees.name_in_full LIKE '%$search%') AND (cl_requests.status=0 OR cl_requests.status IS NULL) ";
 
@@ -439,7 +451,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['filteredEmps'])) {
 
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
-                $output .= "<a href='#' class='list-group-item list-group-item-action employee-option' data-id='".$row['emp_id']."'>".$row['title']." ".$row['name_with_initials']." (".$row['nic']." ".$row['code']." ".$row['employee_id'].")</a>";
+                $output .= "<a href='#' class='list-group-item list-group-item-action employee-option' data-id='".$row['emp_id']."'>".$row['title']." ".$row['name_with_initials']." (".$row['nic']." ".$row['code']." ".$row['system_emp_no'].")</a>";
             }
         } else {
             $output = "<a href='#' class='list-group-item list-group-item-action disabled'>No results found</a>";

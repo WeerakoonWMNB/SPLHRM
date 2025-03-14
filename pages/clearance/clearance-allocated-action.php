@@ -23,6 +23,7 @@
 
                 $query = "SELECT cl_requests.resignation_date,
                      cl_requests.is_complete, 
+                     cl_requests.rejoin_or_not,
                      employees.name_with_initials, 
                      employees.code, 
                      employees.system_emp_no, 
@@ -206,8 +207,15 @@
                                             <td><?= $clearance['designation'] ?></td>
                                         </tr>
                                         <tr>
-                                            <td><b>Employee ID : </b></td>
-                                            <td><?= $clearance['system_emp_no'] ?></td>
+                                            <td><b>Employee ID/Code : </b></td>
+                                            <td>
+                                                <?= $clearance['system_emp_no'] ?>
+                                                <?php 
+                                                    if ($clearance['code']) {
+                                                        echo '/ '.$clearance['code'];
+                                                    }
+                                                ?>
+                                            </td>
                             
                                             <td><b>Employee NIC : </b></td>
                                             <td><?= $clearance['nic'] ?></td>
@@ -222,8 +230,12 @@
                                         <tr>
                                             <td><b>Employee Resignation Date : </b></td>
                                             <td><?= $clearance['resignation_date'] ?></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td><b>Employee Re-Join Status : </b></td>
+                                            <td><?php if (empty($clearance['rejoin_or_not'])) {
+                                                echo 'No';
+                                            } else {
+                                                echo 'Yes';
+                                            } ?></td>
                                         </tr>
                                         <tr>
                                             <td><b>Requested Date : </b></td>

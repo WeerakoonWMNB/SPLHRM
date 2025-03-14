@@ -136,8 +136,15 @@
                                             <td><?= $clearance['designation'] ?></td>
                                         </tr>
                                         <tr>
-                                            <td><b>Employee ID : </b></td>
-                                            <td><?= $clearance['system_emp_no'] ?></td>
+                                            <td><b>Employee ID/Code : </b></td>
+                                            <td>
+                                                <?= $clearance['system_emp_no'] ?>
+                                                <?php 
+                                                    if ($clearance['code']) {
+                                                        echo '/ '.$clearance['code'];
+                                                    }
+                                                ?>
+                                            </td>
                             
                                             <td><b>Employee NIC : </b></td>
                                             <td><?= $clearance['nic'] ?></td>
