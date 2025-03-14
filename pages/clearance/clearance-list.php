@@ -53,9 +53,9 @@
                                     <th>#</th>
                                     <th>Clearance ID </th>
                                     <th>Name</th>
-                                    <!-- <th>Code</th> -->
-                                    <th>EMP ID</th>
                                     <th>Resignation Date</th>
+                                    <th>EMP ID</th>
+                                    <th>Code</th>
                                     <th>Notes</th>
                                     <th>Current Dept</th>
                                     <th>Progress</th>
@@ -141,6 +141,20 @@
                                 </label>
                             </div>
                         </div>
+
+                        <div class="row mb-3">
+                            <label for="inputPassword3" class="col-sm-3 col-form-label">Rejoin or not *</label>
+                            <div class="col-sm-9">
+                                <label class="form-check-label mt-2 me-2">
+                                <input type="radio" class="form-check-input" name="rejoin" id="rejoinn" value="0" required>
+                                    No
+                                </label>
+                                <label class="form-check-label mt-2">
+                                <input type="radio" class="form-check-input" name="rejoin" id="rejoiny" value="1">
+                                    Yes
+                                </label>
+                            </div>
+                        </div>
                         
                     </form>
                 </div>
@@ -178,9 +192,9 @@ $(document).ready(function () {
             { "data": "row_id" },
             { "data": "req_id" },
             { "data": "ini_name" },
-            // { "data": "code" },
-            { "data": "system_emp_no" },
             { "data": "resignation_date" },
+            { "data": "system_emp_no" },
+            { "data": "code" },
             { "data": "notes" },
             { "data": "department" },
             { "data": "progress" },
@@ -205,6 +219,7 @@ function data_set(Id) {
                 $('#edit_id').val(response.data.cl_req_id);
                 $('#resignation_date').val(response.data.resignation_date);
                 $("input[name='rsv'][value='" + response.data.service_letter_recommendation + "']").prop("checked", true);
+                $("input[name='rejoin'][value='" + response.data.rejoin_or_not + "']").prop("checked", true);
 
                 if (response.data?.letter_location) {
                     previewFile(response.data.letter_location);
@@ -246,6 +261,7 @@ function add() {
         $('#previewContainer1').html('');
         $('#previewContainer').html('');
         $("input[name='rsv']").prop("checked", false);
+        $("input[name='rejoin']").prop("checked", false);
 }
 
 

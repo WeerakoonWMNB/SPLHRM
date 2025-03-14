@@ -182,8 +182,15 @@
                                             <td><?= $clearance['designation'] ?></td>
                                         </tr>
                                         <tr>
-                                            <td><b>Employee ID : </b></td>
-                                            <td><?= $clearance['system_emp_no'] ?></td>
+                                            <td><b>Employee ID/Code : </b></td>
+                                            <td>
+                                                <?= $clearance['system_emp_no'] ?> 
+                                                <?php 
+                                                    if ($clearance['code']) {
+                                                        echo '/ '.$clearance['code'];
+                                                    }
+                                                ?>
+                                            </td>
                             
                                             <td><b>Employee NIC : </b></td>
                                             <td><?= $clearance['nic'] ?></td>
@@ -198,8 +205,12 @@
                                         <tr>
                                             <td><b>Employee Resignation Date : </b></td>
                                             <td><?= $clearance['resignation_date'] ?></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td><b>Employee Re-Join Status : </b></td>
+                                            <td><?php if (empty($clearance['rejoin_or_not'])) {
+                                                echo 'No';
+                                            } else {
+                                                echo 'Yes';
+                                            } ?></td>
                                         </tr>
                                         <tr>
                                             <td><b>Requested Date : </b></td>
@@ -240,30 +251,30 @@
                                                 }
                                                 ?>
                                             </td>
-                                            <td></td>
+                                            <td><b>Customer Visit Report : </b></td>
                                             <td>
                                             <?php
-                                                // if (!empty($clearance['cvr_url'])) {
-                                                //     $url = $clearance['cvr_url'];
-                                                //     $fileExtension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+                                                if (!empty($clearance['cvr_url'])) {
+                                                    $url = $clearance['cvr_url'];
+                                                    $fileExtension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
 
-                                                //     if (in_array($fileExtension, ['jpg', 'jpeg', 'png'])) {
-                                                //         // Display Image with improved size
-                                                //         echo '<div id="previewContainer1" style="max-width: 500px; max-height: 600px; overflow: hidden;">';
-                                                //         echo '<img src="' . htmlspecialchars($url) . '" style="width: 100%; height: auto; display: block; border: 1px solid #ddd; border-radius: 8px; padding: 5px;">';
-                                                //         echo '</div>';
-                                                //     } elseif ($fileExtension === 'pdf') {
-                                                //         // Display PDF Link
-                                                //         echo '<div id="previewContainer1">';
-                                                //         echo '<a href="' . htmlspecialchars($url) . '" target="_blank" style="font-weight: bold; color: blue; text-decoration: underline;">View Customer Visit Report(PDF)</a>';
-                                                //         echo '</div>';
-                                                //     } else {
-                                                //         // Unsupported Format
-                                                //         echo '<div id="previewContainer1"><p>Unsupported file format.</p></div>';
-                                                //     }
-                                                // } else {
-                                                //     echo '<div id="previewContainer1"><p>No file uploaded.</p></div>';
-                                                // }
+                                                    if (in_array($fileExtension, ['jpg', 'jpeg', 'png'])) {
+                                                        // Display Image with improved size
+                                                        echo '<div id="previewContainer1" style="max-width: 500px; max-height: 600px; overflow: hidden;">';
+                                                        echo '<img src="' . htmlspecialchars($url) . '" style="width: 100%; height: auto; display: block; border: 1px solid #ddd; border-radius: 8px; padding: 5px;">';
+                                                        echo '</div>';
+                                                    } elseif ($fileExtension === 'pdf') {
+                                                        // Display PDF Link
+                                                        echo '<div id="previewContainer1">';
+                                                        echo '<a href="' . htmlspecialchars($url) . '" target="_blank" style="font-weight: bold; color: blue; text-decoration: underline;">View Customer Visit Report(PDF)</a>';
+                                                        echo '</div>';
+                                                    } else {
+                                                        // Unsupported Format
+                                                        echo '<div id="previewContainer1"><p>Unsupported file format.</p></div>';
+                                                    }
+                                                } else {
+                                                    echo '<div id="previewContainer1"><p>No file uploaded.</p></div>';
+                                                }
                                                 ?>
                                             </td>
                                         </tr>
