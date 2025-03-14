@@ -110,8 +110,8 @@
                 }
               ?>  
               <li class="nav-item"> 
-                  <!-- <a class="nav-link" href="../../pages/clearance/clearance-allocated.php"> Clearance to Attend 
-                  <span class="status-dot red ms-1 mb-2">
+                  <a class="nav-link" href="../../pages/clearance/clearance-allocated.php"> Clearance to Attend 
+                  <!-- <span class="status-dot red ms-1 mb-2">
                     <small>1</small>
                   </span> -->
                 </a>
@@ -125,7 +125,7 @@
         ?>
 
         <?php
-          if (checkAccess([1,2,3])) {
+          if (checkAccess([1,2])) {
         ?>
         <li class="nav-item sidebar-category">
           <p>Employees Manage</p>
