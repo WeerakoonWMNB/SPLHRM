@@ -125,7 +125,7 @@
         ?>
 
         <?php
-          if (checkAccess([1,2])) {
+          if (checkAccess([1,2,3])) {
         ?>
         <li class="nav-item sidebar-category">
           <p>Employees Manage</p>
