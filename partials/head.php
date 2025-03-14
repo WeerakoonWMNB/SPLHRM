@@ -97,4 +97,28 @@
                 transform: translateY(0);
             }
         }
+
+        .status-dot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;  /* Adjust as needed */
+            height: 16px; /* Adjust as needed */
+            border-radius: 50%;
+            background-color: red; /* Ensure it remains red */
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            }
+
+            .status-dot small {
+            margin: 0; /* Remove extra margin */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            }
+
+        .green { background-color: #28a745; }  /* Active */
+        .yellow { background-color: #ffc107; } /* Idle */
+        .red { background-color: #dc3545; }   /* Busy */
     </style>

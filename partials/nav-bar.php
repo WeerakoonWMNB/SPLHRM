@@ -90,13 +90,32 @@
             <ul class="nav flex-column sub-menu">
               <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/summary.php"> Summary</a></li>
               <?php
-                if (checkAccess([1,2])) {
+                if (checkAccess([1,2,3])) {
               ?>
-              <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/clearance-list.php"> Clearance List</a></li>
+              <li class="nav-item"> 
+                <a class="nav-link" href="../../pages/clearance/clearance-list.php"> Clearance List 
+                  <?php
+                  if (in_array($_SESSION['ulvl'], [1,2])) {
+                    ?>
+                      <!-- <span class="status-dot red ms-1 mb-2">
+                        <small>1</small>
+                      </span> -->
+                    <?php
+                  }
+                  ?>
+                  
+                </a>
+              </li>
               <?php
                 }
               ?>  
-              <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/clearance-allocated.php"> Clearance to Attend</a></li>
+              <li class="nav-item"> 
+                  <!-- <a class="nav-link" href="../../pages/clearance/clearance-allocated.php"> Clearance to Attend 
+                  <span class="status-dot red ms-1 mb-2">
+                    <small>1</small>
+                  </span> -->
+                </a>
+              </li>
             </ul>
           </div>
         </li>
