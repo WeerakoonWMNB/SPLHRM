@@ -33,6 +33,7 @@
                      cl_requests_steps.is_complete AS step_complete, 
                      cl_requests_steps.step,
                      cl_requests_steps.pending_note,
+                     cl_requests_steps.complete_note,
                      cl_requests_steps.created_date,
                      cl_requests_steps.max_dates,
                      cl_requests_steps.bd_code,
@@ -534,7 +535,15 @@
 
                     <div class="form-group mt-3">
                         <label for="note">Note</label>
-                        <textarea class="form-control" id="note" name="note" rows="3" placeholder="Please write note here.."></textarea>
+                        <textarea class="form-control" id="note" name="note" rows="3" placeholder="Please write note here.."><?php
+                                if (!empty($clearance['pending_note'])) {
+                                    echo '* '.$clearance['pending_note'];
+                                }
+                                if (!empty($clearance['complete_note'])) {
+                                    echo '* '.$clearance['complete_note'];
+                                }
+                            ?>
+                        </textarea>
                     </div>
 
                     <input type="hidden" name="cl_id" id="cl_id" value="<?= $cl_id ?>">

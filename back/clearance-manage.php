@@ -517,7 +517,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve'])) {
             exit();
         }
 
-        $sql = "UPDATE cl_requests_steps SET is_complete = 1, complete_note = ?, last_updated_by = ?, last_updated_date = ? WHERE request_id = ? AND step = 0 AND is_complete != 1";
+        $sql = "UPDATE cl_requests_steps SET is_complete = 1, pending_note = ?, last_updated_by = ?, last_updated_date = ? WHERE request_id = ? AND step = 0 AND is_complete != 1";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("sisi", $approve_note, $by, $datetime, $cl_id);
 

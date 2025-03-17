@@ -7,7 +7,7 @@ include "mail-function.php";
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $cl_id = $_POST['cl_id'];
     $cl_step_id = $_POST['cl_step_id'];
-    $note = $_POST['note'];
+    $note = trim($_POST['note']);
     $physical_items = $_POST['physical_items'] ?? [];
     $monetary_items = $_POST['monetary_items'] ?? [];
     $by = $_SESSION['uid'];
