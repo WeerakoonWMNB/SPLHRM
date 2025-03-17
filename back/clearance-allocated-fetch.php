@@ -75,15 +75,11 @@ $dataQuery = "SELECT cl_requests.*,
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
               INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id 
               AND cl_requests_steps.step = (
-                  SELECT MAX(step) FROM cl_requests_steps 
+                  SELECT MIN(step) FROM cl_requests_steps 
                   WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
-                  AND 
-                    (
-                        (cl_requests_steps.step != 0 AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2))
-                        OR 
-                        (cl_requests_steps.step = 0)
-                    )
-                  )
+                  AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
+                  AND cl_requests_steps.step != '0'
+              )
               WHERE cl_requests.status = 1 $searchQuery ";
 
               if ($user_level != 1 && $user_level != 2) {
@@ -97,7 +93,7 @@ $dataQuery = "SELECT cl_requests.*,
                     )";
                 }
 
-              $dataQuery .= " GROUP BY cl_requests.cl_req_id ORDER BY cl_requests.cl_req_id DESC
+              $dataQuery .= " ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
 
 $stmt = $conn->prepare($dataQuery);
