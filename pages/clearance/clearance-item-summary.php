@@ -225,13 +225,31 @@
                                             <th><?= number_format($payable_sum ? $payable_sum : 0, 2) ?></th>
                                             <th></th>
                                         </tr>
-                                        <tr>
-                                            <th colspan="2">Total Payable (Rs.)</th>
-                                            <th ><?= number_format($payable_sum ? $payable_sum : 0, 2) ?> - <?= number_format($deduction_sum ? $deduction_sum : 0, 2) ?></th>
-                                            <th><u style="border-bottom: 1px solid #000;"><?= number_format((($payable_sum ? $payable_sum : 0) - ($deduction_sum ? $deduction_sum : 0)), 2) ?></u></th>
-                                            <th></th>
-                                        </tr>
+                                        
                                     </table>   
+
+                                    <table width="100%" style="margin-top:15px;">
+                                        <tr>
+                                            <th>Amounts Difference (Rs.)</th>
+                                            <th ><?= number_format($payable_sum ? $payable_sum : 0, 2) ?> - <?= number_format($deduction_sum ? $deduction_sum : 0, 2) ?></th>
+                                            <th><u><?= number_format((($payable_sum ? $payable_sum : 0) - ($deduction_sum ? $deduction_sum : 0)), 2) ?></u></th>
+                                            
+                                        </tr>
+                                        <tr>
+                                            <th colspan="2">
+                                                <?php
+                                                    if ((($payable_sum ? $payable_sum : 0) - ($deduction_sum ? $deduction_sum : 0)) >= 0) {
+                                                        echo 'Total Payable (Rs.)';
+                                                    }
+                                                    else {
+                                                        echo 'Total Deduction (Rs.)';
+                                                    }
+                                                ?>
+                                            </th>
+                                            <th><u style="border-bottom: 1px solid #000;"><?= number_format(abs((($payable_sum ? $payable_sum : 0) - ($deduction_sum ? $deduction_sum : 0))), 2) ?></u></th>
+                                            
+                                        </tr>
+                                    </table>
 
                                     <table width="100%" style="margin-top:15px;">
                                         <tr>

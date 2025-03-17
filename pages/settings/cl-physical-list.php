@@ -29,7 +29,7 @@
                 <div class="col-md-12 grid-margin stretch-card">
                   <div class="card">
                     <div class="card-body">
-                      <p class="card-title"><h4 id="title-name">Material Items</h4></p>
+                      <p class="card-title"><h4 id="title-name">Non Monetary Items</h4></p>
                       <hr id="title-hr">
 
                       <button type="button" data-bs-toggle="modal" data-bs-target="#myModal" class="btn btn-success" onclick="add_branch()"><i class="mdi mdi-playlist-plus me-1"></i> Add Item</button>
@@ -107,7 +107,7 @@
 
       <!-- Modal Header -->
       <div class="modal-header">
-        <h4 class="modal-title">Add Material Items</h4>
+        <h4 class="modal-title">Add Non Monetary Items</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal" ></button>
       </div>
 
@@ -185,7 +185,7 @@
         success: function(response) {
             if (response.success) {
                 // Populate the form fields with the fetched data
-                $('.modal-title').html('Edit Material Items');
+                $('.modal-title').html('Edit Non Monetary Items');
                 $('#edit_id').val(response.data.cl_physical_item_id);
                 $('#department').val(response.data.bd_id);
                 $('#item_name').val(response.data.item_name);
@@ -208,7 +208,7 @@
 }
 
 function add_branch() {
-      $('.modal-title').html('Add Material Items');
+      $('.modal-title').html('Add Non Monetary Items');
       $('#edit_id').val('');
       $('#department').val('');
       $('#item_name').val('');
