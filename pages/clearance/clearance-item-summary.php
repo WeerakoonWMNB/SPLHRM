@@ -213,7 +213,7 @@
                                                 <td>".$item['bd_name']."</td>
                                                 <td>". number_format($item['deduction'] ? $item['deduction'] : 0, 2) ."</td>
                                                 <td>". number_format($item['payable'] ? $item['payable'] : 0, 2)."</td>
-                                                <td>".$item['complete_note']."</td>
+                                                <td>".$item['pending_note']."</td>
                                                 </tr>";
                                                 $i++;
                                             }

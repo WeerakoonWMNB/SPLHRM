@@ -183,7 +183,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve'])) {
             exit();
         }
 
-        $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 3, is_complete = 1, complete_date = ?, approved_by = ?, approved_date = ?, is_complete = 1, complete_note = ?, last_updated_by = ?, last_updated_date = ? WHERE cl_step_id = ? AND is_complete != 1";
+        $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 3, is_complete = 1, complete_date = ?, approved_by = ?, approved_date = ?, is_complete = 1, pending_note = ?, last_updated_by = ?, last_updated_date = ? WHERE cl_step_id = ? AND is_complete != 1";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("sissisi", $datetime, $by, $datetime, $approve_note, $by, $datetime, $cl_step_id);
 
@@ -258,7 +258,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['che'])) {
             exit();
         }
 
-        $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 2, checked_by = ?, checked_date = ?, complete_note = ?, last_updated_by = ?, last_updated_date = ? 
+        $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 2, checked_by = ?, checked_date = ?, pending_note = ?, last_updated_by = ?, last_updated_date = ? 
         WHERE cl_step_id = ? AND is_complete != 1";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("issisi", $by, $datetime, $approve_note, $by, $datetime, $cl_step_id);
