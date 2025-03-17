@@ -76,8 +76,8 @@ $dataQuery = "SELECT cl_requests.*,
                         LIMIT 1) AS last_completed_date
               FROM cl_requests 
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
+              LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
               LEFT JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id
-              LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id 
               AND cl_requests_steps.step = (
                   SELECT MAX(step) FROM cl_requests_steps 
                   WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
