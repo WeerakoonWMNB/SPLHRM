@@ -4,7 +4,7 @@
 
 <?php
         include "../../back/credential-check.php";
-        if (!checkAccess([1])) {
+        if (!checkAccess([1,2])) {
           echo "<script>window.location.href = '../general/dashboard.php';</script>";
                     exit;
         }
