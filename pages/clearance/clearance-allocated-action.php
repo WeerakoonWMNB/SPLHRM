@@ -475,7 +475,7 @@
                         if ($items->num_rows > 0) {
                             echo "<div class='card mt-2'>";
                             echo "<div class='card-header' role='button' data-bs-toggle='collapse' data-bs-target='#IssueCard'>";
-                            echo "<h5 class='mb-0'>Items <i class='mdi mdi-chevron-down'></i></h5>";
+                            echo "<h5 class='mb-0'>Non Monetary Items <i class='mdi mdi-chevron-down'></i></h5>";
                             echo "</div>";
                             echo "<div id='IssueCard' class='collapse'>";
                             echo "<div class='card-body'>";

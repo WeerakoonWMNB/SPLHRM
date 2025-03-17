@@ -155,7 +155,7 @@
                                 <option value="2">RSM</option>
                                 <option value="3">BSM</option>
                                 <option value="4">CRO</option>
-                                <option value="5">Executive</option>
+                                <option value="5">User</option>
                             </select>
                             </div>
                         </div>

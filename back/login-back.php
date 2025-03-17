@@ -14,6 +14,7 @@ require "connection/connection.php";
                 $uid = "";
                 $ulvl = "";
                 $bd_id = "";
+                $u_roll = "";
 
                 foreach ($conn->query($sql) as $row)
                 {
@@ -21,6 +22,7 @@ require "connection/connection.php";
                     $uid = $row['user_id'];
                     $ulvl = $row['user_level'];
                     $bd_id = $row['bd_id'];
+                    $u_roll = $row['process_level'];
                 }
                 
                 if(!empty($uid))
@@ -29,6 +31,7 @@ require "connection/connection.php";
                     $_SESSION['uid'] = $uid;
                     $_SESSION['ulvl'] = $ulvl;
                     $_SESSION['bd_id'] = $bd_id;
+                    $_SESSION['u_roll'] = $u_roll;
 
                      header("Location: ../pages/general/dashboard.php");
                      exit();

@@ -432,6 +432,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['filteredEmps'])) {
     $sql = "SELECT employees.emp_id, employees.title, employees.name_with_initials, employees.nic, employees.system_emp_no, employees.code 
     FROM employees 
     LEFT JOIN cl_requests ON employees.emp_id = cl_requests.emp_id
+    LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
     WHERE (employees.name_with_initials LIKE '%$search%' 
     OR employees.nic LIKE '%$search%' 
     OR employees.system_emp_no LIKE '%$search%' 
@@ -440,7 +441,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['filteredEmps'])) {
 
     // Apply bd_id filter if user level is 1 or 2
     if ($user_level != 1 && $user_level != 2) {
-        $sql .= " AND employees.bd_id IN ('$bd_id')";
+        $sql .= " AND branch_departments.bd_code IN ('$bd_id')";
     }
 
     $sql .= " LIMIT 10";
