@@ -138,9 +138,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($init_name)) $errors[] = "Initial name is required.";
         if (empty($full_name)) $errors[] = "Full name is required.";
         if (empty($emp_type)) $errors[] = "Employee type is required.";
-        // if (in_array($emp_type, ['2', '3']) && (empty($emp_code))) {
-        //     $errors[] = "Valid Employee Marketer Code is required.";
-        // }
+        if (in_array($emp_type, ['2', '3']) && (empty($emp_code))) {
+            $errors[] = "Valid Employee Marketer Code is required.";
+        }
         if (empty($emp_designation)) $errors[] = "Employee Designation is required.";
         if (empty($address1)) $errors[] = "Employee Address is required.";
         //if (empty($employee_id)) $errors[] = "Valid EMP ID is required.";
@@ -381,9 +381,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($init_name)) $errors[] = "Initial name is required.";
         if (empty($full_name)) $errors[] = "Full name is required.";
         if (empty($emp_type)) $errors[] = "Employee type is required.";
-        // if (in_array($emp_type, ['2', '3']) && (empty($emp_code))) {
-        //     $errors[] = "Valid Employee Code is required.";
-        // }
+        if (in_array($emp_type, ['2', '3']) && (empty($emp_code))) {
+            $errors[] = "Valid Employee Code is required.";
+        }
         //if (empty($emp_designation)) $errors[] = "Employee Designation is required.";
         if (empty($address1)) $errors[] = "Employee Address is required.";
         //if (empty($employee_id)) $errors[] = "Valid EMP ID is required.";
@@ -840,7 +840,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['search_id'])) {
     $emp_id = intval($_POST['search_id']);
 
     $stmt = $conn->prepare("SELECT employees.*,branch_departments.company_code,designations.designation,r.name_with_initials as reporting 
-    , nic.location as nic_location, passbook.location as passbook_location, bb.code FROM employees 
+    , nic.location as nic_location, passbook.location as passbook_location, bb.code as bb_code FROM employees 
     INNER JOIN branch_departments ON employees.bd_id = branch_departments.bd_id
     INNER JOIN designations ON employees.designation_id = designations.desig_id
     LEFT JOIN employees r ON employees.reporting_officer_emp_id = r.emp_id

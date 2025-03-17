@@ -491,6 +491,7 @@ function emp_set(empId) {
                 $('#init_name').val(response.data.name_with_initials);
                 $('#full_name').val(response.data.name_in_full);
                 $('#emp_type').val(response.data.emp_cat_id); 
+                emp_code_validate(response.data.emp_cat_id);
                 $('#employee_id').val(response.data.system_emp_no); 
                 $('#emp_code').val(response.data.code);
                 $('#designationDropdown').html('<option value="'+response.data.designation_id+'" selected>'+response.data.designation+'</option>');
@@ -514,7 +515,7 @@ function emp_set(empId) {
                 $('#bankBranch').val(response.data.bank_branch_name);
                 $('#reporting').html('<option value="'+response.data.reporting_officer_emp_id+'" selected>'+response.data.reporting+'</option>');
                 $('#account_number').val(response.data.account_number);
-                $('#bankBranchId').html('<option value="'+response.data.code+'" selected>'+response.data.bank_branch_name+'</option>');
+                $('#bankBranchId').html('<option value="'+response.data.bb_code+'" selected>'+response.data.bank_branch_name+'</option>');
                 if (response.data?.nic_location) {
                     previewFile(response.data.nic_location);
                 }
@@ -816,17 +817,21 @@ $("#bankBranch").on("keyup", function() {
         }
     });
 
-    // $(document).on("change", "#emp_type", function () {
-    //     let employeeData = $(this).val();
+    $(document).on("change", "#emp_type", function () {
+        let employeeData = $(this).val();
         
-    // if (employeeData == "2" || employeeData == "3") {
-    //         $('#emp_code_lable').html('Emp Code *');
-    //         $("input[name='emp_code']").prop("required", true);
-    //     } else {
-    //         $('#emp_code_lable').html('Emp Code');
-    //         $("input[name='emp_code']").prop("required", false);
-    //     }
-    // });
+        emp_code_validate(employeeData);
+    });
+
+    function emp_code_validate(employeeData) {
+        if (employeeData == "2" || employeeData == "3") {
+            $('#emp_code_lable').html('Marketer Code *');
+            $("input[name='emp_code']").prop("required", true);
+        } else {
+            $('#emp_code_lable').html('Marketer Code');
+            $("input[name='emp_code']").prop("required", false);
+        }
+    }
 
 
     //submit form
