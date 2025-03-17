@@ -89,6 +89,7 @@ $dataQuery = "SELECT cl_requests.*,
                     )
                   )
               WHERE cl_requests.status = 1 $searchQuery 
+              GROUP BY cl_requests.cl_req_id
               ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
 
