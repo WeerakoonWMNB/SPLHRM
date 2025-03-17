@@ -134,6 +134,12 @@
                         INNER JOIN cl_requests_steps ON cl_requests.cl_req_id = cl_requests_steps.request_id
                         WHERE cl_requests_steps.step !='0' AND cl_requests_steps.is_complete !='1' AND cl_requests.status='1' AND 
                         (cl_requests_steps.assigned_preparer_user_id = $uid OR cl_requests_steps.assigned_checker_user_id = $uid OR cl_requests_steps.assigned_approver_user_id = $uid)
+                        AND cl_requests_steps.step = (
+                            SELECT MIN(step) FROM cl_requests_steps 
+                            WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
+                            AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
+                            AND cl_requests_steps.step != '0'
+                        )
                         GROUP BY cl_requests.cl_req_id";
                         $result = $conn->query($query); 
 
