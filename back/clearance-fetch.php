@@ -59,15 +59,20 @@ $dataQuery = "SELECT cl_requests.*,
                      cl_requests_steps.step,
                      cl_requests_steps.pending_note,
                      cl_requests_steps.complete_note,
-                     cl_requests_steps.created_date,
+                     cl_requests_steps.created_date as step_created_date,
                      cl_requests_steps.max_dates,
-                     (SELECT bd_name 
-                        FROM branch_departments
-                        INNER JOIN cl_requests_steps ON cl_requests_steps.bd_code = branch_departments.bd_code
-                        WHERE (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2) 
-                              AND cl_requests_steps.request_id = cl_requests.cl_req_id 
-                        ORDER BY cl_requests_steps.step ASC 
-                        LIMIT 1) AS department,
+                     COALESCE(
+                            (SELECT bd_name 
+                            FROM branch_departments
+                            INNER JOIN cl_requests_steps 
+                                ON cl_requests_steps.bd_code = branch_departments.bd_code
+                            WHERE (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2) 
+                                AND cl_requests_steps.request_id = cl_requests.cl_req_id 
+                            ORDER BY cl_requests_steps.step ASC 
+                            LIMIT 1),
+                            'Human Resource Department'
+                        ) AS department,
+
                     (SELECT complete_date 
                         FROM cl_requests_steps
                         WHERE cl_requests_steps.is_complete = 1 
@@ -78,22 +83,20 @@ $dataQuery = "SELECT cl_requests.*,
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
               LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
               LEFT JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id
-              AND cl_requests_steps.step = (
-                  SELECT MIN(step) FROM cl_requests_steps 
-                  WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
-                  AND 
-                    -- (
-                    --     (cl_requests_steps.step != 0 AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2))
-                    --     OR 
-                    --     (cl_requests_steps.step = 0)
-                    -- )
-                    (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
-                  )
+              AND ((cl_requests_steps.step = (
+                                            SELECT MIN(step) FROM cl_requests_steps 
+                                            WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
+                                            AND 
+                                                (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
+                                            )
+                    ) 
+                    OR 
+                    cl_requests_steps.step = 0)
               WHERE cl_requests.status = 1 $searchQuery 
               GROUP BY cl_requests.cl_req_id
               ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
-
+//echo $dataQuery;
 $stmt = $conn->prepare($dataQuery);
 
 // Properly merge params to avoid positional argument error

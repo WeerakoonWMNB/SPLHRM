@@ -50,24 +50,17 @@
               FROM cl_requests 
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
               INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id
-              AND cl_requests_steps.step = (
-                  SELECT MIN(step) FROM cl_requests_steps 
-                  WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
-                  AND 
-                --   (
-                --     (cl_requests_steps.step != 0 AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2))
-                --     OR 
-                --     (cl_requests_steps.step = 0)
-                    
-                --   )
-                (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
-              )
+              AND ((cl_requests_steps.step = (
+                        SELECT MIN(step) FROM cl_requests_steps 
+                        WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
+                        AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
+                    )) OR cl_requests_steps.step = 0)
               INNER JOIN branch_departments ON employees.bd_id = branch_departments.bd_id
               INNER JOIN designations ON employees.designation_id = designations.desig_id 
               INNER JOIN users ON users.user_id = cl_requests.created_by
               LEFT JOIN uploads letter ON letter.request_id = cl_requests.cl_req_id AND letter.document_type = '1'
               LEFT JOIN uploads cvr ON cvr.request_id = cl_requests.cl_req_id AND cvr.document_type = '2'
-              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1");
+              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1 GROUP BY cl_requests.cl_req_id ORDER BY cl_requests_steps.step DESC LIMIT 1");
 
                 if ($clearance->num_rows != 1) {
                     //header("Location: clearance-list.php");
