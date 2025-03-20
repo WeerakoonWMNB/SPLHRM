@@ -220,10 +220,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve'])) {
                 clearanceRequestStepNotice($cl_id,$next_user); // Send email notification
             }
             else {
-                $sql = "UPDATE cl_requests SET is_complete = 1, completed_date = ? WHERE cl_req_id = ? AND is_complete != 1";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("si", $datetime, $cl_id);
-                $stmt->execute();
+                // $sql = "UPDATE cl_requests SET is_complete = 1, completed_date = ? WHERE cl_req_id = ? AND is_complete != 1";
+                // $stmt = $conn->prepare($sql);
+                // $stmt->bind_param("si", $datetime, $cl_id);
+                // $stmt->execute();
 
                 clearanceRequestCompleteNotice($cl_id);
             }
@@ -376,6 +376,79 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['reject'])) {
 
             $_SESSION['success'] = "Request Completed.";
             echo json_encode(["status" => "success", "message" => "Request Completed."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Failed."]);
+        }
+        
+
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['allocate'])) {
+
+    function clean_input($data) {
+        return htmlspecialchars(strip_tags(trim($data)));
+    }
+
+    $cl_id = clean_input($_POST['cl_id']);
+    $by = $_SESSION['uid'];
+    $datetime = date("Y-m-d H:i:s");
+    
+        $errors = [];
+    
+        if (empty($cl_id)) $errors[] = "Clearance id required.";
+
+        if (!empty($errors)) {
+            echo json_encode(["status" => "error", "message" => $errors]);
+            exit();
+        }
+
+        $sql = "UPDATE cl_requests SET allocated_to_finance = 1, finace_allocated_date = ?, finance_allocated_by = ? WHERE cl_req_id = ? AND is_complete != 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sii", $datetime, $by, $cl_id);
+
+        if ($stmt->execute()) {
+
+            finalClearanceNotice($cl_id); // Send email notification
+
+            $_SESSION['success'] = "Allocated to finance.";
+            echo json_encode(["status" => "success", "message" => "Allocated to finance."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Failed."]);
+        }
+        
+
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['fcomplete'])) {
+
+    function clean_input($data) {
+        return htmlspecialchars(strip_tags(trim($data)));
+    }
+
+    $cl_id = clean_input($_POST['cl_id']);
+    $complete_date = clean_input($_POST['complete_date']);
+    $by = $_SESSION['uid'];
+    $datetime = date("Y-m-d H:i:s");
+    
+        $errors = [];
+    
+        if (empty($cl_id)) $errors[] = "Clearance id required.";
+
+        if (!empty($errors)) {
+            echo json_encode(["status" => "error", "message" => $errors]);
+            exit();
+        }
+
+        $sql = "UPDATE cl_requests SET is_complete = 1, completed_date = ?, completed_by = ? WHERE cl_req_id = ? AND is_complete != 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sii", $complete_date, $by, $cl_id);
+
+        if ($stmt->execute()) {
+
+            finalClearanceCompleteNotice($cl_id); // Send email notification
+
+            $_SESSION['success'] = "Clearance Completed.";
+            echo json_encode(["status" => "success", "message" => "Clearance Completed."]);
         } else {
             echo json_encode(["status" => "error", "message" => "Failed."]);
         }
