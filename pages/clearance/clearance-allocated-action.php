@@ -587,7 +587,9 @@
                                 }
                                 if ($clearance['prepare_check_approve']=='2') {
                                     if ($user_level == '1' || $user_level =='2' || $clearance['assigned_approver_user_id'] == $user_id) {
-                                        echo '<button type="button" name="approve" id="approve" class="btn btn-success btn-sm" '. $disabled .' >Approve</button>';
+                                        echo '<button type="button" name="approve" id="approve" class="btn btn-success btn-sm me-1" '. $disabled .' >Approve</button>';
+                                        echo '<button type="button" name="reject" id="reject" class="btn btn-danger btn-sm me-1" '. $disabled .' >Revers to Checking</button>';
+                                        echo '<button type="button" id="pending" class="btn btn-warning btn-sm" '. $disabled .' >Pending</button>';
                                     }
                                 }
 
@@ -1025,6 +1027,49 @@
             error: function () {
                 //alert('An error occurred. Please try again.');
                 $("#che").prop("disabled", false);
+                const alertBox = document.getElementById('customAlert');
+                alertBox.textContent = 'An error occurred. Please try again.';
+                alertBox.style.display = 'block';
+
+                // Hide the alert after 3 seconds
+                setTimeout(() => {
+                    alertBox.style.display = 'none';
+                }, 3000);
+            }
+        });
+    });
+
+    $('#reject').click(function () {
+        $("#reject").prop("disabled", true);
+        let note = document.getElementById('note').value;
+        let cl_step_id = document.getElementById('cl_step_id').value;
+        let cl_id = document.getElementById('cl_id').value;
+
+        $.ajax({
+            url: "../../back/clearance-allocated-manage.php",
+            type: "POST",
+            data: {note: note, cl_step_id: cl_step_id, reject: 'reject', cl_id: cl_id},
+            dataType: 'json',
+            success: function (response) {
+                if (response.status === 'success') {
+                    
+                    location.reload();
+                } else {
+                    //alert("Error: " + response.message);
+                    $("#reject").prop("disabled", false);
+                    const alertBox = document.getElementById('customAlert');
+                    alertBox.innerHTML  =  response.message.join('<br>');
+                    alertBox.style.display = 'block';
+
+                    // Hide the alert after 3 seconds
+                    setTimeout(() => {
+                        alertBox.style.display = 'none';
+                    }, 3000);
+                }
+            },
+            error: function () {
+                //alert('An error occurred. Please try again.');
+                $("#reject").prop("disabled", false);
                 const alertBox = document.getElementById('customAlert');
                 alertBox.textContent = 'An error occurred. Please try again.';
                 alertBox.style.display = 'block';
