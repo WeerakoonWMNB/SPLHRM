@@ -536,14 +536,16 @@
                     <div class="form-group mt-3">
                         <label for="note">Note</label>
                         <textarea class="form-control" id="note" name="note" rows="3" placeholder="Please write note here.."><?php
-                                if (!empty($clearance['pending_note'])) {
-                                    echo '* '.$clearance['pending_note'];
-                                }
-                                if (!empty($clearance['complete_note'])) {
-                                    echo '* '.$clearance['complete_note'];
-                                }
-                            ?>
-                        </textarea>
+                            $notes = [];
+                            if (!empty($clearance['pending_note'])) {
+                                $notes[] = '* ' . trim($clearance['pending_note']);
+                            }
+                            if (!empty($clearance['complete_note'])) {
+                                $notes[] = '* ' . trim($clearance['complete_note']);
+                            }
+                            echo implode("\n", $notes);
+                        ?></textarea>
+
                     </div>
 
                     <input type="hidden" name="cl_id" id="cl_id" value="<?= $cl_id ?>">
