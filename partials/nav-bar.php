@@ -202,10 +202,10 @@
               <?php
                 if (checkAccess([1,2,3])) {
                   
-                  if (in_array('FINANCE', explode(',', $_SESSION['bd_id']))) {//Finance
+                  if (in_array('FINANCE', explode(',', $_SESSION['bd_id'])) || checkAccess([1,2])) {//Finance
               ?>
               <li class="nav-item"> 
-                  <a class="nav-link" href="../../pages/clearance/clearance-final.php"> Final Clearance 
+                  <a class="nav-link" href="../../pages/clearance/clearance-final.php"> Final Clearance (FD)
                   <?php
                         $count = 0;
                         $query = "SELECT * FROM cl_requests WHERE cl_requests.status='1' AND cl_requests.is_complete ='0' AND cl_requests.allocated_to_finance='1'";
