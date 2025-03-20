@@ -198,6 +198,39 @@
               <?php
                 }
               ?>
+
+              <?php
+                if (checkAccess([1,2,3])) {
+                  
+                  if (in_array('FINANCE', explode(',', $_SESSION['bd_id']))) {//Finance
+              ?>
+              <li class="nav-item"> 
+                  <a class="nav-link" href="../../pages/clearance/clearance-final.php"> Final Clearance 
+                  <?php
+                        $count = 0;
+                        $query = "SELECT * FROM cl_requests WHERE cl_requests.status='1' AND cl_requests.is_complete ='0' AND cl_requests.allocated_to_finance='1'";
+                        $result = $conn->query($query); 
+
+                        if ($result) {
+                          if ($result->num_rows > 0) {
+                            $count = $result->num_rows;
+                          }
+
+                          if ($count>0) {
+                            ?>
+                            <span class="status-dot red ms-1 mb-2">
+                                <small><?= htmlspecialchars($count ?? 0) ?></small>
+                            </span>
+                            <?php
+                          }
+                        } 
+                ?>
+                </a>
+              </li>
+              <?php
+                  }
+                }
+              ?>
             </ul>
           </div>
         </li>

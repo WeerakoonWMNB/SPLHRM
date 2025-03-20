@@ -17,6 +17,7 @@
 
                 $clearance = $conn->query("SELECT cl_requests.resignation_date,
                      cl_requests.is_complete, 
+                     cl_requests.allocated_to_finance,
                      employees.name_with_initials, 
                      employees.code, 
                      employees.system_emp_no, 
@@ -65,7 +66,7 @@
               LEFT JOIN uploads letter ON letter.request_id = cl_requests.cl_req_id AND letter.document_type = '1'
               LEFT JOIN uploads cvr ON cvr.request_id = cl_requests.cl_req_id AND cvr.document_type = '2'
               LEFT JOIN bank_branch bb ON bb.bank_code = employees.bank_code AND bb.branch_code = employees.branch_code
-              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1");
+              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1 AND cl_requests.is_complete = 0");
 
                 if ($clearance->num_rows != 1) {
                     //header("Location: clearance-list.php");
@@ -113,9 +114,23 @@
                         <p class="card-title"><h4 id="title-name">Clearance Request Summary</h4></p>
                         <hr id="title-hr">
 
-                        <a href="clearance-list.php" class="btn btn-secondary btn-sm mb-2">Back</a>
+                        <a href="clearance-final.php" class="btn btn-secondary btn-sm mb-2">Back</a>
                         <button type="button" class="btn btn-info btn-sm mb-2" onclick="printDiv('printArea')">Print</button>
-                        
+                        <?php
+                            if ($clearance['is_complete'] != 1 && $clearance['allocated_to_finance'] == 0) {
+                                echo '<button type="button" id="allocate_finance" class="btn btn-success btn-sm mb-2">Allocate to Finance</button>';
+                            }
+                        ?>
+                        <?php
+                            if ($clearance['is_complete'] != 1 && $clearance['allocated_to_finance'] == 1) {
+                                echo '<div class="form-group">
+                                        <label><b>Completed Date :</b></label>
+                                        <input type="date" class="form-control mb-1" style="width:20%;" id="complete_date" >
+                                    </div>';
+
+                                echo '<button type="button" id="finance_complete" class="btn btn-success btn-sm mb-2">Mark as Complited</button>';
+                            }
+                        ?>
                         <div class="col-md-12 grid-margin stretch-card" id="printArea">
                         <div class="card">
                             <div class="card-body">
@@ -281,7 +296,8 @@
                             </div>
                         </div>
                         </div>
-                
+                        <input type="hidden" id="cl_id" value="<?= $cl_id ?>">
+                        
                     </div>
                 </div>
                 </div>
@@ -303,6 +319,106 @@
             document.body.innerHTML = originalContent;
             window.location.reload(); // Reload to restore the original page
         }
+
+        $('#allocate_finance').click(function () {
+        $("#allocate_finance").prop("disabled", true);
+        let cl_id = document.getElementById('cl_id').value;
+
+            $.ajax({
+                url: "../../back/clearance-allocated-manage.php",
+                type: "POST",
+                data: {allocate: 'allocate', cl_id: cl_id},
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        
+                        location.reload();
+                    } else {
+                        //alert("Error: " + response.message);
+                        $("#allocate_finance").prop("disabled", false);
+                        const alertBox = document.getElementById('customAlert');
+                        alertBox.innerHTML  =  response.message.join('<br>');
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+                    }
+                },
+                error: function () {
+                    //alert('An error occurred. Please try again.');
+                    $("#allocate_finance").prop("disabled", false);
+                    const alertBox = document.getElementById('customAlert');
+                    alertBox.textContent = 'An error occurred. Please try again.';
+                    alertBox.style.display = 'block';
+
+                    // Hide the alert after 3 seconds
+                    setTimeout(() => {
+                        alertBox.style.display = 'none';
+                    }, 3000);
+                }
+            });
+
+        });
+
+        $('#finance_complete').click(function () {
+        $("#finance_complete").prop("disabled", true);
+        let cl_id = document.getElementById('cl_id').value;
+        let complete_date = document.getElementById('complete_date').value;
+
+        if (complete_date) {
+            $.ajax({
+                url: "../../back/clearance-allocated-manage.php",
+                type: "POST",
+                data: {fcomplete: 'fcomplete', cl_id: cl_id, complete_date: complete_date},
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        window.location.href = 'clearance-final.php';
+                        //location.reload();
+                    } else {
+                        //alert("Error: " + response.message);
+                        $("#finance_complete").prop("disabled", false);
+                        const alertBox = document.getElementById('customAlert');
+                        alertBox.innerHTML  =  response.message.join('<br>');
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+                    }
+                },
+                error: function () {
+                    //alert('An error occurred. Please try again.');
+                    $("#finance_complete").prop("disabled", false);
+                    const alertBox = document.getElementById('customAlert');
+                    alertBox.textContent = 'An error occurred. Please try again.';
+                    alertBox.style.display = 'block';
+
+                    // Hide the alert after 3 seconds
+                    setTimeout(() => {
+                        alertBox.style.display = 'none';
+                    }, 3000);
+                }
+            });
+        }
+        else {
+                    $("#finance_complete").prop("disabled", false);
+                    const alertBox = document.getElementById('customAlert');
+                    alertBox.textContent = 'Please select a date to mark as completed.';
+                    alertBox.style.display = 'block';
+
+                    // Hide the alert after 3 seconds
+                    setTimeout(() => {
+                        alertBox.style.display = 'none';
+                    }, 3000);
+        }
+
+            
+            
+        });
     </script>
 </body>
 
