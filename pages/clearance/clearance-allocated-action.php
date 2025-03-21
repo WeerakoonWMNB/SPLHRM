@@ -376,10 +376,10 @@
                             echo "<thead><tr>
                                     <th>#</th>
                                     <th>Item Name</th>
-                                    <th>Status *</th>
-                                    <th>Action *</th>
+                                    <th style='min-width:100px'>Status *</th>
+                                    <th style='min-width:100px'>Action *</th>
                                     <th>Quantity *</th>
-                                    <th>Amount</th>
+                                    <th style='min-width:150px'>Amount</th>
                                     <th>Issued Date</th>
                                     <th>Remarks</th>
                                     <th>Attachments</th>
