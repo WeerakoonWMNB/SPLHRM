@@ -739,7 +739,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['bd_id'])) {
     $bd_id = $_GET['bd_id'];
 
     // Prepare the SQL statement to prevent SQL injection
-    $query = "SELECT * FROM users
+    $query = "SELECT user_id,name FROM users
                 WHERE users.is_active = 1 AND FIND_IN_SET(?, users.bd_id) > 0";
 
     if ($stmt = $conn->prepare($query)) {
