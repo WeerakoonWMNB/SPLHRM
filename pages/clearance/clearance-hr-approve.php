@@ -519,13 +519,13 @@ function fetchExistingRecords() {
                 
                 // Fetch employees for the selected department
                 let employees = await getEmployees(record.department_id);
-                console.log(record.assigned_preparer_user_id);
+                //console.log(record.assigned_preparer_user_id);
                 
                 let preparerOptions = getEmployeeOptions(employees, record.assigned_preparer_user_id);
                 let checkerOptions = getEmployeeOptions(employees, record.assigned_checker_user_id);
                 let approverOptions = getEmployeeOptions(employees, record.assigned_approver_user_id);
 
-                let disable = record.is_complete != '0' ? "disabled" : "";
+                let disable = record.is_complete == '1' ? "disabled" : "";
 
                 let newRow = `
                     <tr>
