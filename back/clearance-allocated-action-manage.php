@@ -256,11 +256,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $row = $result->fetch_assoc();
     $next_user = null;
 
-    if (!empty($row['assigned_preparer_user_id']) && empty($row['prepared_by'])) {
-        $next_user = $row['assigned_preparer_user_id'];
-    } else if (!empty($row['assigned_checker_user_id']) && empty($row['checked_by'])) {
+    // if (!empty($row['assigned_preparer_user_id']) && empty($row['prepared_by'])) {
+    //     $next_user = $row['assigned_preparer_user_id'];
+    // } else 
+    if (!empty($row['assigned_checker_user_id']) && empty($row['checked_by']) && $row['assigned_checker_user_id'] != $by ) {
         $next_user = $row['assigned_checker_user_id'];
-    } else if (!empty($row['assigned_approver_user_id']) && empty($row['approved_by'])) {
+    } else if (!empty($row['assigned_approver_user_id']) && empty($row['approved_by']) && $row['assigned_approver_user_id'] != $by ) {
         $next_user = $row['assigned_approver_user_id'];
     }
 
