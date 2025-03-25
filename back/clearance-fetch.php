@@ -53,7 +53,7 @@ $stmt->close();
 $dataQuery = "SELECT cl_requests.*, 
                      employees.name_with_initials, 
                      employees.code, 
-                     employees.system_emp_no, 
+                     employees.epf_no, 
                      employees.title, 
                      cl_requests_steps.is_complete AS step_complete, 
                      cl_requests_steps.step,
@@ -128,16 +128,16 @@ while ($row = $dataResult->fetch_assoc()) {
                 <a href="clearance-hr-approve.php?id='.base64_encode($cl_req_id).'" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View">
                     <i class="mdi mdi-eye"></i>
                 </a>';
-    if ($row['is_complete'] == '1') {
+    // if ($row['is_complete'] == '1') {
         $actionButtons .= '<a href="clearance-item-summary.php?id='.base64_encode($cl_req_id).'" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="summary">
                     <i class="mdi mdi-format-list-bulleted"></i>
                 </a>';
-    } 
-    else {
-        $actionButtons .= '<button type="button" class="btn btn-success btn-sm" title="summary" disabled>
-                            <i class="mdi mdi-format-list-bulleted"></i>
-                        </button>';
-    }           
+    // } 
+    // else {
+    //     $actionButtons .= '<button type="button" class="btn btn-success btn-sm" title="summary" disabled>
+    //                         <i class="mdi mdi-format-list-bulleted"></i>
+    //                     </button>';
+    // }           
 
     if ($row['step_complete'] == '1' || $row['step'] > 0) {
         $actionButtons .= '<button type="button" class="btn btn-warning btn-sm" title="Edit" disabled>

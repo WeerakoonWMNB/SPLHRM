@@ -41,7 +41,7 @@
                                     <!-- <th>Name </th> -->
                                     <th>Full Name</th>
                                     <th>Code</th>
-                                    <th>EMP ID</th>
+                                    <th>EPF No</th>
                                     <th>NIC</th>
                                     <th>Department</th>
                                     <th>Actions</th>
@@ -444,7 +444,7 @@ $(document).ready(function () {
             // { "data": "ini_name" },
             { "data": "f_name" },
             { "data": "code" },
-            { "data": "system_emp_no" },
+            { "data": "epf_no" },
             { "data": "nic" },
             { "data": "bd_name" },
             { "data": "action" }

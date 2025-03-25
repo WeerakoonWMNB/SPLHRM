@@ -53,7 +53,7 @@
                                     <th>Clearance ID </th>
                                     <th>Name</th>
                                     <th>Code</th>
-                                    <th>EMP ID</th>
+                                    <th>EPF No</th>
                                     <th>Resignation Date</th>
                                     <th>Notes</th>
                                     <th>Current Dept</th>
@@ -97,7 +97,7 @@ $(document).ready(function () {
             { "data": "req_id" },
             { "data": "ini_name" },
             { "data": "code" },
-            { "data": "system_emp_no" },
+            { "data": "epf_no" },
             { "data": "resignation_date" },
             { "data": "notes" },
             { "data": "department" },
