@@ -123,7 +123,7 @@ while ($row = $dataResult->fetch_assoc()) {
             <input type="hidden" name="row_id" value="' . $cl_req_id . '">
             <div class="d-flex gap-2">';
 
-        $actionButtons .= '<a href="clearance-item-summary.php?id='.base64_encode($cl_req_id).'" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="summary">
+        $actionButtons .= '<a href="clearance-item-summary.php?id='.base64_encode($cl_req_id).'&cf=cf" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="summary">
                     <i class="mdi mdi-format-list-bulleted"></i>
                 </a>'; 
                 
