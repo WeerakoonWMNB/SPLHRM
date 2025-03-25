@@ -40,12 +40,12 @@
                      bb.branch_name,
                      bb.branch_code,
                      employees.account_number,
-                    (SELECT complete_date 
+                    (SELECT cl_step_id 
                         FROM cl_requests_steps
-                        WHERE cl_requests_steps.is_complete = 1 
+                        WHERE cl_requests_steps.is_complete != 1 
                               AND cl_requests_steps.request_id = cl_requests.cl_req_id 
                         ORDER BY cl_requests_steps.step DESC 
-                        LIMIT 1) AS last_completed_date
+                        LIMIT 1) AS not_completed_steps
               FROM cl_requests 
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
               INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id
@@ -113,11 +113,18 @@
                     <div class="card-body">
                         <p class="card-title"><h4 id="title-name">Clearance Request Summary</h4></p>
                         <hr id="title-hr">
-
-                        <!-- <a href="clearance-final.php" class="btn btn-secondary btn-sm mb-2">Back</a> -->
+                        <?php
+                            if (isset($_GET['cl'])) {
+                                echo '<a href="clearance-list.php" class="btn btn-secondary btn-sm mb-2">Back</a>';
+                            }
+                            if (isset($_GET['cf'])) {
+                                echo '<a href="clearance-final.php" class="btn btn-secondary btn-sm mb-2">Back</a>';
+                            }
+                        ?>
+                        
                         <button type="button" class="btn btn-info btn-sm mb-2" onclick="printDiv('printArea')">Print</button>
                         <?php
-                            if ($clearance['is_complete'] != 1 && $clearance['allocated_to_finance'] == 0) {
+                            if ($clearance['is_complete'] != 1 && $clearance['allocated_to_finance'] == 0 && empty($clearance['not_completed_steps']) ) {
                                 echo '<button type="button" id="allocate_finance" class="btn btn-success btn-sm mb-2">Allocate to Finance</button>';
                             }
                         ?>

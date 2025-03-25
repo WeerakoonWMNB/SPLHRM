@@ -129,7 +129,7 @@ while ($row = $dataResult->fetch_assoc()) {
                     <i class="mdi mdi-eye"></i>
                 </a>';
     // if ($row['is_complete'] == '1') {
-        $actionButtons .= '<a href="clearance-item-summary.php?id='.base64_encode($cl_req_id).'" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="summary">
+        $actionButtons .= '<a href="clearance-item-summary.php?id='.base64_encode($cl_req_id).'&cl=cl" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="summary">
                     <i class="mdi mdi-format-list-bulleted"></i>
                 </a>';
     // } 
