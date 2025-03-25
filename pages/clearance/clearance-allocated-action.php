@@ -26,7 +26,7 @@
                      cl_requests.rejoin_or_not,
                      employees.name_with_initials, 
                      employees.code, 
-                     employees.system_emp_no, 
+                     employees.epf_no, 
                      employees.title, 
                      employees.nic,
                      employees.appointment_date,
@@ -208,9 +208,9 @@
                                             <td><?= $clearance['designation'] ?></td>
                                         </tr>
                                         <tr>
-                                            <td><b>Employee ID/Code : </b></td>
+                                            <td><b>Employee EPF/Code : </b></td>
                                             <td>
-                                                <?= $clearance['system_emp_no'] ?>
+                                                <?= $clearance['epf_no'] ?>
                                                 <?php 
                                                     if ($clearance['code']) {
                                                         echo '/ '.$clearance['code'];

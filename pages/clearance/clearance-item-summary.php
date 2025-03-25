@@ -20,7 +20,7 @@
                      cl_requests.allocated_to_finance,
                      employees.name_with_initials, 
                      employees.code, 
-                     employees.system_emp_no, 
+                     employees.epf_no, 
                      employees.title, 
                      employees.nic,
                      employees.appointment_date,
@@ -114,7 +114,7 @@
                         <p class="card-title"><h4 id="title-name">Clearance Request Summary</h4></p>
                         <hr id="title-hr">
 
-                        <a href="clearance-final.php" class="btn btn-secondary btn-sm mb-2">Back</a>
+                        <!-- <a href="clearance-final.php" class="btn btn-secondary btn-sm mb-2">Back</a> -->
                         <button type="button" class="btn btn-info btn-sm mb-2" onclick="printDiv('printArea')">Print</button>
                         <?php
                             if ($clearance['is_complete'] != 1 && $clearance['allocated_to_finance'] == 0) {
@@ -151,9 +151,9 @@
                                             <td><?= $clearance['designation'] ?></td>
                                         </tr>
                                         <tr>
-                                            <td><b>Employee ID/Code : </b></td>
+                                            <td><b>Employee EPF No/Code : </b></td>
                                             <td>
-                                                <?= $clearance['system_emp_no'] ?>
+                                                <?= $clearance['epf_no'] ?>
                                                 <?php 
                                                     if ($clearance['code']) {
                                                         echo '/ '.$clearance['code'];

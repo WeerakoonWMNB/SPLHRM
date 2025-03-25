@@ -52,7 +52,7 @@
                                     <th>Clearance ID </th>
                                     <th>Name</th>
                                     <th>Resignation Date</th>
-                                    <th>EMP ID</th>
+                                    <th>EPF No</th>
                                     <th>Code</th>
                                     <th>Notes</th>
                                     <th>Actions</th>
