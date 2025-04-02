@@ -1141,3 +1141,168 @@ function finalClearanceCompleteNotice($cl_id) {
 
   sendMail($mailid, $mailheading, $content);
 }
+
+//-------------- marketer login details email ------------------//
+function croMail($mCode,$mname,$uname,$pass,$branchmail) {
+
+  $content = '<!doctype html>
+  <html lang="en">
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <title>Clearance Request Notification</title>
+      <style media="all" type="text/css">
+        @media all {
+          .btn-primary table td:hover {
+            background-color: #ec0867 !important;
+          }
+
+          .btn-primary a:hover {
+            background-color: #ec0867 !important;
+            border-color: #ec0867 !important;
+          }
+        }
+        @media only screen and (max-width: 640px) {
+          .main p, .main td, .main span {
+            font-size: 16px !important;
+          }
+          .wrapper {
+            padding: 8px !important;
+          }
+          .content {
+            padding: 0 !important;
+          }
+          .container {
+            padding: 0 !important;
+            padding-top: 8px !important;
+            width: 100% !important;
+          }
+          .main {
+            border-left-width: 0 !important;
+            border-radius: 0 !important;
+            border-right-width: 0 !important;
+          }
+          .btn table {
+            max-width: 100% !important;
+            width: 100% !important;
+          }
+          .btn a {
+            font-size: 16px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+          }
+        }
+      </style>
+    </head>
+
+    <body style="font-family: Helvetica, sans-serif; background-color: #f4f5f6; margin: 0; padding: 0;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body" style="width: 100%; background-color: #f4f5f6;">
+        <tr>
+          <td></td>
+          <td class="container" style="max-width: 600px; width: 600px; margin: 0 auto; padding: 24px;">
+            <div class="content">
+
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main" style="background: #ffffff; border: 1px solid #eaebed; border-radius: 16px; width: 100%;">
+                
+                <tr>
+                  <td class="wrapper" style="padding: 24px;">
+                    <p>Dear Team,</p>
+                    <p>Please find and share the following login credentials with the appropriate individuals.</p>
+                    
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="width: 100%;">
+                      <tbody>
+                        <tr>
+                          <td align="left">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+                              <tbody>
+                                <tr><td><strong>Marketer Name:</strong>'.$mname.' </td></tr>
+                                <tr><td><strong>Marketer Code:</strong> '.$mCode.'</td></tr>
+                                <tr><td><strong>User Name:</strong> '.$uname.'</td></tr>
+                                <tr><td><strong>Password:</strong> '.$pass.'</td></tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <p>This is a system-generated email. No action is required in response to this notification. For any concerns, please contact IT Department.</p>
+
+                    <p style="font-size: 12px; text-align: center;"><i>*** Please note that this is an automated email. Do not reply to it. ***</i></p>
+                  </td>
+                </tr>
+              </table>
+
+              <div class="footer" style="padding-top: 24px; text-align: center;">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+                  <tr>
+                    <td class="content-block" style="color: #9a9ea6; font-size: 16px; text-align: center;">
+                      Sadaharitha Plantations Ltd, 6A Alfred Pl, Colombo 03.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="content-block powered-by" style="color: #9a9ea6; font-size: 16px; text-align: center;">
+                      @ SPL IT
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+            </div>
+          </td>
+          <td></td>
+        </tr>
+      </table>
+    </body>
+  </html>';
+
+  
+  // // Branch code to search
+  // $branch_code = $row['bd_code']; 
+
+  // // SQL query to find exact matches in bd_id column
+  // $sql = "SELECT username FROM users WHERE is_active=1 AND process_level IN (1,2,3,4) AND (bd_id = ? 
+  //         OR bd_id LIKE CONCAT(? , ',%') 
+  //         OR bd_id LIKE CONCAT('%,', ? , ',%') 
+  //         OR bd_id LIKE CONCAT('%,', ? ))";
+
+  // $stmt = $conn->prepare($sql);
+  // $stmt->bind_param("ssss", $branch_code, $branch_code, $branch_code, $branch_code);
+  // $stmt->execute();
+  // $result = $stmt->get_result();
+
+  // // Fetch results into an array
+  // $mailid = [];
+  // while ($row1 = $result->fetch_assoc()) {
+  //     $mailid[] = $row1['username'];
+  // }
+
+  // if ($_SERVER['HTTP_HOST'] === 'hrinfo.sadaharitha.com'){
+  //   //HR Mail
+  //   $mailid[] = 'amalr@sadaharitha.com';
+  // }
+
+  $mailid[] = $branchmail;
+  $mailid[] = 'nishshankaw@sadaharitha.com';
+  $mailheading = 'Online Proposal System Login Credentials ('.$mCode.')';
+
+  sendMail($mailid, $mailheading, $content);
+}
+
+// Get input parameters
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $mCode = $_POST['param1'];
+  $mname = $_POST['param2'];
+  $uname = $_POST['param3'];
+  $pass = $_POST['param4'];
+  $branchmail = $_POST['param5'];
+
+  // if (!$mCode || !$mname || !$uname || !$pass || !$branchmail) {
+  //     echo json_encode(["error" => "Missing parameters"]);
+  //     exit;
+  // }
+
+  $result = croMail($mCode, $mname, $uname, $pass, $branchmail);
+  echo json_encode($result);
+}
+//-------------- end marketer login details email ------------------//
