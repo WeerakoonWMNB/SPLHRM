@@ -52,7 +52,7 @@ $user_level = $_SESSION['ulvl'];
                         <div class="col-md-4 mb-3">
                             <label for="searchEmployee">Select Department</label>
                             <select class="form-control mt-3" id="department" name="department" style="border: 1px solid #ccc; border-radius: 4px; padding: 10px;">
-                                <option value="">All Departments</option>
+                                
                                 <?php
                                     $query = "SELECT * FROM branch_departments";
                                     if (!empty($dept) && ($user_level != '1' && $user_level != '2')) {
