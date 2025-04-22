@@ -235,6 +235,29 @@
           </div>
         </li>
 
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="collapse" href="#clearance-reports" aria-expanded="false" aria-controls="clearance-reports">
+            <i class="mdi mdi-account-settings menu-icon"></i>
+            <span class="menu-title">Clearance Reports</span>
+            <i class="menu-arrow"></i>
+          </a>
+          <div class="collapse" id="clearance-reports">
+            <ul class="nav flex-column sub-menu">
+
+              <?php
+                if (checkAccess([1,2,3])) {
+              ?>
+              <li class="nav-item"> 
+                <a class="nav-link" href="../../pages/clearance/individual-report.php"> Individual </a>
+              </li>
+              <?php
+                }
+              ?>  
+
+            </ul>
+          </div>
+        </li>
+
         <?php
           }
         ?>
