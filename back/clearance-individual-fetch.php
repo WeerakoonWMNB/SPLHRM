@@ -85,24 +85,6 @@ $dataQuery = "SELECT cl_requests.*,
               LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
               INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id
               INNER JOIN branch_departments selectedBranch ON cl_requests_steps.bd_code = selectedBranch.bd_code
-              AND (
-                    cl_requests_steps.step = (
-                        SELECT MIN(step) 
-                        FROM cl_requests_steps 
-                        WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
-                        AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
-                    )  
-                    OR (
-                        NOT EXISTS (
-                            SELECT MIN(step)
-                            FROM cl_requests_steps 
-                            WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
-                            AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
-                        ) 
-                        AND cl_requests_steps.step = 0
-                    )
-                )
-
               WHERE cl_requests.status = 1 AND cl_requests_steps.bd_code IN ('$dept')  $searchQuery 
               ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
