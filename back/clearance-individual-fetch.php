@@ -60,18 +60,6 @@ $dataQuery = "SELECT cl_requests.*,
                      cl_requests_steps.created_date as step_created_date,
                      cl_requests_steps.max_dates,
                      selectedBranch.bd_name as selected_branch,
-                     branch_departments.bd_name AS department_name, 
-                     COALESCE(
-                            (SELECT bd_name 
-                            FROM branch_departments
-                            INNER JOIN cl_requests_steps 
-                                ON cl_requests_steps.bd_code = branch_departments.bd_code
-                            WHERE (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2) 
-                                AND cl_requests_steps.request_id = cl_requests.cl_req_id 
-                            ORDER BY cl_requests_steps.step ASC 
-                            LIMIT 1),
-                            'Human Resource Department'
-                        ) AS department,
 
                     (SELECT complete_date 
                         FROM cl_requests_steps
@@ -85,7 +73,7 @@ $dataQuery = "SELECT cl_requests.*,
               LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
               INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id
               INNER JOIN branch_departments selectedBranch ON cl_requests_steps.bd_code = selectedBranch.bd_code
-              WHERE cl_requests.status = 1 AND cl_requests_steps.step>1 AND cl_requests_steps.bd_code IN ('$dept')  $searchQuery 
+              WHERE cl_requests.status = 1 AND cl_requests_steps.step>1 AND cl_requests_steps.is_complete=1 AND cl_requests_steps.bd_code IN ('$dept')  $searchQuery 
               ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
 //echo $dataQuery;
@@ -135,26 +123,6 @@ while ($row = $dataResult->fetch_assoc()) {
     $note = trim($note); // Remove any extra spaces
 
     $row['notes'] = $note;
-
-    // Progress Bar Calculation
-    $progressQuery = "SELECT 
-                        ROUND((SUM(CASE WHEN is_complete = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*))) AS completion_percentage
-                      FROM cl_requests_steps
-                      WHERE request_id = ?";
-    $stmtProgress = $conn->prepare($progressQuery);
-    $stmtProgress->bind_param("i", $cl_req_id);
-    $stmtProgress->execute();
-    $stmtProgress->bind_result($completion_percentage);
-    $stmtProgress->fetch();
-    $stmtProgress->close();
-
-    if ($row['is_complete'] == '0' && ($row['step_complete'] == '1' && $row['step'] == "0")) {
-        $completion_percentage = 10;
-    }
-
-    $row['progress'] = '<div class="progress">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: ' . ($completion_percentage ?: 0) . '%" aria-valuenow="' . ($completion_percentage ?: 0) . '" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>';
 
     // Delay Status Calculation
     $referenceDate = !empty($row['last_completed_date']) ? $row['last_completed_date'] : $row['created_date'];
