@@ -75,7 +75,7 @@
               INNER JOIN users ON users.user_id = cl_requests.created_by
               LEFT JOIN uploads ON uploads.request_id = cl_requests.cl_req_id AND uploads.document_type = '1'
               LEFT JOIN uploads cvr ON cvr.request_id = cl_requests.cl_req_id AND cvr.document_type = '2'
-              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests_steps.bd_code = '$dept' AND cl_requests.status = 1 ";
+              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests_steps.step>1 AND cl_requests_steps.bd_code = '$dept' AND cl_requests.status = 1 ";
               //echo $query;exit;
 
                 $clearance = $conn->query($query);
