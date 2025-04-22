@@ -514,7 +514,7 @@
                         <div>
                             
                         </div>
-                        <a href="clearance-allocated.php" class="btn btn-info btn-sm">Back</a>
+                        <a href="individual-report.php" class="btn btn-info btn-sm">Back</a>
                     </div>
 
                 </form>

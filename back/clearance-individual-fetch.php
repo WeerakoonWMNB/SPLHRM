@@ -59,6 +59,7 @@ $dataQuery = "SELECT cl_requests.*,
                      cl_requests_steps.complete_note,
                      cl_requests_steps.created_date as step_created_date,
                      cl_requests_steps.max_dates,
+                     selectedBranch.bd_name as selected_branch,
                      branch_departments.bd_name AS department_name, 
                      COALESCE(
                             (SELECT bd_name 
@@ -80,8 +81,10 @@ $dataQuery = "SELECT cl_requests.*,
                         LIMIT 1) AS last_completed_date
               FROM cl_requests 
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
+              
               LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
-              LEFT JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id
+              INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id
+              INNER JOIN branch_departments selectedBranch ON cl_requests_steps.bd_code = selectedBranch.bd_code
               AND (
                     cl_requests_steps.step = (
                         SELECT MIN(step) 
