@@ -83,6 +83,7 @@ $user_level = $_SESSION['ulvl'];
                                     <th>Resignation Date</th>
                                     <th>EPF No</th>
                                     <th>Code</th>
+                                    <th>Note</th>
                                     <th>Selected Dept</th>
                                     <th>Actions</th>
                                 </tr>
@@ -129,7 +130,8 @@ $(document).ready(function () {
             { "data": "resignation_date" },
             { "data": "epf_no" },
             { "data": "code" },
-            { "data": "department_name" },
+            { "data": "pending_note" },
+            { "data": "selected_branch" },
             { "data": "action" }
         ]
     });
