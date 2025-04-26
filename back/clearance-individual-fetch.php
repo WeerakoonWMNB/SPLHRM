@@ -73,7 +73,7 @@ $dataQuery = "SELECT cl_requests.*,
               LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
               INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id
               INNER JOIN branch_departments selectedBranch ON cl_requests_steps.bd_code = selectedBranch.bd_code
-              WHERE cl_requests.status = 1 AND cl_requests_steps.step>1 AND cl_requests_steps.is_complete=1 AND cl_requests_steps.bd_code IN ('$dept')  $searchQuery 
+              WHERE cl_requests.status = 1 AND cl_requests_steps.step>0 AND cl_requests_steps.is_complete=1 AND cl_requests_steps.bd_code IN ('$dept')  $searchQuery 
               ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
 //echo $dataQuery;

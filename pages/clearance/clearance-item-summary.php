@@ -130,10 +130,17 @@
                         ?>
                         <?php
                             if ($clearance['is_complete'] != 1 && $clearance['allocated_to_finance'] == 1) {
-                                echo '<div class="form-group">
-                                        <label><b>Completed Date :</b></label>
-                                        <input type="date" class="form-control mb-1" style="width:20%;" id="complete_date" >
-                                    </div>';
+                                echo '<div class="d-flex">
+                                            <div class="form-group me-3">
+                                                <label><b>Payment Date :</b></label>
+                                                <input type="date" class="form-control mb-1" style="width:250px; border:1px solid #ccc;" id="complete_date">
+                                            </div>
+                                            <div class="form-group">
+                                                <label><b>Check Number :</b></label>
+                                                <input type="text" class="form-control mb-1" style="width:350px; border:1px solid #ccc;" id="check_number">
+                                            </div>
+                                        </div>';
+
 
                                 echo '<button type="button" id="finance_complete" class="btn btn-success btn-sm mb-2">Mark as Complited</button>';
                             }
@@ -373,12 +380,13 @@
         $("#finance_complete").prop("disabled", true);
         let cl_id = document.getElementById('cl_id').value;
         let complete_date = document.getElementById('complete_date').value;
+        let check_number = document.getElementById('check_number').value;
 
-        if (complete_date) {
+        if (complete_date &&& check_number) {
             $.ajax({
                 url: "../../back/clearance-allocated-manage.php",
                 type: "POST",
-                data: {fcomplete: 'fcomplete', cl_id: cl_id, complete_date: complete_date},
+                data: {fcomplete: 'fcomplete', cl_id: cl_id, complete_date: complete_date, check_number: check_number},
                 dataType: 'json',
                 success: function (response) {
                     if (response.status === 'success') {
@@ -414,7 +422,7 @@
         else {
                     $("#finance_complete").prop("disabled", false);
                     const alertBox = document.getElementById('customAlert');
-                    alertBox.textContent = 'Please select a date to mark as completed.';
+                    alertBox.textContent = 'Pament date and check number required.';
                     alertBox.style.display = 'block';
 
                     // Hide the alert after 3 seconds
