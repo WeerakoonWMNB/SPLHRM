@@ -428,6 +428,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['fcomplete'])) {
 
     $cl_id = clean_input($_POST['cl_id']);
     $complete_date = clean_input($_POST['complete_date']);
+    $check_number = clean_input($_POST['check_number']);
     $by = $_SESSION['uid'];
     $datetime = date("Y-m-d H:i:s");
     
@@ -440,9 +441,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['fcomplete'])) {
             exit();
         }
 
-        $sql = "UPDATE cl_requests SET is_complete = 1, completed_date = ?, completed_by = ? WHERE cl_req_id = ? AND is_complete != 1";
+        $sql = "UPDATE cl_requests SET is_complete = 1, completed_date = ?, check_number = ?, completed_by = ? WHERE cl_req_id = ? AND is_complete != 1";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sii", $complete_date, $by, $cl_id);
+        $stmt->bind_param("ssii", $complete_date, $check_number, $by, $cl_id);
 
         if ($stmt->execute()) {
 
