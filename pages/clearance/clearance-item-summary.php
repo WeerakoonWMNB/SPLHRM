@@ -1,7 +1,19 @@
 <?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
+<style>
+    /* Hide the third column when printing */
+  @media print {
+    .no-print-col {
+      display: none;
+    }
 
+    /* Also hide matching <td>s in rows */
+    td.no-print-col {
+      display: none;
+    }
+  }
+</style>
 <?php
         include "../../back/credential-check.php";
         if (!checkAccess([1,2])) {
@@ -218,6 +230,7 @@
                                             <th>Deductions (Rs.)</th>
                                             <th>Payable (Rs.)</th>
                                             <th>Remark</th>
+                                            <th class="no-print-col">Details</th>
                                         </tr>
                                         <?php
                                         $query = "SELECT cl_requests_steps.*, branch_departments.bd_name,
@@ -237,12 +250,18 @@
                                             while ($item = $clearance->fetch_assoc()) {
                                                 $deduction_sum += $item['deduction'] ? $item['deduction'] : 0;
                                                 $payable_sum += $item['payable'] ? $item['payable'] : 0;
+                                                $dept = $item['bd_code'];
                                                 echo "<tr>
                                                 <td>$i</td>
                                                 <td>".$item['bd_name']."</td>
                                                 <td>". number_format($item['deduction'] ? $item['deduction'] : 0, 2) ."</td>
                                                 <td>". number_format($item['payable'] ? $item['payable'] : 0, 2)."</td>
                                                 <td>".$item['pending_note']."</td>
+                                                <td class='no-print-col'>
+                                                <a target='_blank' href='individual-detail-summary.php?id=".base64_encode($cl_id)."&dept=".base64_encode($dept)."' class='btn btn-info btn-sm' data-bs-toggle='tooltip' title='View'>
+                                                    <i class='mdi mdi-eye'></i>
+                                                </a>
+                                                </td>
                                                 </tr>";
                                                 $i++;
                                             }
@@ -382,7 +401,7 @@
         let complete_date = document.getElementById('complete_date').value;
         let check_number = document.getElementById('check_number').value;
 
-        if (complete_date &&& check_number) {
+        if (complete_date && check_number) {
             $.ajax({
                 url: "../../back/clearance-allocated-manage.php",
                 type: "POST",
