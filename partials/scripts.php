@@ -15,7 +15,7 @@
     <script src="../../js/jquery.cookie.js" type="text/javascript"></script>
   <!-- End plugin js for this page -->
   <!-- Custom js for this page-->
-  <script src="../../js/dashboard.js"></script>
+  <!-- <script src="../../js/dashboard.js"></script> -->
   <!-- End custom js for this page-->
   <script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
   <!-- Latest jQuery -->
