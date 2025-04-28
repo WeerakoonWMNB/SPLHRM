@@ -202,7 +202,8 @@
           options: {
             scales: {
               y: {
-                beginAtZero: true
+                beginAtZero: true,
+                min: 0,  
               }
             }
           }
