@@ -140,17 +140,17 @@ while ($row = $dataResult->fetch_assoc()) {
     //                     </button>';
     // }           
 
-    if ($row['step_complete'] == '1' || empty($row['step'])) {
-        $actionButtons .= '<button type="button" class="btn btn-warning btn-sm" title="Edit" disabled>
-                            <i class="mdi mdi-playlist-check"></i>
-                        </button>';
-    } else {
+    if ($row['is_complete'] == '0' && $row['step'] == "0" && $row['step_complete'] == "0") {
         $actionButtons .= '<button type="button" class="btn btn-warning btn-sm" onclick="data_set(' . $cl_req_id . ')" title="Edit">
                             <i class="mdi mdi-playlist-check"></i>
                         </button>';
+    } else {
+        $actionButtons .= '<button type="button" class="btn btn-warning btn-sm" title="Edit" disabled>
+            <i class="mdi mdi-playlist-check"></i>
+        </button>';
     }
 
-    if ($row['is_complete'] == '1' || ($row['step_complete'] != '1' && $row['step'] == "0")) {
+    if ($row['is_complete'] == '0' && $row['step'] == "0" && $row['step_complete'] == "0") {
         $actionButtons .= '<button type="submit" name="delete_data" class="btn btn-danger btn-sm" onclick="return confirm(\'Are you sure?\');" title="Delete">
                             <i class="mdi mdi-playlist-remove"></i>
                         </button>';
