@@ -88,7 +88,7 @@
           </a>
           <div class="collapse" id="clearance">
             <ul class="nav flex-column sub-menu">
-              <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/summary.php"> Summary</a></li>
+              <!-- <li class="nav-item"> <a class="nav-link" href="../../pages/clearance/summary.php"> Summary</a></li> -->
               <?php
                 if (checkAccess([1,2,3])) {
                   if (in_array($_SESSION['u_roll'], [1,4]) || in_array($_SESSION['ulvl'], [1,2])) {//HOD and CRO || Admin and HR
