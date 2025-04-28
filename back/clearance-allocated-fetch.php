@@ -58,6 +58,7 @@ $dataQuery = "SELECT cl_requests.*,
                      cl_requests_steps.complete_note,
                      cl_requests_steps.created_date,
                      cl_requests_steps.max_dates,
+                     cl_requests_steps.bd_code,
                      (SELECT bd_name 
                         FROM branch_departments
                         INNER JOIN cl_requests_steps ON cl_requests_steps.bd_code = branch_departments.bd_code
@@ -119,7 +120,11 @@ while ($row = $dataResult->fetch_assoc()) {
                 <a href="clearance-allocated-action.php?id='.base64_encode($cl_req_id).'" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View">
                     <i class="mdi mdi-eye"></i>
                 </a>';
-
+        if ($row['bd_code'] == 'RECOVERY') {
+            $actionButtons .= '<a href="clearance-item-summary.php?id='.base64_encode($cl_req_id).'&ca=ca" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="summary">
+            <i class="mdi mdi-format-list-bulleted"></i>
+        </a>';
+         }
     $actionButtons .= '</div></form>';
 
     $row['action'] = $actionButtons;

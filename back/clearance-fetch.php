@@ -1,5 +1,6 @@
 <?php
 session_start();
+include "credential-check.php";
 require "connection/connection.php";
 
 // Read DataTables request parameters
@@ -128,18 +129,18 @@ while ($row = $dataResult->fetch_assoc()) {
                 <a href="clearance-hr-approve.php?id='.base64_encode($cl_req_id).'" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View">
                     <i class="mdi mdi-eye"></i>
                 </a>';
-    // if ($row['is_complete'] == '1') {
+    if ($user_level == '1' || $user_level == '2') {
         $actionButtons .= '<a href="clearance-item-summary.php?id='.base64_encode($cl_req_id).'&cl=cl" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="summary">
                     <i class="mdi mdi-format-list-bulleted"></i>
                 </a>';
-    // } 
+     } 
     // else {
     //     $actionButtons .= '<button type="button" class="btn btn-success btn-sm" title="summary" disabled>
     //                         <i class="mdi mdi-format-list-bulleted"></i>
     //                     </button>';
     // }           
 
-    if ($row['step_complete'] == '1' || $row['step'] > 0) {
+    if ($row['step_complete'] == '1' || empty($row['step'])) {
         $actionButtons .= '<button type="button" class="btn btn-warning btn-sm" title="Edit" disabled>
                             <i class="mdi mdi-playlist-check"></i>
                         </button>';

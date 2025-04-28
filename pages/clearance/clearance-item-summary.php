@@ -78,7 +78,7 @@
               LEFT JOIN uploads letter ON letter.request_id = cl_requests.cl_req_id AND letter.document_type = '1'
               LEFT JOIN uploads cvr ON cvr.request_id = cl_requests.cl_req_id AND cvr.document_type = '2'
               LEFT JOIN bank_branch bb ON bb.bank_code = employees.bank_code AND bb.branch_code = employees.branch_code
-              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1 AND cl_requests.is_complete = 0");
+              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1 AND (cl_requests.is_complete = 0 OR cl_requests.is_complete = 1 OR cl_requests.is_complete = 2)");
 
                 if ($clearance->num_rows != 1) {
                     //header("Location: clearance-list.php");
@@ -131,6 +131,9 @@
                             }
                             if (isset($_GET['cf'])) {
                                 echo '<a href="clearance-final.php" class="btn btn-secondary btn-sm mb-2">Back</a>';
+                            }
+                            if (isset($_GET['ca'])) {
+                                echo '<a href="clearance-allocated.php" class="btn btn-secondary btn-sm mb-2">Back</a>';
                             }
                         ?>
                         
