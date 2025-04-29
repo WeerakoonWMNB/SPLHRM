@@ -1,6 +1,5 @@
 <?php
 header('Content-Type: application/json');
-
 require "connection/connection.php";
 
 $data = [
@@ -9,10 +8,14 @@ $data = [
     'completed' => []
 ];
 
+$base = new DateTime('first day of this month');
+
 for ($i = 5; $i >= 0; $i--) {
-    $start = date('Y-m-01', strtotime("-$i months"));
-    $end = date('Y-m-t', strtotime("-$i months"));
-    $label = date('M Y', strtotime("-$i months"));
+    $month = clone $base;
+    $month->modify("-{$i} months");
+    $start = $month->format('Y-m-01');
+    $end = $month->format('Y-m-t');
+    $label = $month->format('M Y');
 
     // Created Count
     $stmtCreated = $conn->prepare("SELECT COUNT(*) as total FROM cl_requests WHERE created_date BETWEEN ? AND ? AND status = '1'");
@@ -36,6 +39,5 @@ for ($i = 5; $i >= 0; $i--) {
 }
 
 $conn->close();
-
 echo json_encode($data);
 ?>

@@ -1,26 +1,38 @@
 <?php
 header('Content-Type: application/json');
-
 require "connection/connection.php";
+
 // Prepare data arrays
 $data = [
     'labels' => [],
     'values' => []
 ];
 
+// Start from the 1st of the current month
+$base = new DateTime('first day of this month');
+
 // Loop over past 6 months
 for ($i = 5; $i >= 0; $i--) {
-    $start = date('Y-m-01', strtotime("-$i months")); // 1st day of the month
-    $end = date('Y-m-t', strtotime("-$i months"));     // last day of the month
-    $label = date('M Y', strtotime("-$i months"));
+    $month = clone $base;
+    $month->modify("-{$i} months");
 
-    // Prepare and execute query
-    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM cl_requests WHERE completed_date BETWEEN ? AND ? AND status = '1' AND is_complete = '1'");
+    $start = $month->format('Y-m-01');
+    $end = $month->format('Y-m-t');
+    $label = $month->format('M Y');
+
+    // Query completed clearances
+    $stmt = $conn->prepare("
+        SELECT COUNT(*) as total 
+        FROM cl_requests 
+        WHERE completed_date BETWEEN ? AND ? 
+        AND status = '1' 
+        AND is_complete = '1'
+    ");
     $stmt->bind_param('ss', $start, $end);
     $stmt->execute();
     $result = $stmt->get_result()->fetch_assoc();
 
-    // Store the label and the count
+    // Store results
     $data['labels'][] = $label;
     $data['values'][] = (int)$result['total'];
 
