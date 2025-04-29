@@ -312,7 +312,7 @@
                                 if (!empty($clearance['cvr_url'])) {
                                     $url = $clearance['cvr_url'];
                                     $fileExtension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
-        
+                                    echo '<input type="hidden" name="old_cvr_url" id="old_cvr_url" value="'.$url.'">';
                                     if (in_array($fileExtension, ['jpg', 'jpeg', 'png'])) {
                                         // Display Image with improved size
                                         echo '<div id="previewContainer1" style="max-width: 500px; max-height: 600px; overflow: hidden;">';
@@ -839,9 +839,30 @@
             formData.append("cl_id", $("#cl_id").val());
             formData.append("note", $("#note").val());
             var fileInput = $("#customervisitreport");
+            var OldfileInput = $("#old_cvr_url");
 
             if (fileInput.length > 0 ) {
-                formData.append("customervisitreport", fileInput[0].files[0]); // Append file if exists
+                //formData.append("customervisitreport", fileInput[0].files[0]); // Append file if exists
+                if (fileInput[0].files.length > 0) {
+                    formData.append("customervisitreport", fileInput[0].files[0]); // Append file if selected
+                }
+                else if (OldfileInput) {
+                    
+                }
+                else {
+                    $("#submit").prop("disabled", false);
+                    const alertBox = document.getElementById('customAlert');
+                    alertBox.textContent = "Customer Visit Report is Required.";
+                    alertBox.style.display = 'block';
+
+                    // Hide the alert after 3 seconds
+                    setTimeout(() => {
+                        alertBox.style.display = 'none';
+                    }, 3000);
+
+                    hasError = true;
+                    return false;
+                }
             }
 
             $("#submit").prop("disabled", true);
