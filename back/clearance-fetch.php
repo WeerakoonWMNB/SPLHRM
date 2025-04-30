@@ -17,7 +17,13 @@ $searchQuery = "";
 $params = [];
 
 if ($user_level != 1 && $user_level != 2) {
-    $searchQuery .= " AND branch_departments.bd_code IN ('$dept') ";
+    $deptArray = explode(',', $dept); // or wherever $dept comes from
+    // Optional: sanitize input to avoid SQL injection
+    $deptArray = array_map('trim', $deptArray); // remove extra spaces
+    $deptArray = array_map(function($d) { return "'" . addslashes($d) . "'"; }, $deptArray);
+    $dept = implode(',', $deptArray);
+
+    $searchQuery .= " AND branch_departments.bd_code IN ($dept) ";
 }
 
 if (!empty($searchValue)) {
