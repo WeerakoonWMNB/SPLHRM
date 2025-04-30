@@ -441,7 +441,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['filteredEmps'])) {
 
     // Apply bd_id filter if user level is 1 or 2
     if ($user_level != 1 && $user_level != 2) {
-        $sql .= " AND branch_departments.bd_code IN ('$bd_id')";
+        $deptArray = explode(',', $bd_id); // or wherever $dept comes from
+        // Optional: sanitize input to avoid SQL injection
+        $deptArray = array_map('trim', $deptArray); // remove extra spaces
+        $deptArray = array_map(function($d) { return "'" . addslashes($d) . "'"; }, $deptArray);
+        $bd_id = implode(',', $deptArray);
+
+        $sql .= " AND branch_departments.bd_code IN ($bd_id)";
     }
 
     $sql .= " LIMIT 10";
