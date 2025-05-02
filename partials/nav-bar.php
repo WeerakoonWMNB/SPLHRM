@@ -347,6 +347,17 @@
           }
         ?>
 
+          <li class="nav-item sidebar-category">
+            <p>Profile</p>
+            <span></span>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/users/change-password.php">
+            <i class="mdi mdi-account menu-icon"></i>
+              <span class="menu-title">Change Password</span>
+            </a>
+          </li>
+
         <li class="nav-item">
           <a class="nav-link" href="../general/logout.php">
             <button class="btn bg-danger btn-sm menu-title"> <i class="mdi mdi-logout"></i> Log Out</button>

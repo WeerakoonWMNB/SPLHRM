@@ -147,3 +147,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['search_id'])) {
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid request.']);
 }
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['changePassword'])) {
+    $userId = $_SESSION['uid'];
+    $currentPassword = $_POST['currentPassword'] ?? '';
+    $newPassword = $_POST['newPassword'] ?? '';
+    $confirmPassword = $_POST['confirmPassword'] ?? '';
+
+    if (!$userId) {
+        $_SESSION['error'] = "User not logged in.";
+        header("Location: ../pages/users/change-password.php");
+        exit();
+    }
+
+    if ($newPassword !== $confirmPassword) {
+        $_SESSION['error'] = "New passwords do not match.";
+        header("Location: ../pages/users/change-password.php");
+        exit();
+    }
+
+    
+    // Get current hashed password from DB
+    $stmt = $conn->prepare("SELECT password FROM users WHERE user_id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+
+    if (!$user || ($currentPassword != $user['password'])) {
+        $_SESSION['error'] = "Current password is incorrect.";
+        header("Location: ../pages/users/change-password.php");
+        exit();
+    }
+
+    // Hash new password and update
+    $updateStmt = $conn->prepare("UPDATE users SET password = ? WHERE user_id = ?");
+    $updateStmt->bind_param("si", $newPassword, $userId);
+    $success = $updateStmt->execute();
+
+    if ($success) {
+        $_SESSION['success'] = "Password successfully changed.";
+        header("Location: ../pages/users/change-password.php");
+        exit();
+    } else {
+        $_SESSION['error'] = "Failed to change password. Please try again.";
+        header("Location: ../pages/users/change-password.php");
+        exit();
+    }
+}
