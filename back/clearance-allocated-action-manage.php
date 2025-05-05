@@ -4,7 +4,7 @@ require "connection/connection.php";
 require "functions.php";
 include "mail-function.php";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['customerVisitReportForm'])) {
     $cl_id = $_POST['cl_id'];
     $cl_step_id = $_POST['cl_step_id'];
     $note = trim($_POST['note']);
@@ -282,3 +282,65 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     exit;
 }
 
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['customerVisitReportForm'])) {
+    $cl_id = $_POST['cl_id'];
+    $by = $_SESSION['uid'];
+    $datetime = date("Y-m-d H:i:s");
+
+    // Check if the file is uploaded
+    if (isset($_FILES['customervisitreport'])) {
+        $file_path_cvr = null; // Default null, will store path if valid file uploaded
+    
+            $file = $_FILES['customervisitreport'];
+            $file_name = time() . "_" . basename($file['name']); // Unique filename
+            $file_tmp = $file['tmp_name'];
+            $file_size = $file['size'];
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+            $allowed_exts = ['pdf', 'jpg', 'jpeg', 'png'];
+    
+            // Validate file type
+            if (!in_array($file_ext, $allowed_exts)) {
+                $_SESSION['error'] = "Invalid file format. Only PDF, JPG, JPEG, PNG allowed.";
+                    header("Location: ../pages/clearance/individual-report-summary.php");
+                exit;
+            }
+    
+            // Validate file size (Max: 5MB)
+            if ($file_size > 5 * 1024 * 1024) {
+                $_SESSION['error'] = "File size exceeds 5MB limit.";
+                    header("Location: ../pages/clearance/individual-report-summary.php");
+                exit;
+            }
+    
+            // Move file to uploads directory if no errors
+            if (empty($errors)) {
+                $upload_dir = "../uploads/";
+                $file_path_cvr1 = "../../uploads/" . $file_name;
+                $file_path_cvr = $upload_dir . $file_name;
+    
+                if (move_uploaded_file($file_tmp, $file_path_cvr)) {
+
+                    $upload_sql = "INSERT INTO uploads (document_type, location, request_id, created_by, created_date) VALUES (2, ?, ?, ?, ?)";
+                    $upload_stmt = $conn->prepare($upload_sql);
+                    $upload_stmt->bind_param('siss', $file_path_cvr1, $cl_id, $by, $datetime);
+                    $upload_stmt->execute();
+                    $upload_stmt->close();
+
+                    $_SESSION['success'] = "Successfully Uploaded.";
+                    header("Location: ../pages/clearance/individual-report-summary.php");
+                    exit;
+                }
+
+                else {
+                    $_SESSION['error'] = "Failed to move uploaded file.";
+                    header("Location: ../pages/clearance/individual-report-summary.php");
+                    exit;
+                }
+            }
+
+    } else {
+        $_SESSION['error'] = "Please attach file to upload.";
+        header("Location: ../pages/clearance/individual-report-summary.php");
+        exit;
+    }
+}

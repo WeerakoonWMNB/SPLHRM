@@ -46,7 +46,6 @@
                      cl_requests.created_date as request_date,
                      users.name AS request_by,
                      letter.location AS url,
-                     cvr.location AS cvr_url,
                      bb.bank_name,
                      bb.bank_code,
                      bb.branch_name,
@@ -76,7 +75,6 @@
               INNER JOIN designations ON employees.designation_id = designations.desig_id 
               INNER JOIN users ON users.user_id = cl_requests.created_by
               LEFT JOIN uploads letter ON letter.request_id = cl_requests.cl_req_id AND letter.document_type = '1'
-              LEFT JOIN uploads cvr ON cvr.request_id = cl_requests.cl_req_id AND cvr.document_type = '2'
               LEFT JOIN bank_branch bb ON bb.bank_code = employees.bank_code AND bb.branch_code = employees.branch_code
               WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1 AND (cl_requests.is_complete = 0 OR cl_requests.is_complete = 1 OR cl_requests.is_complete = 2)");
 
