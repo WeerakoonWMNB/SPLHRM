@@ -254,6 +254,16 @@
                 }
               ?>  
 
+              <?php
+                if (checkAccess([1,2])) {
+              ?>
+              <li class="nav-item"> 
+                <a class="nav-link" href="../../pages/reports/clearance-pending.php"> Pending </a>
+              </li>
+              <?php
+                }
+              ?>
+
             </ul>
           </div>
         </li>

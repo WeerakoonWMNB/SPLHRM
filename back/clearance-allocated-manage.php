@@ -31,6 +31,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['pending'])) {
         $stmt->bind_param("sisi", $pending_note, $by, $datetime, $cl_step_id);
 
         if ($stmt->execute()) {
+            $conn->query("INSERT INTO step_pending (cl_step_id, created_datetime) 
+            VALUES ('$cl_step_id', '$datetime')");
+            //select next user to be attended
             clearanceRequestPending($cl_id,$pending_note); // Send email notification
             $_SESSION['success'] = "Request marked as pending.";
             echo json_encode(["status" => "success", "message" => "Request marked as pending."]);
@@ -188,6 +191,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve'])) {
         $stmt->bind_param("sissisi", $datetime, $by, $datetime, $approve_note, $by, $datetime, $cl_step_id);
 
         if ($stmt->execute()) {
+            //update pending as completed
+            $pending_query = $conn->query("UPDATE step_pending SET is_pending_completed = 1, pending_completed_datetime = '$datetime' WHERE cl_step_id = '$cl_step_id' AND is_pending_completed != 1");
+            
             //select next user to be attended
             $query = "SELECT assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id, prepared_by, checked_by, approved_by 
             FROM cl_requests_steps WHERE request_id = ? AND step !='0' AND is_complete !='1' ORDER BY step ASC LIMIT 1";
@@ -264,6 +270,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['che'])) {
         $stmt->bind_param("issisi", $by, $datetime, $approve_note, $by, $datetime, $cl_step_id);
 
         if ($stmt->execute()) {
+            //update pending as completed
+            $pending_query = $conn->query("UPDATE step_pending SET is_pending_completed = 1, pending_completed_datetime = '$datetime' WHERE cl_step_id = '$cl_step_id' AND is_pending_completed != 1");
+            
             //select next user to be attended
             $query = "SELECT assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id, prepared_by, checked_by, approved_by 
             FROM cl_requests_steps WHERE request_id = ? AND step !='0' AND is_complete !='1' ORDER BY step ASC LIMIT 1";
