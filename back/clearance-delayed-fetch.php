@@ -34,15 +34,7 @@ if (!empty($searchValue)) {
 // Total records count (without filtering)
 $totalRecordsQuery = "SELECT 
                 count(*) AS total,
-                (
-                    SELECT complete_date 
-                    FROM cl_requests_steps
-                    WHERE is_complete = 1 
-                    AND request_id = cr.cl_req_id
-                    AND step < crs.step 
-                    ORDER BY step DESC 
-                    LIMIT 1
-                ) AS last_complete_date,
+                crs.allocated_date AS last_complete_date,
                 crs.max_dates,
                 crs.complete_date,
                 crs.created_date
@@ -51,15 +43,8 @@ $totalRecordsQuery = "SELECT
             INNER JOIN branch_departments bd ON bd.bd_code = crs.bd_code 
             WHERE cr.status = '1' 
             AND crs.step > 0 
-            AND DATEDIFF(IFNULL(crs.complete_date, CURDATE()),IFNULL((
-                    SELECT complete_date 
-                    FROM cl_requests_steps
-                    WHERE is_complete = 1 
-                    AND request_id = cr.cl_req_id
-                    AND step < crs.step 
-                    ORDER BY step DESC 
-                    LIMIT 1
-                ),crs.created_date)) + 1 - crs.max_dates > 0";
+            AND crs.allocated_date IS NOT NULL
+            AND DATEDIFF(IFNULL(crs.complete_date, CURDATE()),IFNULL(crs.allocated_date,crs.created_date)) + 1 - crs.max_dates > 0";
 
 if ($dept) {
     $totalRecordsQuery .= " AND crs.bd_code IN ('$dept')";
@@ -79,15 +64,7 @@ $totalRecords = $totalRecordsResult->fetch_assoc()['total'];
 // Total records count (with filtering)
 $totalRecordsQuery = "SELECT 
                 count(*) AS total,
-                (
-                    SELECT complete_date
-                    FROM cl_requests_steps crs_sub
-                    WHERE crs_sub.is_complete = 1 
-                        AND crs_sub.request_id = cr.cl_req_id
-                        AND crs_sub.step < crs.step
-                    ORDER BY crs_sub.step DESC
-                    LIMIT 1
-                ) AS last_complete_date,
+                crs.allocated_date AS last_complete_date,
                 crs.max_dates,
                 crs.complete_date,
                 crs.created_date
@@ -96,15 +73,8 @@ $totalRecordsQuery = "SELECT
             INNER JOIN branch_departments bd ON bd.bd_code = crs.bd_code 
             WHERE cr.status = '1' 
             AND crs.step > 0
-            AND DATEDIFF(IFNULL(crs.complete_date, CURDATE()) ,IFNULL((
-                    SELECT complete_date 
-                    FROM cl_requests_steps
-                    WHERE is_complete = 1 
-                    AND request_id = cr.cl_req_id
-                    AND step < crs.step 
-                    ORDER BY step DESC 
-                    LIMIT 1
-                ),crs.created_date)) + 1 - crs.max_dates > 0 
+            AND crs.allocated_date IS NOT NULL
+            AND DATEDIFF(IFNULL(crs.complete_date, CURDATE()) ,IFNULL(crs.allocated_date,crs.created_date)) + 1 - crs.max_dates > 0 
                 $searchQuery";
 if ($dept) {
     $totalRecordsQuery .= " AND crs.bd_code IN ('$dept')";
@@ -143,15 +113,7 @@ $dataQuery = "SELECT
                 crs.complete_date AS step_completed_date,
                 crs.max_dates,
                 bds.bd_name AS selected_branch,
-                (
-                    SELECT complete_date
-                    FROM cl_requests_steps crs_sub
-                    WHERE crs_sub.is_complete = 1 
-                        AND crs_sub.request_id = cr.cl_req_id
-                        AND crs_sub.step < crs.step
-                    ORDER BY crs_sub.step DESC
-                    LIMIT 1
-                ) AS last_complete_date
+                crs.allocated_date AS last_complete_date
 
 
             FROM cl_requests cr
@@ -160,15 +122,8 @@ $dataQuery = "SELECT
             INNER JOIN cl_requests_steps crs ON cr.cl_req_id = crs.request_id 
             INNER JOIN branch_departments bds ON bds.bd_code = crs.bd_code 
             WHERE cr.status = '1' 
-            AND crs.step > 0 AND DATEDIFF(IFNULL(crs.complete_date, CURDATE()),IFNULL((
-                    SELECT complete_date 
-                    FROM cl_requests_steps
-                    WHERE is_complete = 1 
-                    AND request_id = cr.cl_req_id
-                    AND step < crs.step 
-                    ORDER BY step DESC 
-                    LIMIT 1
-                ),crs.created_date)) +1 - crs.max_dates > 0 ";
+            AND crs.allocated_date IS NOT NULL
+            AND crs.step > 0 AND DATEDIFF(IFNULL(crs.complete_date, CURDATE()),IFNULL(crs.allocated_date,crs.created_date)) +1 - crs.max_dates > 0 ";
 if ($dept) {
     $dataQuery .= " AND crs.bd_code IN ('$dept')";
 }

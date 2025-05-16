@@ -612,14 +612,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action']) && $_POST['
             $approver = $data['approver'];
 
             $query = "UPDATE cl_requests_steps 
-                      SET step = ?, last_updated_by = ?, last_updated_date = ?, 
-                          assigned_preparer_user_id = ?, assigned_checker_user_id = ?, assigned_approver_user_id = ? 
-                      WHERE request_id = ? AND bd_code = ? AND is_complete != '1' AND step != 0";
+                    SET step = ?, last_updated_by = ?, last_updated_date = ?, 
+              assigned_preparer_user_id = ?, assigned_checker_user_id = ?, assigned_approver_user_id = ?";
 
+            $params = [$step, $created_by, $created_date, $preparer, $checker, $approver];
+            $types = "iisiii";  // i=int, s=string (assuming created_date is string)
+
+            // Conditionally add allocated_date
+            if ($step == 1) {
+                $query .= ", allocated_date = ?";
+                $params[] = $created_date;  // Assuming allocated_date uses same value as last_updated_date
+                $types .= "s";
+            }
+
+            $query .= " WHERE request_id = ? AND bd_code = ? AND is_complete != '1' AND step != 0";
+            $params[] = $cl_id;
+            $params[] = $bd_code;
+            $types .= "is";
+
+            // Prepare statement
             $stmt = mysqli_prepare($conn, $query);
-            mysqli_stmt_bind_param($stmt, "iisiiiis", $step, $created_by, $created_date, $preparer, $checker, $approver, $cl_id, $bd_code);
+
+            // Dynamically bind parameters
+            mysqli_stmt_bind_param($stmt, $types, ...$params);
+
             mysqli_stmt_execute($stmt);
             mysqli_stmt_close($stmt);
+
             
         }
 
@@ -647,14 +666,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action']) && $_POST['
             }
 
             $query = "INSERT INTO cl_requests_steps 
-                      (request_id, step, bd_code, max_dates, created_date, created_by, 
-                       assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+          (request_id, step, bd_code, max_dates, created_date, created_by, 
+           assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id";
 
+            $values = "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?";
+            $params = [$cl_id, $step, $bd_code, $max_dates, $created_date, $created_by, $preparer, $checker, $approver];
+            $types = "iisisiiii";  // i = int, s = string
+
+            // Conditionally include allocated_date if step == 1
+            if ($step == 1) {
+                $query .= ", allocated_date";
+                $values .= ", ?";
+                $params[] = $created_date;  // Or whatever value is appropriate
+                $types .= "s";
+            }
+
+            $query .= ") ";
+            $values .= ")";
+            $query .= $values;
+
+            // Prepare and bind
             $stmt = mysqli_prepare($conn, $query);
-            mysqli_stmt_bind_param($stmt, "iisisiiii", $cl_id, $step, $bd_code, $max_dates, $created_date, $created_by, $preparer, $checker, $approver);
+            mysqli_stmt_bind_param($stmt, $types, ...$params);
             mysqli_stmt_execute($stmt);
             mysqli_stmt_close($stmt);
+
         }
 
         // **Delete Unmatched Records**

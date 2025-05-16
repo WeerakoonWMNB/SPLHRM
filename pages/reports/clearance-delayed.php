@@ -68,19 +68,13 @@ $user_level = $_SESSION['ulvl'];
                                         $cl_requests_id_array = array();
 
                                         // requests
-                                        $sql = "SELECT crs.created_date, (SELECT complete_date 
-                                                      FROM cl_requests_steps
-                                                      WHERE cl_requests_steps.is_complete = 1 
-                                                            AND cl_requests_steps.request_id = cr.cl_req_id
-                                                            AND cl_requests_steps.step < crs.step 
-                                                      ORDER BY cl_requests_steps.step DESC 
-                                                      LIMIT 1) as assigned_date,
+                                        $sql = "SELECT crs.created_date, crs.allocated_date as assigned_date,
                                                       crs.max_dates,
                                                       cr.cl_req_id,
                                                       crs.complete_date
                                                       FROM cl_requests cr 
                                                 INNER JOIN cl_requests_steps crs ON cr.cl_req_id = crs.request_id 
-                                                WHERE cr.status = '1' AND crs.step>0 GROUP BY crs.cl_step_id";
+                                                WHERE cr.status = '1' AND crs.step>0 AND crs.allocated_date IS NOT NULL GROUP BY crs.cl_step_id";
                                         $result = mysqli_query($conn, $sql);
 
                                         for ($i = 0; $i < mysqli_num_rows($result); $i++) {
@@ -121,16 +115,10 @@ $user_level = $_SESSION['ulvl'];
                                         $cl_requests_id_array = array();
 
                                         //ongoing requests
-                                        $sql = "SELECT *, (SELECT complete_date 
-                                                      FROM cl_requests_steps
-                                                      WHERE cl_requests_steps.is_complete = 1 
-                                                            AND cl_requests_steps.request_id = cr.cl_req_id
-                                                            AND cl_requests_steps.step < crs.step 
-                                                      ORDER BY cl_requests_steps.step DESC 
-                                                      LIMIT 1) as assigned_date
+                                        $sql = "SELECT *, crs.allocated_date as assigned_date
                                                       FROM cl_requests cr 
                                                 INNER JOIN cl_requests_steps crs ON cr.cl_req_id = crs.request_id 
-                                                WHERE cr.status = '1' AND crs.step>0 AND crs.prepare_check_approve !=3 GROUP BY crs.cl_step_id";
+                                                WHERE cr.status = '1' AND crs.step>0 AND crs.prepare_check_approve !=3 AND crs.allocated_date IS NOT NULL GROUP BY crs.cl_step_id";
                                         $result = mysqli_query($conn, $sql);
 
                                         for ($i = 0; $i < mysqli_num_rows($result); $i++) {

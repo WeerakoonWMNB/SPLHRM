@@ -10,15 +10,7 @@ $cl_requests_id_array = [];
 $sql = "SELECT 
         crs.cl_step_id,
         crs.created_date,
-        (
-            SELECT complete_date 
-            FROM cl_requests_steps
-            WHERE is_complete = 1 
-              AND request_id = cr.cl_req_id
-              AND step < crs.step 
-            ORDER BY step DESC 
-            LIMIT 1
-        ) AS assigned_date,
+        crs.allocated_date AS assigned_date,
         crs.max_dates,
         crs.cl_step_id,
         crs.complete_date
@@ -27,6 +19,7 @@ $sql = "SELECT
     INNER JOIN branch_departments bd ON bd.bd_code = crs.bd_code AND bd.is_branch='0'
     WHERE cr.status = '1' 
       AND crs.step > 0
+      AND crs.allocated_date IS NOT NULL
     GROUP BY crs.cl_step_id
 ";
 
