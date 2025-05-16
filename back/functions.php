@@ -26,5 +26,49 @@ function insertEmployeeHistoryLog($emp_id, $change_type, $last_data) {
 
 }
 
+//check date diff with time difference
+// function getWeekdaysDiff($startDate, $endDate) {
+//     $start = new DateTime($startDate);
+//     $end = new DateTime($endDate);
+//     $end->modify('+1 day'); // Include end date
+
+//     $interval = new DateInterval('P1D');
+//     $dateRange = new DatePeriod($start, $interval, $end);
+
+//     $weekdays = 0;
+
+//     foreach ($dateRange as $date) {
+//         $dayOfWeek = $date->format('N'); // 6 = Saturday, 7 = Sunday
+//         if ($dayOfWeek < 6) {
+//             $weekdays++;
+//         }
+//     }
+
+//     return $weekdays;
+// }
+
+// Function to calculate the number of weekdays between two dates
+// This function ignores time and only considers the date part
+function getWeekdaysDiff($startDate, $endDate) {
+    // Keep only the date part (ignore time)
+    $start = new DateTime(date('Y-m-d', strtotime($startDate)));
+    $end = new DateTime(date('Y-m-d', strtotime($endDate)));
+    $end->modify('+1 day'); // Include end date
+
+    $interval = new DateInterval('P1D');
+    $dateRange = new DatePeriod($start, $interval, $end);
+
+    $weekdays = 0;
+
+    foreach ($dateRange as $date) {
+        $dayOfWeek = $date->format('N'); // 6 = Saturday, 7 = Sunday
+        if ($dayOfWeek < 6) {
+            $weekdays++;
+        }
+    }
+
+    return $weekdays;
+}
+
 
 ?>

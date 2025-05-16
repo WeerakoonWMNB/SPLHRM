@@ -186,9 +186,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve'])) {
             exit();
         }
 
-        $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 3, is_complete = 1, complete_date = ?, approved_by = ?, approved_date = ?, is_complete = 1, pending_note = ?, last_updated_by = ?, last_updated_date = ? WHERE cl_step_id = ? AND is_complete != 1";
+        //get the clearance step created date
+        $query = "SELECT (SELECT complete_date 
+                        FROM cl_requests_steps
+                        WHERE cl_requests_steps.is_complete = 1 
+                              AND cl_requests_steps.request_id = cl_requests.cl_req_id 
+                        ORDER BY cl_requests_steps.step DESC 
+                        LIMIT 1) AS last_completed_date, max_dates FROM cl_requests_steps WHERE cl_step_id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("i", $cl_step_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $created_date = $row['last_completed_date'] ?: date('Y-m-d');
+        $max_dates = $row['max_dates'];
+        $referenceDate = date('Y-m-d', strtotime($created_date));
+        $daysGap = getWeekdaysDiff(date('Y-m-d', strtotime($referenceDate)), date('Y-m-d'));
+        $daysGap = $daysGap - $max_dates;
+
+        if ($daysGap<0){
+            $daysGap = 0;
+        } 
+
+        $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 3, is_complete = 1, complete_date = ?, 
+        approved_by = ?, approved_date = ?, is_complete = 1, pending_note = ?, last_updated_by = ?, 
+        last_updated_date = ?, delayed_days = ? WHERE cl_step_id = ? AND is_complete != 1";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sissisi", $datetime, $by, $datetime, $approve_note, $by, $datetime, $cl_step_id);
+        $stmt->bind_param("sissisii", $datetime, $by, $datetime, $approve_note, $by, $datetime, $daysGap, $cl_step_id);
 
         if ($stmt->execute()) {
             //update pending as completed

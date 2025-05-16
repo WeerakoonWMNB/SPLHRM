@@ -264,6 +264,16 @@
                 }
               ?>
 
+              <?php
+                if (checkAccess([1,2])) {
+              ?>
+              <li class="nav-item"> 
+                <a class="nav-link" href="../../pages/reports/clearance-delayed.php"> Delayed </a>
+              </li>
+              <?php
+                }
+              ?>
+
             </ul>
           </div>
         </li>
