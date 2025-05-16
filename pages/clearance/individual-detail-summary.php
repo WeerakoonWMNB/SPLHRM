@@ -10,6 +10,7 @@
             exit;
         }
         include "../../back/connection/connection.php";
+        include "../../back/functions.php";
 
         $cl_id = null;
         $prepare_check_approve = null;
@@ -88,7 +89,8 @@
                 $prepare_check_approve = $clearance['prepare_check_approve'];
 
                 $referenceDate = !empty($clearance['last_completed_date']) ? $clearance['last_completed_date'] : $clearance['created_date'];
-                $daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
+                //$daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
+                $daysGap = getWeekdaysDiff(date('Y-m-d', strtotime($referenceDate)), date('Y-m-d'));
 
                 $delay_status = '<span class="gap-2"><span class="status-dot green"></span> </span>';
 

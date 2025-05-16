@@ -1,6 +1,7 @@
 <?php
 session_start();
 require "connection/connection.php";
+require "functions.php";
 
 // Read DataTables request parameters
 $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 1;
@@ -170,7 +171,8 @@ while ($row = $dataResult->fetch_assoc()) {
 
     // Delay Status Calculation
     $referenceDate = !empty($row['last_completed_date']) ? $row['last_completed_date'] : $row['created_date'];
-    $daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
+    //$daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
+    $daysGap = getWeekdaysDiff(date('Y-m-d', strtotime($referenceDate)), date('Y-m-d'));
 
     $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot green"></span> </div>';
 
