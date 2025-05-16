@@ -208,7 +208,7 @@ while ($row = $dataResult->fetch_assoc()) {
     $max_dates = $row['max_dates'] ?: 2;
     // Delay Status Calculation
     if ($row['step']) {
-        $referenceDate = !empty($row['last_completed_date']) ? $row['last_completed_date'] : $row['created_date'];
+        $referenceDate = !empty($row['last_completed_date']) ? $row['last_completed_date'] : $row['step_created_date'];
     }
     else {
         if ($row['allocated_to_finance'] == '1') {
