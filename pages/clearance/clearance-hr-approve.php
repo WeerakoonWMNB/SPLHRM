@@ -33,6 +33,7 @@
                      branch_departments.bd_name,
                      designations.designation,
                      cl_requests.created_date as request_date,
+                     cl_requests_steps.complete_date,
                      users.name AS request_by,
                      letter.location AS url,                    
                      (SELECT bd_name 
@@ -42,12 +43,7 @@
                               AND cl_requests_steps.request_id = cl_requests.cl_req_id 
                         ORDER BY cl_requests_steps.step ASC 
                         LIMIT 1) AS department,
-                    (SELECT complete_date 
-                        FROM cl_requests_steps
-                        WHERE cl_requests_steps.is_complete = 1 
-                              AND cl_requests_steps.request_id = cl_requests.cl_req_id 
-                        ORDER BY cl_requests_steps.step DESC 
-                        LIMIT 1) AS last_completed_date
+                    cl_requests_steps.allocated_date AS last_completed_date
               FROM cl_requests 
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
               INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id
@@ -70,9 +66,10 @@
 
                 $clearance = $clearance->fetch_assoc();
 
-                $referenceDate = !empty($clearance['last_completed_date']) ? $clearance['last_completed_date'] : $clearance['created_date'];
+                $referenceDate = $clearance['request_date'];
+                $completeDate = $clearance['complete_date'] ? $clearance['complete_date'] : date('Y-m-d');
                 //$daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
-                $daysGap = getWeekdaysDiff(date('Y-m-d', strtotime($referenceDate)), date('Y-m-d'));
+                $daysGap = getWeekdaysDiff(date('Y-m-d', strtotime($referenceDate)), date('Y-m-d', strtotime($completeDate)));
 
                 $delay_status = '<span class="gap-2"><span class="status-dot green"></span> </span>';
 
@@ -81,7 +78,7 @@
                 }
 
                 if ($daysGap > $clearance['max_dates'] && $clearance['step_complete'] == '2') {
-                    $delay_status = '<span class="gap-2"><span class="status-dot yellow"></span> <span class="status-dot red"></span> </span>';
+                    $delay_status = '<span class="gap-2"><span class="status-dot yellow"></span> <span class="status-dot red"></span> '.$daysGap - $clearance['max_dates'].'d </span>';
                 }
 
                 if ($daysGap <= $clearance['max_dates'] && $clearance['step_complete'] == '2') {
@@ -89,7 +86,7 @@
                 }
 
                 if ($daysGap > $clearance['max_dates'] && $clearance['step_complete'] != '2') {
-                    $delay_status = '<span class="gap-2"><span class="status-dot red"></span> </span>';
+                    $delay_status = '<span class="gap-2"><span class="status-dot red"></span> '.$daysGap - $clearance['max_dates'].'d </span>';
                 }
 
 

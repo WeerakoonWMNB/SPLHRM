@@ -81,12 +81,7 @@ $dataQuery = "SELECT cl_requests.*,
                             'Human Resource Department'
                         ) AS department,
 
-                    (SELECT complete_date 
-                        FROM cl_requests_steps
-                        WHERE cl_requests_steps.is_complete = 1 
-                              AND cl_requests_steps.request_id = cl_requests.cl_req_id 
-                        ORDER BY cl_requests_steps.step DESC 
-                        LIMIT 1) AS last_completed_date
+                    cl_requests_steps.allocated_date AS last_completed_date
               FROM cl_requests 
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
               LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
@@ -210,27 +205,52 @@ while ($row = $dataResult->fetch_assoc()) {
                             <div class="progress-bar bg-success" role="progressbar" style="width: ' . ($completion_percentage ?: 0) . '%" aria-valuenow="' . ($completion_percentage ?: 0) . '" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>';
 
+    $max_dates = $row['max_dates'] ?: 2;
     // Delay Status Calculation
-    $referenceDate = !empty($row['last_completed_date']) ? $row['last_completed_date'] : $row['created_date'];
+    if ($row['step']) {
+        $referenceDate = !empty($row['last_completed_date']) ? $row['last_completed_date'] : $row['created_date'];
+    }
+    else {
+        if ($row['allocated_to_finance'] == '1') {
+            $referenceDate =  $row['finace_allocated_date'] ;
+            $row['department'] = 'Finance Department';
+            $max_dates = $row['max_dates'] ?: 3;
+        } else {
+            $referenceQuery = "SELECT complete_date AS allocated_date
+                        FROM cl_requests_steps
+                        WHERE request_id = ? ORDER BY step DESC LIMIT 1";
+            $stmtReference = $conn->prepare($referenceQuery);
+            $stmtReference->bind_param("i", $cl_req_id);
+            $stmtReference->execute();
+            $stmtReference->bind_result($referenceDate);
+            $stmtReference->fetch();
+            $stmtReference->close();
+            $referenceDate = !empty($referenceDate) ? $referenceDate : $row['created_date'];
+            $max_dates = $row['max_dates'] ?: 2;
+        }
+        
+    }
+    
     //$daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
     $daysGap = getWeekdaysDiff(date('Y-m-d', strtotime($referenceDate)), date('Y-m-d'));
 
     $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot green"></span> </div>';
+    
 
     if ($row['step_complete'] == '2') {
         $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> </div>';
     }
 
-    if ($daysGap > $row['max_dates'] && $row['step_complete'] == '2') {
-        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot red"></span> </div>';
+    if ($daysGap > $max_dates && $row['step_complete'] == '2') {
+        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot red"></span> '.$daysGap - $max_dates.'d </div>';
     }
 
-    if ($daysGap <= $row['max_dates'] && $row['step_complete'] == '2') {
+    if ($daysGap <= $max_dates && $row['step_complete'] == '2') {
         $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot green"></span> </div>';
     }
 
-    if ($daysGap > $row['max_dates'] && $row['step_complete'] != '2') {
-        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot red"></span> </div>';
+    if ($daysGap > $max_dates  && $row['step_complete'] != '2') {
+        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot red"></span> '.$daysGap - $max_dates.'d </div>';
     }
 
 

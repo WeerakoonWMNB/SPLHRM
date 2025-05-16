@@ -71,12 +71,7 @@ $dataQuery = "SELECT cl_requests.*,
                             'Human Resource Department'
                         ) AS department,
 
-                    (SELECT complete_date 
-                        FROM cl_requests_steps
-                        WHERE cl_requests_steps.is_complete = 1 
-                              AND cl_requests_steps.request_id = cl_requests.cl_req_id 
-                        ORDER BY cl_requests_steps.step DESC 
-                        LIMIT 1) AS last_completed_date
+                    cl_requests_steps.allocated_date AS last_completed_date
               FROM cl_requests 
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
               LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
@@ -153,26 +148,28 @@ while ($row = $dataResult->fetch_assoc()) {
 
 
     // Delay Status Calculation
-    $referenceDate = !empty($row['last_completed_date']) ? $row['last_completed_date'] : $row['created_date'];
+    $referenceDate =  $row['finace_allocated_date'] ;
     //$daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
     $daysGap = getWeekdaysDiff(date('Y-m-d', strtotime($referenceDate)), date('Y-m-d'));
 
     $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot green"></span> </div>';
 
+    $max_dates = $row['max_dates'] ?: 3;
+
     if ($row['step_complete'] == '2') {
         $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> </div>';
     }
 
-    if ($daysGap > $row['max_dates'] && $row['step_complete'] == '2') {
-        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot red"></span> </div>';
+    if ($daysGap > $max_dates && $row['step_complete'] == '2') {
+        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot red"></span> '.$daysGap - $max_dates.'d </div>';
     }
 
-    if ($daysGap <= $row['max_dates'] && $row['step_complete'] == '2') {
+    if ($daysGap <= $max_dates && $row['step_complete'] == '2') {
         $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot green"></span> </div>';
     }
 
-    if ($daysGap > $row['max_dates'] && $row['step_complete'] != '2') {
-        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot red"></span> </div>';
+    if ($daysGap > $max_dates && $row['step_complete'] != '2') {
+        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot red"></span> '.$daysGap - $max_dates.'d </div>';
     }
 
 

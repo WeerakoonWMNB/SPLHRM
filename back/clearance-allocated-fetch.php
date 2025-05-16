@@ -67,12 +67,7 @@ $dataQuery = "SELECT cl_requests.*,
                               AND cl_requests_steps.request_id = cl_requests.cl_req_id 
                         ORDER BY cl_requests_steps.step ASC 
                         LIMIT 1) AS department,
-                    (SELECT complete_date 
-                        FROM cl_requests_steps
-                        WHERE cl_requests_steps.is_complete = 1 
-                              AND cl_requests_steps.request_id = cl_requests.cl_req_id 
-                        ORDER BY cl_requests_steps.step DESC 
-                        LIMIT 1) AS last_completed_date
+                    cl_requests_steps.allocated_date AS last_completed_date
               FROM cl_requests 
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
               INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id 
@@ -181,7 +176,7 @@ while ($row = $dataResult->fetch_assoc()) {
     }
 
     if ($daysGap > $row['max_dates'] && $row['step_complete'] == '2') {
-        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot red"></span> </div>';
+        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot red"></span> '.$daysGap - $row['max_dates'].'d </div>';
     }
 
     if ($daysGap <= $row['max_dates'] && $row['step_complete'] == '2') {
@@ -189,7 +184,7 @@ while ($row = $dataResult->fetch_assoc()) {
     }
 
     if ($daysGap > $row['max_dates'] && $row['step_complete'] != '2') {
-        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot red"></span> </div>';
+        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot red"></span> '.$daysGap - $row['max_dates'].'d </div>';
     }
 
 
