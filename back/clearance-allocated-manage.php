@@ -217,6 +217,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve'])) {
         if ($stmt->execute()) {
             //update pending as completed
             $pending_query = $conn->query("UPDATE step_pending SET is_pending_completed = 1, pending_completed_datetime = '$datetime' WHERE cl_step_id = '$cl_step_id' AND is_pending_completed != 1");
+            //update next step allocated date
+            $conn->query("UPDATE cl_requests_steps SET allocated_date = '$datetime' WHERE cl_step_id = 
+            (SELECT cl_step_id FROM cl_requests_steps WHERE request_id = '$cl_id' AND step !='0' AND is_complete !='1' ORDER BY step ASC LIMIT 1) AND is_complete != 1");
             
             //select next user to be attended
             $query = "SELECT assigned_preparer_user_id, assigned_checker_user_id, assigned_approver_user_id, prepared_by, checked_by, approved_by 
