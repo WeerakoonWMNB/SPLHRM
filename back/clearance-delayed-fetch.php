@@ -233,6 +233,7 @@ while ($row = $dataResult->fetch_assoc()) {
 
         $row['req_id'] = $cl_req_id;
         
+        $row['assigned_date'] = $assigned_date;
         $data[] = $row;
     }
 
