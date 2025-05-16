@@ -313,7 +313,7 @@ $(document).ready(function () {
             { "data": "code" },
             { "data": "pending_note" },
             { "data": "selected_branch" },
-            { "data": "step_created_date" },
+            { "data": "assigned_date" },
             { "data": "step_completed_date" },
             { "data": "max_dates" },
             { "data": "days_taken" }

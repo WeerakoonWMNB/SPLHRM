@@ -202,7 +202,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         <td>' . $row['code'] . '</td>
         <td>' . $note . '</td>
         <td>' . $row['selected_branch'] . '</td>
-        <td>' . $row['step_created_date'] . '</td>
+        <td>' . $assigned_date . '</td>
         <td>' . $row['step_completed_date'] . '</td>
         <td>' . $row['max_dates'] . '</td>
         <td>' . $overdue_days . '</td>
