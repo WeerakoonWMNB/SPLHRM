@@ -1,6 +1,6 @@
 <?php
 include "../back/connection/connection.php";
-
+date_default_timezone_set("Asia/Colombo");
 // Read JSON input
 $input = file_get_contents("php://input");
 $employees = json_decode($input, true);
@@ -36,7 +36,7 @@ foreach ($employees as $emp) {
         $desig_result = mysqli_query($conn, $desig_query);
         if ($desig_result && mysqli_num_rows($desig_result) > 0) {
             $desig_row = mysqli_fetch_assoc($desig_result);
-            $designation_id = $desig_row['designation_id'];
+            $designation_id = $desig_row['desig_id'];
         }
         // If not found, insert new designation
         else {
@@ -137,7 +137,8 @@ foreach ($employees as $emp) {
     
     $date_created = date('Y-m-d H:i:s');
     $created_by = 1; // Assuming a default user ID, modify as needed
-
+    
+    if(!empty($branch_id)){
     $sql = "INSERT INTO employees (
     code, 
     epf_no, 
@@ -191,25 +192,30 @@ foreach ($employees as $emp) {
     '$account_number',
     '$bank_branch_name'
     )";
-
-    if (mysqli_query($conn, $sql)) {
-        $lastId = mysqli_insert_id($conn);
-        $insertedIds[] =  $emp_id;
-
-        if ($emp_cat_id == '1' || $emp_cat_id == '2') { // If employee type is permanent
-                    $update_query = "UPDATE companies SET permanent_sequence = permanent_sequence + 1 WHERE company_code = ?";
-                    $stmt = $conn->prepare($update_query);
-                    $stmt->bind_param("i", $company_code);
-                    $stmt->execute();
-                    $stmt->close();
-                }
-                else {
-                    $update_query = "UPDATE companies SET fl_sequence = fl_sequence + 1 WHERE company_code = ?";
-                    $stmt = $conn->prepare($update_query);
-                    $stmt->bind_param("i", $company_code);
-                    $stmt->execute();
-                    $stmt->close();
-                }
+    
+    
+        //error_log("[" . date("Y-m-d H:i:s") . "] ".$sql." No employees to transfer.\n", 3, __DIR__."/cron_sync.log");
+        
+    
+        if (mysqli_query($conn, $sql)) {
+            $lastId = mysqli_insert_id($conn);
+            $insertedIds[] =  $emp_id;
+    
+            if ($emp_cat_id == '1' || $emp_cat_id == '2') { // If employee type is permanent
+                        $update_query = "UPDATE companies SET permanent_sequence = permanent_sequence + 1 WHERE company_code = ?";
+                        $stmt = $conn->prepare($update_query);
+                        $stmt->bind_param("i", $company_code);
+                        $stmt->execute();
+                        $stmt->close();
+                    }
+                    else {
+                        $update_query = "UPDATE companies SET fl_sequence = fl_sequence + 1 WHERE company_code = ?";
+                        $stmt = $conn->prepare($update_query);
+                        $stmt->bind_param("i", $company_code);
+                        $stmt->execute();
+                        $stmt->close();
+                    }
+        }
     }
 }
 
