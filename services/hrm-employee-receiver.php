@@ -113,7 +113,7 @@ foreach ($employees as $emp) {
         $gender = 1;
     }
     $nic = mysqli_real_escape_string($conn, $emp['nid']);
-    $company_code = 1; // Assuming a default company code, modify as needed
+    $company_code = '001'; // Assuming a default company code, modify as needed
     if ($emp_cat_id == '1' || $emp_cat_id == '2') { // If employee type is permanent
             $last_id = "SELECT permanent_sequence FROM companies WHERE company_code = ?";
             $stmt = $conn->prepare($last_id);
