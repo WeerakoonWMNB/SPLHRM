@@ -138,7 +138,7 @@ foreach ($employees as $emp) {
     $date_created = date('Y-m-d H:i:s');
     $created_by = 1; // Assuming a default user ID, modify as needed
 
-    $sql = "INSERT INTO employees_test (
+    $sql = "INSERT INTO employees (
     code, 
     epf_no, 
     title, 
