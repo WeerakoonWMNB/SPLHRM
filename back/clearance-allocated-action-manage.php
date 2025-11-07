@@ -239,9 +239,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['customerVisitReportF
 
 
     // Update clearance step
-    $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 1, prepared_by = ?, prepared_date = ?, last_updated_date = ?, last_updated_by = ? WHERE cl_step_id = ? AND prepare_check_approve = 0";
+    $sql = "UPDATE cl_requests_steps SET prepare_check_approve = 1, prepared_by = ?, prepared_date = ?, last_updated_date = ?, last_updated_by = ?, pending_note = ? WHERE cl_step_id = ? AND (prepare_check_approve = 0 OR prepare_check_approve IS NULL OR prepare_check_approve =1)";
     $stmt = $conn->prepare($sql);   
-    $stmt->bind_param("issii", $by, $datetime, $datetime, $by, $cl_step_id);
+    $stmt->bind_param("issisi", $by, $datetime, $datetime, $by, $note ,$cl_step_id);
     $stmt->execute();
     $stmt->close();
 
