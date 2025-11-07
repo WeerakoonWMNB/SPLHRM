@@ -45,6 +45,32 @@
                     <div class="card-body">
                       <p class="card-title"><h4 id="title-name">Allocated Clearance List</h4></p>
                       <hr id="title-hr">
+
+                      <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="searchEmployee">Select Department</label>
+                            <select class="form-control mt-3" id="department" name="department" style="border: 1px solid #ccc; border-radius: 4px; padding: 10px;">
+                                
+                                <?php
+                                    $query = "SELECT * FROM branch_departments";
+                                    if (!empty($dept) && ($user_level != '1' && $user_level != '2')) {
+                                        $dept = mysqli_real_escape_string($conn, $dept);
+                                        $dept = str_replace(",", "','", $dept); // Convert to a comma-separated string for SQL IN clause
+                                        $query .= " WHERE bd_code IN ('$dept')";
+                                    }
+                                    $query .= " ORDER BY is_branch ASC, bd_name ASC";
+                                        
+                                    $result = mysqli_query($conn, $query);
+                                    $i = 1;
+                                    while ($row = mysqli_fetch_assoc($result)) {
+                                        $selected = ($i == 1) ? 'selected' : '';
+                                        echo "<option value='".$row['bd_code']."' ".$selected.">".$row['bd_name']."</option>";
+                                        $i++;
+                                    }
+                                ?>
+                            </select>
+                        </div>
+                      </div>
                       
                       <table id="employeeTable" class="display">
                             <thead>
@@ -83,14 +109,18 @@
 
 $(document).ready(function () {
     // Fetch employees
-    new DataTable('#employeeTable', {
+    var table = new DataTable('#employeeTable', {
         "processing": true,
         "serverSide": true,
         "scrollX": true,
         "order": [], // Disable default sorting
         "ajax": {
             "url": "../../back/clearance-allocated-fetch.php",
-            "type": "POST"
+            "type": "POST",
+            "data": function (d) {
+                // Send department value to server
+                d.department = $('#department').val();
+            }
         },
         "columns": [
             { "data": "row_id" },
@@ -104,6 +134,11 @@ $(document).ready(function () {
             { "data": "progress" },
             { "data": "action" }
         ]
+    });
+
+    // Trigger reload on department change
+    $('#department').on('change', function () {
+        table.ajax.reload();
     });
 });
 
