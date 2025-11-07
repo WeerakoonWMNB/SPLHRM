@@ -11,6 +11,7 @@ $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']
 $user_level = $_SESSION['ulvl'];
 $dept = $_SESSION['bd_id'];
 $user_id = $_SESSION['uid'];
+$dept = $_POST['department'] ?? '';
 
 
 // Prepare search condition
@@ -37,7 +38,14 @@ $totalRecords = $totalRecordsResult->fetch_assoc()['total'];
 // Total records count (with filtering)
 $stmt = $conn->prepare("SELECT COUNT(*) AS total FROM cl_requests 
                         INNER JOIN employees ON cl_requests.emp_id = employees.emp_id
-                        WHERE cl_requests.status = 1 $searchQuery");
+                        INNER JOIN cl_requests_steps ON cl_requests_steps.request_id = cl_requests.cl_req_id 
+              AND cl_requests_steps.step = (
+                  SELECT MIN(step) FROM cl_requests_steps 
+                  WHERE cl_requests_steps.request_id = cl_requests.cl_req_id
+                  AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
+                  AND cl_requests_steps.step != '0'
+              )
+              WHERE cl_requests.status = 1 AND cl_requests_steps.bd_code IN ('$dept')  $searchQuery");
 
 if (!empty($params)) {
     $stmt->bind_param(str_repeat("s", count($params)), ...$params);
@@ -87,7 +95,7 @@ $dataQuery = "SELECT cl_requests.*,
                   AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
                   AND cl_requests_steps.step != '0'
               )
-              WHERE cl_requests.status = 1 $searchQuery ";
+              WHERE cl_requests.status = 1 AND cl_requests_steps.bd_code IN ('$dept') $searchQuery ";
 
               if ($user_level != 1 && $user_level != 2) {
                 $dataQuery .= " AND
