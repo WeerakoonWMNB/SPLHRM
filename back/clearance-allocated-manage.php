@@ -187,12 +187,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve'])) {
         }
 
         //get the clearance step created date
-        $query = "SELECT (SELECT complete_date 
-                        FROM cl_requests_steps
-                        WHERE cl_requests_steps.is_complete = 1 
-                              AND cl_requests_steps.request_id = cl_requests.cl_req_id 
-                        ORDER BY cl_requests_steps.step DESC 
-                        LIMIT 1) AS last_completed_date, max_dates FROM cl_requests_steps WHERE cl_step_id = ?";
+        $query = "SELECT 
+                        (
+                            SELECT complete_date
+                            FROM cl_requests_steps crs_inner
+                            WHERE crs_inner.is_complete = 1 
+                                AND crs_inner.request_id = crs_outer.request_id
+                            ORDER BY crs_inner.step DESC
+                            LIMIT 1
+                        ) AS last_completed_date,
+                        MAX(crs_outer.complete_date) AS max_dates
+                    FROM cl_requests_steps crs_outer
+                    WHERE crs_outer.cl_step_id = ?
+                    GROUP BY crs_outer.request_id;
+                    ";
         $stmt = $conn->prepare($query);
         $stmt->bind_param("i", $cl_step_id);
         $stmt->execute();

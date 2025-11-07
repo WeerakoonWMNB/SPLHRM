@@ -51,13 +51,23 @@
                      cl_requests.created_date as request_date,
                      users.name AS request_by,
                      uploads.location AS url,                  
-                     (SELECT bd_name 
-                        FROM branch_departments
-                        INNER JOIN cl_requests_steps ON cl_requests_steps.bd_code = branch_departments.bd_code
-                        WHERE (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2) 
-                              AND cl_requests_steps.request_id = cl_requests.cl_req_id 
-                        ORDER BY cl_requests_steps.step ASC 
-                        LIMIT 1) AS department,
+                     COALESCE(
+                            (SELECT CONCAT(bd_name, ' - ', IFNULL(users.name, 'Unassigned')) as department
+                            FROM branch_departments
+                            INNER JOIN cl_requests_steps 
+                                ON cl_requests_steps.bd_code = branch_departments.bd_code
+                            LEFT JOIN users 
+                                ON users.user_id = CASE 
+                                    WHEN cl_requests_steps.prepare_check_approve = 0 THEN cl_requests_steps.assigned_preparer_user_id
+                                    WHEN cl_requests_steps.prepare_check_approve = 1 THEN cl_requests_steps.assigned_checker_user_id
+                                    WHEN cl_requests_steps.prepare_check_approve = 2 THEN cl_requests_steps.assigned_approver_user_id
+                                END
+                            WHERE (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2) 
+                                AND cl_requests_steps.request_id = cl_requests.cl_req_id 
+                            ORDER BY cl_requests_steps.step ASC 
+                            LIMIT 1),
+                            'Human Resource Department'
+                        ) AS department,
                     cl_requests_steps.allocated_date AS last_completed_date
               FROM cl_requests 
               INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 

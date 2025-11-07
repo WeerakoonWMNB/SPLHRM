@@ -70,10 +70,16 @@ $dataQuery = "SELECT cl_requests.*,
                      cl_requests_steps.created_date as step_created_date,
                      cl_requests_steps.max_dates,
                      COALESCE(
-                            (SELECT bd_name 
+                            (SELECT CONCAT(bd_name, ' - ', IFNULL(users.name, 'Unassigned')) as department
                             FROM branch_departments
                             INNER JOIN cl_requests_steps 
                                 ON cl_requests_steps.bd_code = branch_departments.bd_code
+                            LEFT JOIN users 
+                                ON users.user_id = CASE 
+                                    WHEN cl_requests_steps.prepare_check_approve = 0 THEN cl_requests_steps.assigned_preparer_user_id
+                                    WHEN cl_requests_steps.prepare_check_approve = 1 THEN cl_requests_steps.assigned_checker_user_id
+                                    WHEN cl_requests_steps.prepare_check_approve = 2 THEN cl_requests_steps.assigned_approver_user_id
+                                END
                             WHERE (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2) 
                                 AND cl_requests_steps.request_id = cl_requests.cl_req_id 
                             ORDER BY cl_requests_steps.step ASC 
