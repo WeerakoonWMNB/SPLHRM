@@ -155,6 +155,7 @@ $dataQuery = "SELECT
                 LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
                 $deptJoin
                 WHERE cl_requests.status = 1 $searchQuery $deptFilter
+                GROUP BY cl_requests.cl_req_id
                 ORDER BY cl_requests.cl_req_id DESC
                 LIMIT ?, ?";
 
