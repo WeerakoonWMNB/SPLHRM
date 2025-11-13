@@ -202,7 +202,7 @@
               <?php
                 if (checkAccess([1,2,3])) {
                   
-                  if (in_array('FINANCE', explode(',', $_SESSION['bd_id'])) || checkAccess([1,2])) {//Finance
+                  if (in_array('171', explode(',', $_SESSION['bd_id'])) || checkAccess([1,2])) {//Finance
               ?>
               <li class="nav-item"> 
                   <a class="nav-link" href="../../pages/clearance/clearance-final.php"> Final Clearance (FD)
