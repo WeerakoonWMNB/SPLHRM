@@ -11,8 +11,13 @@ $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']
 $user_level = $_SESSION['ulvl'];
 $dept = $_SESSION['bd_id'];
 $user_id = $_SESSION['uid'];
-$dept = $_POST['department'] ?? '';
+$department = $_POST['department'] ?? '';
 
+if ($user_level == '1' || $user_level == '2') {
+    
+        $dept = $department;
+    
+}
 
 // Prepare search condition
 $searchQuery = " AND cl_requests.is_complete = 0 ";
@@ -30,6 +35,13 @@ if (!empty($searchValue)) {
     $params = array_fill(0, 6, $searchValue);
 }
 
+if (!empty($dept)) {
+    $dept = " AND cl_requests_steps.bd_code IN ('$dept') ";
+}
+else {
+    $dept = "";
+}
+
 // Total records count (without filtering)
 $totalRecordsQuery = "SELECT COUNT(*) AS total FROM cl_requests WHERE status = 1 ";
 $totalRecordsResult = $conn->query($totalRecordsQuery);
@@ -45,7 +57,7 @@ $stmt = $conn->prepare("SELECT COUNT(*) AS total FROM cl_requests
                   AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
                   AND cl_requests_steps.step != '0'
               )
-              WHERE cl_requests.status = 1 AND cl_requests_steps.bd_code IN ('$dept')  $searchQuery");
+              WHERE cl_requests.status = 1 $dept $searchQuery");
 
 if (!empty($params)) {
     $stmt->bind_param(str_repeat("s", count($params)), ...$params);
@@ -95,7 +107,7 @@ $dataQuery = "SELECT cl_requests.*,
                   AND (cl_requests_steps.is_complete = 0 OR cl_requests_steps.is_complete = 2)
                   AND cl_requests_steps.step != '0'
               )
-              WHERE cl_requests.status = 1 AND cl_requests_steps.bd_code IN ('$dept') $searchQuery ";
+              WHERE cl_requests.status = 1 $dept $searchQuery ";
 
               if ($user_level != 1 && $user_level != 2) {
                 $dataQuery .= " AND
@@ -108,7 +120,7 @@ $dataQuery = "SELECT cl_requests.*,
                     )";
                 }
 
-              $dataQuery .= " ORDER BY cl_requests.cl_req_id DESC
+              $dataQuery .= " GROUP BY cl_requests.cl_req_id ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
 
 $stmt = $conn->prepare($dataQuery);

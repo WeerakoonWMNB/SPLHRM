@@ -10,6 +10,8 @@
                     exit;
         }
         include "../../back/connection/connection.php";
+        $user_level = $_SESSION['ulvl'];
+        $dept = $_SESSION['bd_id'];
 ?>
 
 <head>
@@ -62,8 +64,17 @@
                                         
                                     $result = mysqli_query($conn, $query);
                                     $i = 1;
+                                    if ($user_level == '1' || $user_level == '2') {
+                                            echo "<option value='' >All</option>";
+                                        }
                                     while ($row = mysqli_fetch_assoc($result)) {
+
+                                      if ($user_level == '1' || $user_level == '2') {
+                                        $selected = '';
+                                      }
+                                      else {
                                         $selected = ($i == 1) ? 'selected' : '';
+                                      }
                                         echo "<option value='".$row['bd_code']."' ".$selected.">".$row['bd_name']."</option>";
                                         $i++;
                                     }

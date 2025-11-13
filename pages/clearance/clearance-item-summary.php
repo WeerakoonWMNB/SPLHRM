@@ -16,7 +16,7 @@
 </style>
 <?php
         include "../../back/credential-check.php";
-        if (!checkAccess([1,2])) {
+        if (!checkAccess([1,2,3])) {
             echo "<script>window.location.href = '../general/dashboard.php';</script>";
                     exit;
         }
