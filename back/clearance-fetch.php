@@ -96,7 +96,7 @@ if (!empty($department)) {
 }
 
 // Total records count (without filtering)
-$totalRecordsQuery = "SELECT COUNT(*) AS total FROM cl_requests WHERE status = 1";
+$totalRecordsQuery = "SELECT COUNT(*) AS total FROM cl_requests WHERE status = 1 AND is_complete = 0";
 $totalRecordsResult = $conn->query($totalRecordsQuery);
 $totalRecords = $totalRecordsResult->fetch_assoc()['total'];
 
@@ -106,7 +106,7 @@ $countQuery = "SELECT COUNT(*) AS total
                 INNER JOIN employees ON cl_requests.emp_id = employees.emp_id
                 LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
                 $deptJoin
-                WHERE cl_requests.status = 1 $searchQuery $deptFilter";
+                WHERE cl_requests.status = 1 AND cl_requests.is_complete = 0 $searchQuery $deptFilter";
 
 $stmt = $conn->prepare($countQuery);
 
@@ -154,7 +154,7 @@ $dataQuery = "SELECT
                 INNER JOIN employees ON cl_requests.emp_id = employees.emp_id 
                 LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
                 $deptJoin
-                WHERE cl_requests.status = 1 $searchQuery $deptFilter
+                WHERE cl_requests.status = 1 AND cl_requests.is_complete = 0 $searchQuery $deptFilter
                 GROUP BY cl_requests.cl_req_id
                 ORDER BY cl_requests.cl_req_id DESC
                 LIMIT ?, ?";

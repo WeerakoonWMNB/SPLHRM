@@ -50,7 +50,7 @@
                           </div>
 
                           <div class="col-md-3 grid-margin stretch-card">
-                            <div class="card bg-primary d-flex align-items-center">
+                            <div class="card bg-warning d-flex align-items-center">
                               <div class="card-body py-5">
                                 <div
                                   class="d-flex flex-row align-items-center flex-wrap justify-content-md-center justify-content-xl-start py-1">
@@ -65,7 +65,7 @@
                                     <h5 class="text-white font-weight-bold">
                                       <?php echo $total_pending; ?> Clearances
                                     </h5>
-                                    <p class="mt-2 text-white card-text">Active</p>
+                                    <p class="mt-2 text-white card-text">Ongoing</p>
                                   </div>
                                 </div>
                               </div>
@@ -73,16 +73,15 @@
                           </div>
 
                           <div class="col-md-3 grid-margin stretch-card">
-                            <div class="card bg-warning d-flex align-items-center">
+                            <div class="card" style="background-color:#800000; color:white;">
                               <div class="card-body py-5">
-                                <div
-                                  class="d-flex flex-row align-items-center flex-wrap justify-content-md-center justify-content-xl-start py-1">
+                                <div class="d-flex flex-row align-items-center flex-wrap justify-content-md-center justify-content-xl-start py-1">
                                   <i class="mdi mdi-format-indent-increase text-white icon-lg"></i>
                                   <div class="ms-3 ml-md-0 ml-xl-3">
                                     <?php
                                       $sql = "SELECT COUNT(*) as total FROM cl_requests 
-                                      INNER JOIN cl_requests_steps ON cl_requests.cl_req_id = cl_requests_steps.request_id 
-                                      WHERE cl_requests.status = '1' AND cl_requests_steps.is_complete = '2'";
+                                        INNER JOIN cl_requests_steps ON cl_requests.cl_req_id = cl_requests_steps.request_id 
+                                        WHERE cl_requests.status = '1' AND cl_requests_steps.is_complete = '2'";
                                       $result = mysqli_query($conn, $sql);
                                       $row = mysqli_fetch_assoc($result);
                                       $total_pending_approval = $row['total'];
@@ -96,6 +95,7 @@
                               </div>
                             </div>
                           </div>
+
 
                           <div class="col-md-3 grid-margin stretch-card">
                             <div class="card bg-success d-flex align-items-center">

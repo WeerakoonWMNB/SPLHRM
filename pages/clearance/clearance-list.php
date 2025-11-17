@@ -81,7 +81,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Clearance ID </th>
+                                    <th>Clearance ID (Delayed Days)</th>
                                     <th>Name</th>
                                     <th>Resignation Date</th>
                                     <th>EPF No</th>
