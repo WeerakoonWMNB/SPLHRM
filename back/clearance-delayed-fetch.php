@@ -51,11 +51,11 @@ if ($dept) {
 }
 
 if ($fromdate) {
-    $totalRecordsQuery .= " AND last_complete_date >= '$fromdate 00:00:00' ";
+    $totalRecordsQuery .= " AND allocated_date >= '$fromdate 00:00:00' ";
 }
 
 if ($todate) {
-    $totalRecordsQuery .= " AND last_complete_date <= '$todate 23:59:59' ";
+    $totalRecordsQuery .= " AND allocated_date <= '$todate 23:59:59' ";
 }
 
 $totalRecordsResult = $conn->query($totalRecordsQuery);
@@ -81,11 +81,11 @@ if ($dept) {
 }
 
 if ($fromdate) {
-    $totalRecordsQuery .= " AND last_complete_date >= '$fromdate 00:00:00' ";
+    $totalRecordsQuery .= " AND allocated_date >= '$fromdate 00:00:00' ";
 }
 
 if ($todate) {
-    $totalRecordsQuery .= " AND last_complete_date <= '$todate 23:59:59' ";
+    $totalRecordsQuery .= " AND allocated_date <= '$todate 23:59:59' ";
 }
 
 $stmt = $conn->prepare($totalRecordsQuery);
@@ -129,11 +129,11 @@ if ($dept) {
 }
 
 if ($fromdate) {
-    $dataQuery .= " AND last_complete_date >= '$fromdate 00:00:00' ";
+    $dataQuery .= " AND allocated_date >= '$fromdate 00:00:00' ";
 }
 
 if ($todate) {
-    $dataQuery .= " AND last_complete_date <= '$todate 23:59:59' ";
+    $dataQuery .= " AND allocated_date <= '$todate 23:59:59' ";
 }
 
 $dataQuery .= " $searchQuery

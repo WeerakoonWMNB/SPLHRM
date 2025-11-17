@@ -139,13 +139,13 @@ $html = '
     <th>Name</th>
     <th>Resignation Date</th>
     <th>EPF No</th>
-    <th>Code</th>
+    <th>Sales Code</th>
     <th>Note</th>
     <th>Selected Dept</th>
     <th>Allocated Date</th>
     <th>Completed Date</th>
-    <th>Allocated Dates</th>
-    <th>Delayed Dates</th>
+    <th>Allocated Days</th>
+    <th>Delayed Days</th>
 </tr>
 </thead>
 <tbody>';

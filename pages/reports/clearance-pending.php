@@ -201,12 +201,12 @@ $user_level = $_SESSION['ulvl'];
                                     <th>Name</th>
                                     <th>Resignation Date</th>
                                     <th>EPF No</th>
-                                    <th>Code</th>
+                                    <th>Sales Code</th>
                                     <th>Note</th>
                                     <th>Selected Dept</th>
                                     <th>Pending start</th>
                                     <th>Pending cleared</th>
-                                    <th>Pending Dates</th>
+                                    <th>Pending Days</th>
                                 </tr>
                             </thead>
                         </table>

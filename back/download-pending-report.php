@@ -146,12 +146,12 @@ $html = '
     <th>Name</th>
     <th>Resignation Date</th>
     <th>EPF No</th>
-    <th>Code</th>
+    <th>Sales Code</th>
     <th>Note</th>
     <th>Selected Dept</th>
     <th>Pending started</th>
     <th>Pending cleared</th>
-    <th>Pending Dates</th>
+    <th>Pending Days</th>
 </tr>
 </thead>
 <tbody>';

@@ -149,7 +149,7 @@ $user_level = $_SESSION['ulvl'];
                     <div class="row">
                         
 
-                        <div class="col-md-6 grid-margin stretch-card">
+                        <div class="col-md-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
                                     <p class="card-title">Departments Clearance Delayed Metrics</p>
@@ -159,7 +159,7 @@ $user_level = $_SESSION['ulvl'];
                             </div> <!-- End card -->
                         </div>
 
-                        <div class="col-md-6 grid-margin stretch-card">
+                        <div class="col-md-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
                                     <p class="card-title">Branches Clearance Delayed Metrics</p>
@@ -246,13 +246,13 @@ $user_level = $_SESSION['ulvl'];
                                     <th>Name</th>
                                     <th>Resignation Date</th>
                                     <th>EPF No</th>
-                                    <th>Code</th>
+                                    <th>Sales Code</th>
                                     <th>Note</th>
                                     <th>Selected Dept</th>
                                     <th>Allocated Date</th>
                                     <th>Completed Date</th>
-                                    <th>Allocated Dates</th>
-                                    <th>Delayed Dates</th>
+                                    <th>Allocated Days</th>
+                                    <th>Delayed Days</th>
                                 </tr>
                             </thead>
                         </table>
@@ -330,12 +330,11 @@ $(document).ready(function () {
   $(function () {
     // Fetch and display the department pending counts
     $.ajax({
-      url: '../../back/clearance-delayed-department-fetch.php', // Adjust path as needed
+      url: '../../back/clearance-delayed-department-fetch.php',
       method: 'GET',
       success: function(response) {
         console.log("Response:", response);
 
-        // Parse if response is JSON string
         if (typeof response === 'string') {
           try {
             response = JSON.parse(response);
@@ -350,7 +349,7 @@ $(document).ready(function () {
           return;
         }
 
-        // Generate as many colors as needed
+        // Generate colors
         function generateColors(n) {
           const bgColors = [], borderColors = [];
           for (let i = 0; i < n; i++) {
@@ -365,9 +364,10 @@ $(document).ready(function () {
 
         const { bgColors, borderColors } = generateColors(response.labels.length);
 
-        const doughnutPieData = {
+        const barChartData = {
           labels: response.labels,
           datasets: [{
+            label: "Delayed Departments",
             data: response.data,
             backgroundColor: bgColors,
             borderColor: borderColors,
@@ -375,8 +375,13 @@ $(document).ready(function () {
           }]
         };
 
-        const doughnutPieOptions = {
+        const barChartOptions = {
           responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
           animation: {
             animateScale: true,
             animateRotate: true
@@ -384,11 +389,11 @@ $(document).ready(function () {
         };
 
         if ($("#dcpm-chart").length) {
-          const doughnutChartCanvas = $("#dcpm-chart").get(0).getContext("2d");
-          new Chart(doughnutChartCanvas, {
-            type: 'doughnut',
-            data: doughnutPieData,
-            options: doughnutPieOptions
+          const chartCanvas = $("#dcpm-chart").get(0).getContext("2d");
+          new Chart(chartCanvas, {
+            type: 'bar',   // ← changed from 'doughnut'
+            data: barChartData,
+            options: barChartOptions
           });
         }
       },
@@ -398,14 +403,15 @@ $(document).ready(function () {
     });
 
 
+
     // Fetch and display the branch pending counts
     $.ajax({
-      url: '../../back/clearance-delayed-branch-fetch.php', // Adjust path as needed
+      url: '../../back/clearance-delayed-branch-fetch.php',
       method: 'GET',
       success: function(response) {
         console.log("Response:", response);
 
-        // Parse if response is JSON string
+        // Parse if JSON is string
         if (typeof response === 'string') {
           try {
             response = JSON.parse(response);
@@ -420,7 +426,7 @@ $(document).ready(function () {
           return;
         }
 
-        // Generate as many colors as needed
+        // Generate random colors
         function generateColors(n) {
           const bgColors = [], borderColors = [];
           for (let i = 0; i < n; i++) {
@@ -435,9 +441,10 @@ $(document).ready(function () {
 
         const { bgColors, borderColors } = generateColors(response.labels.length);
 
-        const doughnutPieData = {
+        const barChartData = {
           labels: response.labels,
           datasets: [{
+            label: "Delayed Branches",
             data: response.data,
             backgroundColor: bgColors,
             borderColor: borderColors,
@@ -445,8 +452,13 @@ $(document).ready(function () {
           }]
         };
 
-        const doughnutPieOptions = {
+        const barChartOptions = {
           responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
           animation: {
             animateScale: true,
             animateRotate: true
@@ -454,11 +466,11 @@ $(document).ready(function () {
         };
 
         if ($("#bcpm-chart").length) {
-          const doughnutChartCanvas = $("#bcpm-chart").get(0).getContext("2d");
-          new Chart(doughnutChartCanvas, {
-            type: 'doughnut',
-            data: doughnutPieData,
-            options: doughnutPieOptions
+          const chartCanvas = $("#bcpm-chart").get(0).getContext("2d");
+          new Chart(chartCanvas, {
+            type: 'bar', // ← changed to column/bar chart
+            data: barChartData,
+            options: barChartOptions
           });
         }
       },
@@ -466,6 +478,7 @@ $(document).ready(function () {
         console.error("Failed to load pending counts:", error);
       }
     });
+
 
     // Fetch and display the deparment pending dates counts
     $.ajax({
