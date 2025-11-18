@@ -9,8 +9,8 @@ $department = $_GET['department'] ?? '';
 $fromdate = $_GET['fromdate'] ?? '';
 $todate = $_GET['todate'] ?? '';
 
-$fromdateEsc = mysqli_real_escape_string($conn, $fromdate);
-$todateEsc = mysqli_real_escape_string($conn, $todate);
+ $fromdateEsc = mysqli_real_escape_string($conn, $fromdate);
+ $todateEsc = mysqli_real_escape_string($conn, $todate);
 
 // Build SQL
 $sql = "SELECT 
@@ -44,11 +44,11 @@ $sql = "SELECT
         }
 
         if ($fromdateEsc) {
-            $sql .= " AND last_complete_date >= '$fromdateEsc 00:00:00' ";
+            $sql .= " AND crs.allocated_date >= '$fromdateEsc 00:00:00' ";
         }
         
         if ($todateEsc) {
-            $sql .= " AND last_complete_date <= '$todateEsc 23:59:59' ";
+            $sql .= " AND crs.allocated_date <= '$todateEsc 23:59:59' ";
         }
         
 

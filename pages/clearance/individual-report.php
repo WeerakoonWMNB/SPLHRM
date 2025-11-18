@@ -78,7 +78,7 @@ $user_level = $_SESSION['ulvl'];
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Clearance ID (Delayed Days)</th>
+                                    <th>Clearance ID</th>
                                     <th>Name</th>
                                     <th>Resignation Date</th>
                                     <th>EPF No</th>

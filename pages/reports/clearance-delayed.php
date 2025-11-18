@@ -367,7 +367,7 @@ $(document).ready(function () {
         const barChartData = {
           labels: response.labels,
           datasets: [{
-            label: "Delayed Departments",
+            label: "Number of delayed clearances",
             data: response.data,
             backgroundColor: bgColors,
             borderColor: borderColors,
@@ -444,7 +444,7 @@ $(document).ready(function () {
         const barChartData = {
           labels: response.labels,
           datasets: [{
-            label: "Delayed Branches",
+            label: "Number of delayed clearances",
             data: response.data,
             backgroundColor: bgColors,
             borderColor: borderColors,
