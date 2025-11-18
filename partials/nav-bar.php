@@ -274,6 +274,16 @@
                 }
               ?>
 
+              <?php
+                if (checkAccess([1,2,3])) {
+              ?>
+              <li class="nav-item"> 
+                <a class="nav-link" href="../../pages/reports/completed-clearance-report.php"> Completed </a>
+              </li>
+              <?php
+                }
+              ?>
+
             </ul>
           </div>
         </li>

@@ -29,6 +29,8 @@
 
                 $clearance = $conn->query("SELECT cl_requests.resignation_date,
                      cl_requests.is_complete, 
+                     cl_requests.completed_date,
+                     cl_requests.check_number,
                      cl_requests.allocated_to_finance,
                      employees.name_with_initials, 
                      employees.code, 
@@ -133,6 +135,9 @@
                             if (isset($_GET['ca'])) {
                                 echo '<a href="clearance-allocated.php" class="btn btn-secondary btn-sm mb-2">Back</a>';
                             }
+                            if (isset($_GET['fl'])) {
+                                echo '<a href="../reports/completed-clearance-report.php" class="btn btn-secondary btn-sm mb-2">Back</a>';
+                            }
                         ?>
                         
                         <button type="button" class="btn btn-info btn-sm mb-2" onclick="printDiv('printArea')">Print</button>
@@ -222,6 +227,19 @@
                                             <td></td>
                                             <td></td>
                                         </tr>
+
+                                        <?php 
+                                            if ($clearance['is_complete'] == 1 ) {
+                                        ?>
+                                        <tr>
+                                            <td><b>Completed Date : </b></td>
+                                            <td><?= $clearance['completed_date'] ?></td>
+                                            <td><b>Check No : </b></td>
+                                            <td><?= $clearance['check_number'] ?></td>
+                                        </tr>
+                                        <?php   
+                                            }
+                                        ?>
                                     </table>
                                     
                                     <table width="100%" style="margin-top:15px;">
