@@ -130,17 +130,27 @@ while ($row = $dataResult->fetch_assoc()) {
     $row['ini_name'] = htmlspecialchars($row['title'] . ' ' . $row['name_with_initials'], ENT_QUOTES, 'UTF-8');
     $note = '';
 
-    if (!empty($row['pending_note'])) {
-        $note .= '* ' . $row['pending_note'];
-    }
+    // select pending or complete note from steps table according to clearance id
+    $step_note_query = "SELECT pending_note, complete_note, branch_departments.bd_name FROM cl_requests_steps 
+    LEFT JOIN branch_departments ON branch_departments.bd_code = cl_requests_steps.bd_code
+    WHERE request_id = ? AND is_complete=1 ORDER BY step DESC";
+    $step_note_stmt = $conn->prepare($step_note_query);
+    $step_note_stmt->bind_param("s", $cl_req_id);
+    $step_note_stmt->execute();
 
-    if (!empty($row['complete_note'])) {
-        if (!empty($note)) {
-            $note .= '<br>'; // Add a break only if there's already content
+    $step_note_result = $step_note_stmt->get_result();
+    if ($step_note_result->num_rows > 0) {
+        // fetch all notes from foreach
+        while ($note_row = $step_note_result->fetch_assoc()) {
+            if (!empty($note_row['complete_note'])) {
+                $note .= htmlspecialchars($note_row['complete_note'], ENT_QUOTES, 'UTF-8') . ' ('. htmlspecialchars($note_row['bd_name'], ENT_QUOTES, 'UTF-8'). ') <br>';
+            } 
+            if (!empty($note_row['pending_note'])) {
+                $note .= htmlspecialchars($note_row['pending_note'], ENT_QUOTES, 'UTF-8') . ' ('. htmlspecialchars($note_row['bd_name'], ENT_QUOTES, 'UTF-8'). ') <br>';
+            }
         }
-        $note .= '* ' . $row['complete_note'];
     }
-
+    $step_note_stmt->close();
 
     $note = trim($note); // Remove any extra spaces
 
