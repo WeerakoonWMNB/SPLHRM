@@ -54,7 +54,7 @@
                                     <th>Resignation Date</th>
                                     <th>EPF No</th>
                                     <th>Code</th>
-                                    <th>Notes</th>
+                                    <th>Notes (Department)</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
