@@ -61,7 +61,7 @@
                                         $query .= " WHERE bd_code IN ('$dept')";
                                     }
                                     $query .= " ORDER BY is_branch ASC, bd_name ASC";
-                                        
+                                    //echo $query;exit;
                                     $result = mysqli_query($conn, $query);
                                     $i = 1;
                                     if ($user_level == '1' || $user_level == '2') {
