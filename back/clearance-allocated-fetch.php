@@ -13,7 +13,7 @@ $dept = $_SESSION['bd_id'];
 $user_id = $_SESSION['uid'];
 $department = $_POST['department'] ?? '';
 
-if ($user_level == '1' || $user_level == '2') {
+if ($user_level != '1' && $user_level != '2') {
     
         $dept = $department;
     
@@ -114,9 +114,9 @@ $dataQuery = "SELECT cl_requests.*,
                     (
                         (cl_requests_steps.assigned_preparer_user_id != 0 AND cl_requests_steps.prepared_by IS NULL AND cl_requests_steps.assigned_preparer_user_id = $user_id) 
                         OR
-                        (cl_requests_steps.assigned_checker_user_id != 0 AND cl_requests_steps.checked_by IS NULL AND cl_requests_steps.assigned_checker_user_id = $user_id)
+                        (cl_requests_steps.assigned_checker_user_id != 0 AND cl_requests_steps.checked_by IS NULL AND cl_requests_steps.prepared_by IS NOT NULL AND cl_requests_steps.assigned_checker_user_id = $user_id)
                         OR
-                        (cl_requests_steps.assigned_approver_user_id != 0 AND cl_requests_steps.approved_by IS NULL AND cl_requests_steps.assigned_approver_user_id = $user_id)
+                        (cl_requests_steps.assigned_approver_user_id != 0 AND cl_requests_steps.approved_by IS NULL AND cl_requests_steps.prepared_by IS NOT NULL AND cl_requests_steps.checked_by IS NOT NULL AND cl_requests_steps.assigned_approver_user_id = $user_id)
                     )";
                 }
 
