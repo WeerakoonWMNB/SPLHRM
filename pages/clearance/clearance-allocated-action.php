@@ -451,7 +451,7 @@
 
                     function getSavedPhysicalItems($conn, $cl_step_id) {
                         $saved = [];
-                        $result = $conn->query("SELECT cl_physical_item_id, quantity, remark, item_type FROM cl_request_step_physical_items 
+                        $result = $conn->query("SELECT cl_physical_item_id, quantity, remark, item_type, document_path FROM cl_request_step_physical_items 
                                                 WHERE step_id = '$cl_step_id'");
                         while ($row = $result->fetch_assoc()) {
                             $saved[$row['cl_physical_item_id']] = $row;
@@ -482,6 +482,7 @@
                                     <th>Quantity *</th>
                                     <th>Action *</th>
                                     <th>Remarks</th>
+                                    <th>Attachments</th>
                                 </tr></thead>";
                             echo "<tbody>";
 
@@ -491,6 +492,7 @@
                                 $quantity = isset($savedItems[$itemId]) ? $savedItems[$itemId]['quantity'] : "1";
                                 $remarks = isset($savedItems[$itemId]) ? $savedItems[$itemId]['remark'] : "";
                                 $item_type = isset($savedItems[$itemId]) ? $savedItems[$itemId]['item_type'] : "";
+                                $document_path = isset($savedItems[$itemId]) ? $savedItems[$itemId]['document_path'] : "";
 
                                 echo "<tr>";
                                 echo "<td><input type='checkbox' class='issue-check' name='issue_check[]' value='{$itemId}' $checked $dis></td>";
@@ -508,6 +510,12 @@
                                 echo "<td>
                                 <input type='text' class='form-control' name='issue_note[{$itemId}]' value='$remarks'>
                                 </td>
+                                <td>
+                                        <input type='file' class='form-control' name='physical_attachments[{$itemId}]' accept='.pdf, .jpg, .jpeg, .png' >";
+                                if (!empty($document_path)) {
+                                    echo "<a href='".$document_path."' target='_blank'><button type='button' class='btn btn-primary btn-sm mt-2'>view</button></a>";
+                                }
+                                echo "</td>
                                 ";
                                 echo "</tr>";
                             }
@@ -939,6 +947,12 @@
                 formData.append("physical_items[" + itemId + "][item_type]", $(`select[name='issue_action[${itemId}]']`).val());
                 formData.append("physical_items[" + itemId + "][quantity]", $(`input[name='issue_quantity[${itemId}]']`).val());
                 formData.append("physical_items[" + itemId + "][remark]", $(`input[name='issue_note[${itemId}]']`).val());
+
+                let fileInputElem = $(`input[name='physical_attachments[${itemId}]']`)[0];
+                if (fileInputElem && fileInputElem.files.length > 0) {
+                    let fileInput = fileInputElem.files[0];
+                    formData.append("physical_files[" + itemId + "]", fileInput);
+                }
             });
 
             if (hasError) return false;

@@ -8,7 +8,7 @@ use PHPMailer\PHPMailer\Exception;
 //Load Composer's autoloader
 require '../vendor/autoload.php';
 
-function sendMail($mailids, $mailheading, $mailbody)
+function sendMail($mailids, $mailheading, $mailbody, $systemHeader = 'HRM System (Clearance)')
 {
     include 'connection/connection.php';
 
@@ -29,7 +29,7 @@ function sendMail($mailids, $mailheading, $mailbody)
             $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
 
             //Recipients
-            $mail->setFrom('splhrm.sadaharitha@gmail.com', 'HRM System (do not reply)');
+            $mail->setFrom('splhrm.sadaharitha@gmail.com', $systemHeader );
             foreach ($mailids as $mailid) {
                 $mail->addAddress($mailid);
             }

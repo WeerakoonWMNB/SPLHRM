@@ -13,10 +13,14 @@ $dept = $_SESSION['bd_id'];
 $user_id = $_SESSION['uid'];
 $department = $_POST['department'] ?? '';
 
-if ($user_level != '1' && $user_level != '2') {
-    
-        $dept = $department;
-    
+if (($user_level == '1' || $user_level == '2') && !empty($department)) {
+
+    $dept = $department;
+
+
+}
+else if (($user_level == '1' || $user_level == '2') && empty($department)) {
+    $dept = "";
 }
 
 // Prepare search condition
@@ -109,8 +113,8 @@ $dataQuery = "SELECT cl_requests.*,
               )
               WHERE cl_requests.status = 1 $dept $searchQuery ";
 
-              if ($user_level != 1 && $user_level != 2) {
-                $dataQuery .= " AND
+if ($user_level != 1 && $user_level != 2) {
+    $dataQuery .= " AND
                     (
                         (cl_requests_steps.assigned_preparer_user_id != 0 AND cl_requests_steps.prepared_by IS NULL AND cl_requests_steps.assigned_preparer_user_id = $user_id) 
                         OR
@@ -118,9 +122,9 @@ $dataQuery = "SELECT cl_requests.*,
                         OR
                         (cl_requests_steps.assigned_approver_user_id != 0 AND cl_requests_steps.approved_by IS NULL AND cl_requests_steps.prepared_by IS NOT NULL AND cl_requests_steps.checked_by IS NOT NULL AND cl_requests_steps.assigned_approver_user_id = $user_id)
                     )";
-                }
+}
 
-              $dataQuery .= " GROUP BY cl_requests.cl_req_id ORDER BY cl_requests.cl_req_id DESC
+$dataQuery .= " GROUP BY cl_requests.cl_req_id ORDER BY cl_requests.cl_req_id DESC
               LIMIT ?, ?";
 
 $stmt = $conn->prepare($dataQuery);
@@ -143,14 +147,14 @@ while ($row = $dataResult->fetch_assoc()) {
         <form method="POST" action="#">
             <input type="hidden" name="row_id" value="' . $cl_req_id . '">
             <div class="d-flex gap-2">
-                <a href="clearance-allocated-action.php?id='.base64_encode($cl_req_id).'" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View">
+                <a href="clearance-allocated-action.php?id=' . base64_encode($cl_req_id) . '" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View">
                     <i class="mdi mdi-eye"></i>
                 </a>';
-        if ($row['bd_code'] == 'RECOVERY') {
-            $actionButtons .= '<a href="clearance-item-summary.php?id='.base64_encode($cl_req_id).'&ca=ca" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="summary">
+    if ($row['bd_code'] == 'RECOVERY') {
+        $actionButtons .= '<a href="clearance-item-summary.php?id=' . base64_encode($cl_req_id) . '&ca=ca" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="summary">
             <i class="mdi mdi-format-list-bulleted"></i>
         </a>';
-         }
+    }
     $actionButtons .= '</div></form>';
 
     $row['action'] = $actionButtons;
@@ -199,27 +203,27 @@ while ($row = $dataResult->fetch_assoc()) {
     //$daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
     $daysGap = getWeekdaysDiff(date('Y-m-d', strtotime($referenceDate)), date('Y-m-d'));
 
-    $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot green"></span> </div>';
+    $delay_status = '<div class="d-flex gap-2">' . $cl_req_id . ' <span class="status-dot green"></span> </div>';
 
     if ($row['step_complete'] == '2') {
-        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> </div>';
+        $delay_status = '<div class="d-flex gap-2">' . $cl_req_id . ' <span class="status-dot yellow"></span> </div>';
     }
 
     if ($daysGap > $row['max_dates'] && $row['step_complete'] == '2') {
-        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot red"></span> '.$daysGap - $row['max_dates'].'d </div>';
+        $delay_status = '<div class="d-flex gap-2">' . $cl_req_id . ' <span class="status-dot yellow"></span> <span class="status-dot red"></span> ' . $daysGap - $row['max_dates'] . 'd </div>';
     }
 
     if ($daysGap <= $row['max_dates'] && $row['step_complete'] == '2') {
-        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot yellow"></span> <span class="status-dot green"></span> </div>';
+        $delay_status = '<div class="d-flex gap-2">' . $cl_req_id . ' <span class="status-dot yellow"></span> <span class="status-dot green"></span> </div>';
     }
 
     if ($daysGap > $row['max_dates'] && $row['step_complete'] != '2') {
-        $delay_status = '<div class="d-flex gap-2">'.$cl_req_id.' <span class="status-dot red"></span> '.$daysGap - $row['max_dates'].'d </div>';
+        $delay_status = '<div class="d-flex gap-2">' . $cl_req_id . ' <span class="status-dot red"></span> ' . $daysGap - $row['max_dates'] . 'd </div>';
     }
 
 
     $row['req_id'] = $delay_status;
-    
+
     $data[] = $row;
 }
 

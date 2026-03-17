@@ -369,6 +369,7 @@
               <li class="nav-item"> <a class="nav-link" href="../../pages/settings/department-list.php"> Branch/Dept </a></li>
               <li class="nav-item"> <a class="nav-link" href="../../pages/settings/designation-list.php"> Designations </a></li>
               <li class="nav-item"> <a class="nav-link" href="../../pages/settings/type-list.php"> Emp. Categories </a></li>
+              <li class="nav-item"> <a class="nav-link" href="../../pages/settings/mail-user-list.php"> Resign Mail Receivers </a></li>
             </ul>
           </div>
         </li>

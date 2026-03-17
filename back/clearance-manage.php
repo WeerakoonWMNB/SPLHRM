@@ -529,6 +529,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve'])) {
 
         if ($stmt->execute()) {
             clearanceRequestAccept($cl_id,$approve_note); // Send email notification
+            clearanceRequestAcceptNotify($cl_id);
             $_SESSION['success'] = "Request marked as approved.";
             echo json_encode(["status" => "success", "message" => "Request marked as approved."]);
         } else {

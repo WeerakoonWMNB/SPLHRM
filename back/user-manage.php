@@ -9,6 +9,10 @@ if (isset($_POST['edit_id']) && !empty($_POST['edit_id'])) {
         $user_level = intval($_POST['user_level']);
         $process_level = intval($_POST['process_level']); // 1=hod, 2=rsm, 3=bsm, 4=cro, 5=executive
         $branch = isset($_POST['branch']) ? implode(',', $_POST['branch']) : '';
+        //remove last comma if exists
+        if (substr($branch, -1) === ',') {
+            $branch = substr($branch, 0, -1);
+        }
         $emp_id = intval($_POST['emp']);
         $username = trim($_POST['username']);
         $password = !empty($_POST['password']) ? trim($_POST['password']) : null;
@@ -144,8 +148,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['search_id'])) {
     } else {
         echo json_encode(['success' => false, 'message' => 'User not found.']);
     }
-} else {
-    echo json_encode(['success' => false, 'message' => 'Invalid request.']);
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['changePassword'])) {
