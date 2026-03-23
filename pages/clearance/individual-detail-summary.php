@@ -179,7 +179,21 @@
                                                 <?= $clearance['epf_no'] ?>
                                                 <?php 
                                                     if ($clearance['code']) {
-                                                        echo '/ '.$clearance['code'];
+                                                        echo '<br> '.$clearance['code'];
+                                                    }
+
+                                                    // select and display request_related_user_codes if exists 
+                                                    $related_users_sql = "SELECT emp_code, emp_name, nic FROM request_related_user_codes WHERE request_id = ?";
+                                                    $related_users_stmt = $conn->prepare($related_users_sql);
+                                                    $related_users_stmt->bind_param("i", $cl_id);
+                                                    $related_users_stmt->execute();
+                                                    $related_users_result = $related_users_stmt->get_result();
+
+                                                    if ($related_users_result->num_rows > 0) {
+                                                        echo "<br>";
+                                                        while ($row = $related_users_result->fetch_assoc()) {
+                                                            echo  $row['emp_code'] . "<br>";
+                                                        }
                                                     }
                                                 ?>
                                             </td>

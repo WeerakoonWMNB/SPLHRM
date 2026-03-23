@@ -155,17 +155,67 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['customerVisitReportF
 
             $result = $conn->query("SELECT * FROM cl_request_step_physical_items WHERE cl_physical_item_id = '$item_id' AND request_id = '$cl_id' AND step_id = '$cl_step_id'");
             if ($result->num_rows > 0) {
-                $conn->query("UPDATE cl_request_step_physical_items SET quantity = '$quantity', remark = '$remark', 
-                last_updated_by = '$by', last_updated_date = '$datetime', item_type = '$type' WHERE cl_physical_item_id = '$item_id' 
-                AND request_id = '$cl_id' AND step_id = '$cl_step_id'");
+                $destination = '';
+                if (isset($_FILES['physical_files']['name'][$item_id])) {
+                    $row = $result->fetch_assoc();
+                    $document_path = $row['document_path'];
+                    if ($document_path && file_exists(substr($document_path, 3))) {
+                        unlink(substr($document_path, 3));
+                    }
+                    $fileName = $_FILES['physical_files']['name'][$item_id];
+                    $fileTmpPath = $_FILES['physical_files']['tmp_name'][$item_id];
+                    $uploadDir = '../uploads/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0777, true);
+                    }
+                    $newFileName = 'phys_' . $item_id . '_' . time() . '_' . basename($fileName);
+                    $destination = $uploadDir . $newFileName;
+                    if (move_uploaded_file($fileTmpPath, $destination)) {
+                        $destination = '../' . $destination;
+                    }
+                }
+                
+                $update_query = "UPDATE cl_request_step_physical_items SET quantity = '$quantity', remark = '$remark', 
+                last_updated_by = '$by', last_updated_date = '$datetime', item_type = '$type'";
+                if (!empty($destination)) {
+                    $update_query .= ", document_path = '$destination'";
+                }
+                $update_query .= " WHERE cl_physical_item_id = '$item_id' AND request_id = '$cl_id' AND step_id = '$cl_step_id'";
+                $conn->query($update_query);
             } else {
-                $conn->query("INSERT INTO cl_request_step_physical_items (cl_physical_item_id, request_id, step_id, item_type, quantity, remark, created_by, created_date) VALUES ('$item_id', '$cl_id', '$cl_step_id', '$type', '$quantity', '$remark', '$by', '$datetime')");
+                $destination = '';
+                if (isset($_FILES['physical_files']['name'][$item_id])) {
+                    $fileName = $_FILES['physical_files']['name'][$item_id];
+                    $fileTmpPath = $_FILES['physical_files']['tmp_name'][$item_id];
+                    $uploadDir = '../uploads/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0777, true);
+                    }
+                    $newFileName = 'phys_' . $item_id . '_' . time() . '_' . basename($fileName);
+                    $destination = $uploadDir . $newFileName;
+                    if (move_uploaded_file($fileTmpPath, $destination)) {
+                        $destination = '../' . $destination;
+                    }
+                }
+                $conn->query("INSERT INTO cl_request_step_physical_items (cl_physical_item_id, request_id, step_id, item_type, quantity, remark, created_by, created_date, document_path) VALUES ('$item_id', '$cl_id', '$cl_step_id', '$type', '$quantity', '$remark', '$by', '$datetime', '$destination')");
             }
         }
 
         // Delete unmatched physical records
         if (!empty($existing_physical_ids)) {
-            $conn->query("DELETE FROM cl_request_step_physical_items WHERE request_id = '$cl_id' AND step_id = '$cl_step_id' AND cl_physical_item_id NOT IN ('" . implode("','", $existing_physical_ids) . "')");
+            $ids_to_delete = implode("','", $existing_physical_ids);
+            
+            $result = $conn->query("SELECT document_path FROM cl_request_step_physical_items WHERE request_id = '$cl_id' 
+            AND step_id = '$cl_step_id' AND cl_physical_item_id NOT IN ('$ids_to_delete')");
+            
+            while ($row = $result->fetch_assoc()) {
+                $document_path = $row['document_path'];
+                if ($document_path && file_exists(substr($document_path, 3))) {
+                    unlink(substr($document_path, 3));
+                }
+            }
+            
+            $conn->query("DELETE FROM cl_request_step_physical_items WHERE request_id = '$cl_id' AND step_id = '$cl_step_id' AND cl_physical_item_id NOT IN ('$ids_to_delete')");
         }
     }
 
