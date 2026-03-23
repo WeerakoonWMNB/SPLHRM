@@ -202,13 +202,22 @@
               <?php
                 if (checkAccess([1,2,3])) {
                   
-                  if (in_array('171', explode(',', $_SESSION['bd_id'])) || checkAccess([1,2])) {//Finance
+                  if (in_array('171', explode(',', $_SESSION['bd_id'])) || in_array('SFIN', explode(',', $_SESSION['bd_id'])) || checkAccess([1,2])) {//Finance
               ?>
               <li class="nav-item"> 
                   <a class="nav-link" href="../../pages/clearance/clearance-final.php"> Final Clearance (FD)
                   <?php
                         $count = 0;
-                        $query = "SELECT * FROM cl_requests WHERE cl_requests.status='1' AND cl_requests.is_complete ='0' AND cl_requests.allocated_to_finance='1'";
+                        $company_id = $_SESSION['company_id'];
+                        $query = "SELECT cl_requests.* FROM cl_requests 
+                        INNER JOIN employees ON employees.emp_id = cl_requests.emp_id
+                        INNER JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
+                        WHERE cl_requests.status='1' AND cl_requests.is_complete ='0' AND cl_requests.allocated_to_finance='1'";
+
+                        if (!checkAccess([1,2])) {
+                          $query .= " AND branch_departments.company_id = $company_id";
+                        }
+                        
                         $result = $conn->query($query); 
 
                         if ($result) {

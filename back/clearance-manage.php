@@ -155,6 +155,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $step_stmt->close();
                 }
 
+                // Insert related employee codes 
+                $insert_sql = "
+                    INSERT INTO request_related_user_codes (request_id, emp_id, emp_code, emp_name, nic)
+                    SELECT ?, e.emp_id, e.code, e.name_with_initials, e.nic
+                    FROM employees e
+                    INNER JOIN employees base ON base.emp_id = ?
+                    WHERE e.emp_id != base.emp_id
+                    AND e.nic = base.nic
+                    AND e.code IS NOT NULL
+                ";
+
+                $stmt = $conn->prepare($insert_sql);
+                $stmt->bind_param("ii", $request_id, $employee);
+                $stmt->execute();
+                
+
                 clearanceRequest($request_id); // Send email notification
                 $_SESSION['success'] = "Clearance added successfully.";
                 echo json_encode(["status" => "success", "message" => "Clearance added successfully."]);

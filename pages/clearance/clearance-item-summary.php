@@ -188,7 +188,21 @@
                                                 <?= $clearance['epf_no'] ?>
                                                 <?php 
                                                     if ($clearance['code']) {
-                                                        echo '/ '.$clearance['code'];
+                                                        echo '<br> '.$clearance['code'];
+                                                    }
+
+                                                    // select and display request_related_user_codes if exists 
+                                                    $related_users_sql = "SELECT emp_code, emp_name, nic FROM request_related_user_codes WHERE request_id = ?";
+                                                    $related_users_stmt = $conn->prepare($related_users_sql);
+                                                    $related_users_stmt->bind_param("i", $cl_id);
+                                                    $related_users_stmt->execute();
+                                                    $related_users_result = $related_users_stmt->get_result();
+
+                                                    if ($related_users_result->num_rows > 0) {
+                                                        echo "<br>";
+                                                        while ($row = $related_users_result->fetch_assoc()) {
+                                                            echo  $row['emp_code'] . "<br>";
+                                                        }
                                                     }
                                                 ?>
                                             </td>
@@ -254,9 +268,17 @@
                                         <?php
                                         $query = "SELECT cl_requests_steps.*, branch_departments.bd_name,
                                         (SELECT SUM(amount) as deduction FROM cl_request_step_amunt_items WHERE item_type='1' AND step_id=cl_requests_steps.cl_step_id AND request_id= $cl_id) as deduction,
-                                        (SELECT SUM(amount) as payable FROM cl_request_step_amunt_items WHERE item_type='2' AND step_id=cl_requests_steps.cl_step_id AND request_id= $cl_id) as payable  
+                                        (SELECT SUM(amount) as payable FROM cl_request_step_amunt_items WHERE item_type='2' AND step_id=cl_requests_steps.cl_step_id AND request_id= $cl_id) as payable,
+                                        uc.name AS created_by_name,
+                                        ub.name AS checked_by_name,
+                                        ua.name AS approved_by_name
+
                                         FROM cl_requests_steps 
                                         INNER JOIN branch_departments ON branch_departments.bd_code = cl_requests_steps.bd_code
+                                        LEFT JOIN users uc ON uc.user_id = cl_requests_steps.prepared_by
+                                        LEFT JOIN users ub ON ub.user_id = cl_requests_steps.checked_by
+                                        LEFT JOIN users ua ON ua.user_id = cl_requests_steps.approved_by
+
                                         WHERE cl_requests_steps.request_id = $cl_id AND cl_requests_steps.step!=0 AND cl_requests_steps.is_complete=1
                                         ORDER BY cl_requests_steps.step ASC";
                                         $clearance = $conn->query($query);
@@ -272,7 +294,13 @@
                                                 $dept = $item['bd_code'];
                                                 echo "<tr>
                                                 <td>$i</td>
-                                                <td>".$item['bd_name']."</td>
+                                                <td>
+                                                    <table width='100%' id='innerTable' style='border:none;'>
+                                                        <tr><td colspan='3' style='font-weight:bold;font-size:14px;'>".$item['bd_name']."</td></tr>
+                                                        <tr style='font-size:12px;'><th>Prepared By</th><th>Checked By</th><th>Approved By</th></tr>
+                                                        <tr style='font-size:12px;'><td>".$item['created_by_name']."</td><td>".$item['checked_by_name']."</td><td>".$item['approved_by_name']."</td></tr>
+                                                    </table>
+                                                </td>
                                                 <td>". number_format($item['deduction'] ? $item['deduction'] : 0, 2) ."</td>
                                                 <td>". number_format($item['payable'] ? $item['payable'] : 0, 2)."</td>
                                                 <td>".$item['pending_note']."</td>

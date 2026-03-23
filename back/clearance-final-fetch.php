@@ -10,7 +10,7 @@ $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
 $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : "";
 $user_level = $_SESSION['ulvl'];
 $dept = $_SESSION['bd_id'];
-
+$user_company = $_SESSION['company_id'];
 
 // Prepare search condition
 $searchQuery = "";
@@ -28,8 +28,16 @@ if (!empty($searchValue)) {
     $params = array_fill(0, 6, $searchValue);
 }
 
+if($user_level != 1 && $user_level != 2) {
+    $searchQuery .= " AND branch_departments.company_id = ?";
+    $params[] = $user_company;
+}
+
 // Total records count (without filtering)
-$totalRecordsQuery = "SELECT COUNT(*) AS total FROM cl_requests WHERE cl_requests.status = 1  AND cl_requests.is_complete ='0' AND cl_requests.allocated_to_finance='1'";
+$totalRecordsQuery = "SELECT COUNT(*) AS total FROM cl_requests INNER JOIN employees ON cl_requests.emp_id = employees.emp_id INNER JOIN branch_departments ON branch_departments.bd_id = employees.bd_id WHERE cl_requests.status = 1  AND cl_requests.is_complete ='0' AND cl_requests.allocated_to_finance='1'";
+if ($user_level !=1 && $user_level !=2) {
+                          $totalRecordsQuery .= " AND branch_departments.company_id = $user_company";
+                        }
 $totalRecordsResult = $conn->query($totalRecordsQuery);
 $totalRecords = $totalRecordsResult->fetch_assoc()['total'];
 
