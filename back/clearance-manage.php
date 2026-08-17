@@ -449,7 +449,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['filteredEmps'])) {
     FROM employees 
     LEFT JOIN cl_requests ON employees.emp_id = cl_requests.emp_id
     LEFT JOIN branch_departments ON branch_departments.bd_id = employees.bd_id
-    WHERE (employees.name_with_initials LIKE '%$search%' 
+    WHERE employees.status=1 AND (employees.name_with_initials LIKE '%$search%' 
     OR employees.nic LIKE '%$search%' 
     OR employees.system_emp_no LIKE '%$search%' 
     OR employees.code LIKE '%$search%' 

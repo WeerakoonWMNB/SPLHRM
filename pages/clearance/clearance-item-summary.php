@@ -12,6 +12,10 @@
     td.no-print-col {
       display: none;
     }
+
+    .no-print-detail {
+      display: none !important;
+    }
   }
 </style>
 <?php
@@ -78,7 +82,7 @@
               INNER JOIN users ON users.user_id = cl_requests.created_by
               LEFT JOIN uploads letter ON letter.request_id = cl_requests.cl_req_id AND letter.document_type = '1'
               LEFT JOIN bank_branch bb ON bb.bank_code = employees.bank_code AND bb.branch_code = employees.branch_code AND employees.bank_code !=0
-              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1 AND (cl_requests.is_complete = 0 OR cl_requests.is_complete = 1 OR cl_requests.is_complete = 2)");
+              WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1 AND (cl_requests.is_complete = 0 OR cl_requests.is_complete = 1 OR cl_requests.is_complete = 2) GROUP BY cl_requests.cl_req_id");
 
                 if ($clearance->num_rows != 1) {
                     //header("Location: clearance-list.php");
@@ -140,7 +144,8 @@
                             }
                         ?>
                         
-                        <button type="button" class="btn btn-info btn-sm mb-2" onclick="printDiv('printArea')">Print</button>
+                        <button type="button" class="btn btn-info btn-sm mb-2" onclick="printDiv('printArea', false)">Print without Detail</button>
+                        <button type="button" class="btn btn-info btn-sm mb-2" onclick="printDiv('printArea', true)">Print with Detail</button>
                         <?php
                             if ($clearance['is_complete'] != 1 && $clearance['allocated_to_finance'] == 0 && empty($clearance['not_completed_steps']) ) {
                                 echo '<button type="button" id="allocate_finance" class="btn btn-success btn-sm mb-2">Allocate to Finance</button>';
@@ -268,17 +273,15 @@
                                         <?php
                                         $query = "SELECT cl_requests_steps.*, branch_departments.bd_name,
                                         (SELECT SUM(amount) as deduction FROM cl_request_step_amunt_items WHERE item_type='1' AND step_id=cl_requests_steps.cl_step_id AND request_id= $cl_id) as deduction,
-                                        (SELECT SUM(amount) as payable FROM cl_request_step_amunt_items WHERE item_type='2' AND step_id=cl_requests_steps.cl_step_id AND request_id= $cl_id) as payable,
-                                        uc.name AS created_by_name,
-                                        ub.name AS checked_by_name,
-                                        ua.name AS approved_by_name
-
+                                        (SELECT SUM(amount) as payable FROM cl_request_step_amunt_items WHERE item_type='2' AND step_id=cl_requests_steps.cl_step_id AND request_id= $cl_id) as payable,  
+                                        uc.name AS created_by_name, cl_requests_steps.prepared_date,
+                                        ub.name AS checked_by_name, cl_requests_steps.checked_date,
+                                        ua.name AS approved_by_name, cl_requests_steps.approved_date
                                         FROM cl_requests_steps 
                                         INNER JOIN branch_departments ON branch_departments.bd_code = cl_requests_steps.bd_code
                                         LEFT JOIN users uc ON uc.user_id = cl_requests_steps.prepared_by
                                         LEFT JOIN users ub ON ub.user_id = cl_requests_steps.checked_by
                                         LEFT JOIN users ua ON ua.user_id = cl_requests_steps.approved_by
-
                                         WHERE cl_requests_steps.request_id = $cl_id AND cl_requests_steps.step!=0 AND cl_requests_steps.is_complete=1
                                         ORDER BY cl_requests_steps.step ASC";
                                         $clearance = $conn->query($query);
@@ -298,7 +301,7 @@
                                                     <table width='100%' id='innerTable' style='border:none;'>
                                                         <tr><td colspan='3' style='font-weight:bold;font-size:14px;'>".$item['bd_name']."</td></tr>
                                                         <tr style='font-size:12px;'><th>Prepared By</th><th>Checked By</th><th>Approved By</th></tr>
-                                                        <tr style='font-size:12px;'><td>".$item['created_by_name']."</td><td>".$item['checked_by_name']."</td><td>".$item['approved_by_name']."</td></tr>
+                                                        <tr style='font-size:12px;'><td>".$item['created_by_name']." (".$item['prepared_date'].")</td><td>".$item['checked_by_name']." (".$item['checked_date'].")</td><td>".$item['approved_by_name']." (".$item['approved_date'].")</td></tr>
                                                     </table>
                                                 </td>
                                                 <td>". number_format($item['deduction'] ? $item['deduction'] : 0, 2) ."</td>
@@ -370,6 +373,60 @@
                                         </tr>
                                     </table>
                                     <p>Document date: <?= $datetime; ?></p>
+
+                                    <?php
+                                    $details_query = "SELECT 
+                                        ai.item_name,
+                                        rsai.item_type,
+                                        rsai.amount,
+                                        rsai.remark,
+                                        bd.bd_name
+                                    FROM cl_request_step_amunt_items rsai
+                                    INNER JOIN cl_amount_items ai ON rsai.cl_amount_item_id = ai.cl_amount_item_id
+                                    INNER JOIN cl_requests_steps crs ON rsai.step_id = crs.cl_step_id
+                                    INNER JOIN branch_departments bd ON crs.bd_code = bd.bd_code
+                                    WHERE rsai.request_id = '$cl_id' AND rsai.item_type IN ('1', '2')
+                                    ORDER BY bd.bd_name ASC, ai.item_name ASC";
+                                    $details_result = $conn->query($details_query);
+
+                                    $payment_details = [];
+                                    if ($details_result && $details_result->num_rows > 0) {
+                                        while ($row = $details_result->fetch_assoc()) {
+                                            $payment_details[$row['bd_name']][] = $row;
+                                        }
+                                    }
+                                    ?>
+                                    
+                                    <?php if (!empty($payment_details)): ?>
+                                    <div id="payment-details-section" style="margin-top: 20px; margin-bottom: 20px;">
+                                        <h4 style="text-align: center; margin-bottom: 10px;">PAYMENT DETAILS</h4>
+                                        <table width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th width="40%">Item Name</th>
+                                                    <th width="20%">Type</th>
+                                                    <th width="20%" style="text-align: right;">Amount (Rs.)</th>
+                                                    <th width="20%">Remark</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($payment_details as $dept_name => $items): ?>
+                                                    <tr style="background-color: #f9f9f9;">
+                                                        <td colspan="4" style="font-weight: bold; padding-left: 10px;"><?= htmlspecialchars($dept_name) ?></td>
+                                                    </tr>
+                                                    <?php foreach ($items as $item): ?>
+                                                        <tr>
+                                                            <td style="padding-left: 15px;"><?= htmlspecialchars($item['item_name']) ?></td>
+                                                            <td><?= $item['item_type'] == '1' ? 'Deduction' : 'Payable' ?></td>
+                                                            <td style="text-align: right;"><?= number_format($item['amount'], 2) ?></td>
+                                                            <td><?= htmlspecialchars($item['remark']) ?></td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
 
                             </div>
@@ -390,7 +447,15 @@
 <div id="customAlertSuccess" class="custom-alert-success"></div>
   <?php require '../../partials/scripts.php'; ?>
   <script>
-        function printDiv(divId) {
+        function printDiv(divId, printDetails = true) {
+            var detailSection = document.getElementById('payment-details-section');
+            if (detailSection) {
+                if (printDetails) {
+                    detailSection.classList.remove('no-print-detail');
+                } else {
+                    detailSection.classList.add('no-print-detail');
+                }
+            }
             var content = document.getElementById(divId).innerHTML;
             var originalContent = document.body.innerHTML;
             

@@ -3,26 +3,26 @@
 <html lang="en">
 
 <?php
-        include "../../back/credential-check.php";
-        if (!checkAccess([1,2,3])) {
-            //header("Location: ../general/dashboard.php");
-            echo "<script>window.location.href = '../general/dashboard.php';</script>";
-            exit;
-        }
-        include "../../back/connection/connection.php";
-        include "../../back/functions.php";
+include "../../back/credential-check.php";
+if (!checkAccess([1, 2, 3])) {
+    //header("Location: ../general/dashboard.php");
+    echo "<script>window.location.href = '../general/dashboard.php';</script>";
+    exit;
+}
+include "../../back/connection/connection.php";
+include "../../back/functions.php";
 
-        $cl_id = null;
-        $prepare_check_approve = null;
-        $cl_step_id = null;
-        $user_level = $_SESSION['ulvl'];
+$cl_id = null;
+$prepare_check_approve = null;
+$cl_step_id = null;
+$user_level = $_SESSION['ulvl'];
 
-        if (isset($_GET['id'])) {
-            if (!empty($_GET['id'])) {
-                $cl_id = base64_decode($_GET['id']);
-                $user_id = $_SESSION['uid'];
+if (isset($_GET['id'])) {
+    if (!empty($_GET['id'])) {
+        $cl_id = base64_decode($_GET['id']);
+        $user_id = $_SESSION['uid'];
 
-                $query = "SELECT cl_requests.resignation_date,
+        $query = "SELECT cl_requests.resignation_date,
                      cl_requests.is_complete, 
                      cl_requests.rejoin_or_not,
                      employees.name_with_initials, 
@@ -84,8 +84,8 @@
               LEFT JOIN uploads ON uploads.request_id = cl_requests.cl_req_id AND uploads.document_type = '1'
               WHERE cl_requests.cl_req_id = '$cl_id' AND cl_requests.status = 1 AND cl_requests.is_complete = 0";
 
-              if ($user_level != 1 && $user_level != 2) {
-                $query .= " AND
+        if ($user_level != 1 && $user_level != 2) {
+            $query .= " AND
                     (
                         (cl_requests_steps.assigned_preparer_user_id != 0 AND cl_requests_steps.prepared_by IS NULL AND cl_requests_steps.assigned_preparer_user_id = $user_id) 
                         OR
@@ -93,296 +93,314 @@
                         OR
                         (cl_requests_steps.assigned_approver_user_id != 0 AND cl_requests_steps.approved_by IS NULL AND cl_requests_steps.assigned_approver_user_id = $user_id)
                     )";
-                }
+        }
 
-                $clearance = $conn->query($query);
+        $clearance = $conn->query($query);
 
-                if ($clearance->num_rows != 1) {
-                    //header("Location: clearance-allocated.php");
-                    echo "<script>window.location.href = 'clearance-allocated.php';</script>";
-                    exit;
-                }   
+        if ($clearance->num_rows != 1) {
+            //header("Location: clearance-allocated.php");
+            echo "<script>window.location.href = 'clearance-allocated.php';</script>";
+            exit;
+        }
 
-                $clearance = $clearance->fetch_assoc();
-                $prepare_check_approve = $clearance['prepare_check_approve'];
+        $clearance = $clearance->fetch_assoc();
+        $prepare_check_approve = $clearance['prepare_check_approve'];
 
-                $referenceDate = !empty($clearance['last_completed_date']) ? $clearance['last_completed_date'] : $clearance['created_date'];
-                //$daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
-                $daysGap = getWeekdaysDiff(date('Y-m-d', strtotime($referenceDate)), date('Y-m-d'));
+        $referenceDate = !empty($clearance['last_completed_date']) ? $clearance['last_completed_date'] : $clearance['created_date'];
+        //$daysGap = (new DateTime($referenceDate))->diff(new DateTime())->days;
+        $daysGap = getWeekdaysDiff(date('Y-m-d', strtotime($referenceDate)), date('Y-m-d'));
 
-                $delay_status = '<span class="gap-2"><span class="status-dot green"></span> </span>';
+        $delay_status = '<span class="gap-2"><span class="status-dot green"></span> </span>';
 
-                if ($clearance['step_complete'] == '2') {
-                    $delay_status = '<span class="gap-2"><span class="status-dot yellow"></span> </span>';
-                }
+        if ($clearance['step_complete'] == '2') {
+            $delay_status = '<span class="gap-2"><span class="status-dot yellow"></span> </span>';
+        }
 
-                if ($daysGap > $clearance['max_dates'] && $clearance['step_complete'] == '2') {
-                    $delay_status = '<span class="gap-2"><span class="status-dot yellow"></span> <span class="status-dot red"></span> '.$daysGap - $clearance['max_dates'].'d </span>';
-                }
+        if ($daysGap > $clearance['max_dates'] && $clearance['step_complete'] == '2') {
+            $delay_status = '<span class="gap-2"><span class="status-dot yellow"></span> <span class="status-dot red"></span> ' . $daysGap - $clearance['max_dates'] . 'd </span>';
+        }
 
-                if ($daysGap <= $clearance['max_dates'] && $clearance['step_complete'] == '2') {
-                    $delay_status = '<span class="gap-2"><span class="status-dot yellow"></span> <span class="status-dot green"></span> </span>';
-                }
+        if ($daysGap <= $clearance['max_dates'] && $clearance['step_complete'] == '2') {
+            $delay_status = '<span class="gap-2"><span class="status-dot yellow"></span> <span class="status-dot green"></span> </span>';
+        }
 
-                if ($daysGap > $clearance['max_dates'] && $clearance['step_complete'] != '2') {
-                    $delay_status = '<span class="gap-2"><span class="status-dot red"></span> '.$daysGap - $clearance['max_dates'].'d </span>';
-                }
+        if ($daysGap > $clearance['max_dates'] && $clearance['step_complete'] != '2') {
+            $delay_status = '<span class="gap-2"><span class="status-dot red"></span> ' . $daysGap - $clearance['max_dates'] . 'd </span>';
+        }
 
 
-                // Progress Bar Calculation
-                    $progressQuery = "SELECT 
+        // Progress Bar Calculation
+        $progressQuery = "SELECT 
                     ROUND((SUM(CASE WHEN is_complete = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*))) AS completion_percentage
                 FROM cl_requests_steps
                 WHERE request_id = ?";
-                $stmtProgress = $conn->prepare($progressQuery);
-                $stmtProgress->bind_param("i", $cl_id);
-                $stmtProgress->execute();
-                $stmtProgress->bind_result($completion_percentage);
-                $stmtProgress->fetch();
-                $stmtProgress->close();
+        $stmtProgress = $conn->prepare($progressQuery);
+        $stmtProgress->bind_param("i", $cl_id);
+        $stmtProgress->execute();
+        $stmtProgress->bind_result($completion_percentage);
+        $stmtProgress->fetch();
+        $stmtProgress->close();
 
-                if ($clearance['is_complete'] == '0' && ($clearance['step_complete'] == '1' && $clearance['step'] == "0")) {
-                    $completion_percentage = 10;
-                }
+        if ($clearance['is_complete'] == '0' && ($clearance['step_complete'] == '1' && $clearance['step'] == "0")) {
+            $completion_percentage = 10;
+        }
 
-                $prog = '<div class="progress">
+        $prog = '<div class="progress">
                         <div class="progress-bar bg-success" role="progressbar" style="width: ' . ($completion_percentage ?: 0) . '%" aria-valuenow="' . ($completion_percentage ?: 0) . '" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>';
-                
-            }
-            else {
-                echo "<script>window.location.href = 'clearance-allocated.php';</script>";
-                    exit;
 
-            }
-        }
-        else {
-            echo "<script>window.location.href = 'clearance-allocated.php';</script>";
-                    exit;
+    } else {
+        echo "<script>window.location.href = 'clearance-allocated.php';</script>";
+        exit;
 
-        }
-        
+    }
+} else {
+    echo "<script>window.location.href = 'clearance-allocated.php';</script>";
+    exit;
+
+}
+
 ?>
 
 <head>
-  <?php require '../../partials/head.php'; ?>
-  <style>
+    <?php require '../../partials/head.php'; ?>
+    <style>
         .status-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
             display: inline-block;
             margin-right: 5px;
-            margin-top:5px;
+            margin-top: 5px;
         }
-        .green { background-color: #28a745; }  /* Active */
-        .yellow { background-color: #ffc107; } /* Idle */
-        .red { background-color: #dc3545; }   /* Busy */
+
+        .green {
+            background-color: #28a745;
+        }
+
+        /* Active */
+        .yellow {
+            background-color: #ffc107;
+        }
+
+        /* Idle */
+        .red {
+            background-color: #dc3545;
+        }
+
+        /* Busy */
     </style>
 </head>
 
 <body>
-  <div class="container-scroller d-flex">
-    <?php require '../../partials/nav-bar.php'; ?>
-    <div class="container-fluid page-body-wrapper">
-      <?php require '../../partials/top-nav.php'; ?>
-      <div class="main-panel">
-        <div class="content-wrapper">
-            
-            <div class="row">
-                <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="card-title"><h4 id="title-name">Clearance Request</h4></p>
-                        <hr id="title-hr">
+    <div class="container-scroller d-flex">
+        <?php require '../../partials/nav-bar.php'; ?>
+        <div class="container-fluid page-body-wrapper">
+            <?php require '../../partials/top-nav.php'; ?>
+            <div class="main-panel">
+                <div class="content-wrapper">
 
-                        <div class="col-md-12 grid-margin stretch-card">
-                        <div class="card">
-                            <div class="card-body">
-                            <h4 class="card-title">Clearance Request ID #<?= $cl_id ?>  <?= $delay_status ?></h4>
-                            <input type="hidden" id="cl_id_for_fetch" value="<?= $cl_id ?>">
-                            <div class="media">
-                                
-                                <div class="media-body">
-                                    <table width="100%" class="table table-bordered">
-                                        <tr>
-                                            <td><b>Employee Name : </b></td>
-                                            <td><?= $clearance['title'].' '.$clearance['name_with_initials'] ?></td>
-                                        
-                                            <td><b>Employee Designation : </b></td>
-                                            <td><?= $clearance['designation'] ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Employee EPF/Code : </b></td>
-                                            <td>
-                                                <?= $clearance['epf_no'] ?>
-                                                <?php 
-                                                    if ($clearance['code']) {
-                                                        echo '<br> '.$clearance['code'];
-                                                    }
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <p class="card-title">
+                                    <h4 id="title-name">Clearance Request</h4>
+                                    </p>
+                                    <hr id="title-hr">
 
-                                                    // select and display request_related_user_codes if exists 
-                                                    $related_users_sql = "SELECT emp_code, emp_name, nic FROM request_related_user_codes WHERE request_id = ?";
-                                                    $related_users_stmt = $conn->prepare($related_users_sql);
-                                                    $related_users_stmt->bind_param("i", $cl_id);
-                                                    $related_users_stmt->execute();
-                                                    $related_users_result = $related_users_stmt->get_result();
+                                    <div class="col-md-12 grid-margin stretch-card">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h4 class="card-title">Clearance Request ID #<?= $cl_id ?>
+                                                    <?= $delay_status ?></h4>
+                                                <input type="hidden" id="cl_id_for_fetch" value="<?= $cl_id ?>">
+                                                <div class="media">
 
-                                                    if ($related_users_result->num_rows > 0) {
-                                                        echo "<br>";
-                                                        while ($row = $related_users_result->fetch_assoc()) {
-                                                            echo  $row['emp_code'] . "<br>";
-                                                        }
-                                                    }
-                                                ?>
-                                            </td>
-                            
-                                            <td><b>Employee NIC : </b></td>
-                                            <td><?= $clearance['nic'] ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Employee Branch/Department : </b></td>
-                                            <td><?= $clearance['bd_name'] ?></td>
-                                        
-                                            <td><b>Employee Appointment Date : </b></td>
-                                            <td><?= $clearance['appointment_date'] ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Employee Resignation Date : </b></td>
-                                            <td><?= $clearance['resignation_date'] ?></td>
-                                            <td><b>Employee Re-Join Status : </b></td>
-                                            <td><?php if (empty($clearance['rejoin_or_not'])) {
-                                                echo 'No';
-                                            } else {
-                                                echo 'Yes';
-                                            } ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Requested Date : </b></td>
-                                            <td><?= $clearance['request_date'] ?></td>
-                                            <td><b>Requested By : </b></td>
-                                            <td><?= $clearance['request_by'] ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Progress : </b></td>
-                                            <td><?= $prog ?></td>
-                                            <td><b>Current Department : </b></td>
-                                            <td><?= $clearance['department'] ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Customer Visit Report : </b></td>
-                                            <td>
-                                            <?php
-                                                // Search for the files in the database
-                                                $queryDoc = "SELECT * FROM uploads WHERE request_id = '$cl_id' AND document_type = '2'";
-                                                $resultDoc = $conn->query($queryDoc);
+                                                    <div class="media-body">
+                                                        <table width="100%" class="table table-bordered">
+                                                            <tr>
+                                                                <td><b>Employee Name : </b></td>
+                                                                <td><?= $clearance['title'] . ' ' . $clearance['name_with_initials'] ?>
+                                                                </td>
 
-                                                if ($resultDoc->num_rows > 0) {
-                                                    $i=1;
-                                                    while ($clearanceDoc = $resultDoc->fetch_assoc()) {
-                                                        $url = $clearanceDoc['location'];
-                                                        $fileExtension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+                                                                <td><b>Employee Designation : </b></td>
+                                                                <td><?= $clearance['designation'] ?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><b>Employee EPF/Code : </b></td>
+                                                                <td>
+                                                                    <?= $clearance['epf_no'] ?>
+                                                                    <?php
+                                                                    if ($clearance['code']) {
+                                                                        echo '<br> ' . $clearance['code'];
+                                                                    }
 
-                                                        echo '<div style="margin-bottom: 20px;">';
+                                                                    // select and display request_related_user_codes if exists 
+                                                                    $related_users_sql = "SELECT emp_code, emp_name, nic FROM request_related_user_codes WHERE request_id = ?";
+                                                                    $related_users_stmt = $conn->prepare($related_users_sql);
+                                                                    $related_users_stmt->bind_param("i", $cl_id);
+                                                                    $related_users_stmt->execute();
+                                                                    $related_users_result = $related_users_stmt->get_result();
 
-                                                        if (in_array($fileExtension, ['jpg', 'jpeg', 'png'])) {
-                                                            // Display Image
-                                                            echo '<div style="max-width: 500px; max-height: 600px; overflow: hidden;">';
-                                                            echo '<img src="' . htmlspecialchars($url) . '" style="width: 100%; height: auto; display: block; border: 1px solid #ddd; border-radius: 8px; padding: 5px;">';
-                                                            echo '</div>';
-                                                        } elseif ($fileExtension === 'pdf') {
-                                                            // Display PDF Link
-                                                            echo '<a href="' . htmlspecialchars($url) . '" target="_blank" style="font-weight: bold; color: blue; text-decoration: underline;">'.$i.'. View Document (PDF)</a>';
-                                                            $i++;
-                                                        } else {
-                                                            // Unsupported Format
-                                                            echo '<p>Unsupported file format.</p>';
-                                                        }
+                                                                    if ($related_users_result->num_rows > 0) {
+                                                                        echo "<br>";
+                                                                        while ($row = $related_users_result->fetch_assoc()) {
+                                                                            echo $row['emp_code'] . "<br>";
+                                                                        }
+                                                                    }
+                                                                    ?>
+                                                                </td>
 
-                                                        echo '</div>';
-                                                    }
-                                                } else {
-                                                    echo '<div><p>No file uploaded.</p></div>';
-                                                }
-                                            ?>
-                                            </td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                    </table>
-                                    
+                                                                <td><b>Employee NIC : </b></td>
+                                                                <td><?= $clearance['nic'] ?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><b>Employee Branch/Department : </b></td>
+                                                                <td><?= $clearance['bd_name'] ?></td>
+
+                                                                <td><b>Employee Appointment Date : </b></td>
+                                                                <td><?= $clearance['appointment_date'] ?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><b>Employee Resignation Date : </b></td>
+                                                                <td><?= $clearance['resignation_date'] ?></td>
+                                                                <td><b>Employee Re-Join Status : </b></td>
+                                                                <td><?php if (empty($clearance['rejoin_or_not'])) {
+                                                                    echo 'No';
+                                                                } else {
+                                                                    echo 'Yes';
+                                                                } ?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><b>Requested Date : </b></td>
+                                                                <td><?= $clearance['request_date'] ?></td>
+                                                                <td><b>Requested By : </b></td>
+                                                                <td><?= $clearance['request_by'] ?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><b>Progress : </b></td>
+                                                                <td><?= $prog ?></td>
+                                                                <td><b>Current Department : </b></td>
+                                                                <td><?= $clearance['department'] ?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><b>Customer Visit Report : </b></td>
+                                                                <td>
+                                                                    <?php
+                                                                    // Search for the files in the database
+                                                                    $queryDoc = "SELECT * FROM uploads WHERE request_id = '$cl_id' AND document_type = '2'";
+                                                                    $resultDoc = $conn->query($queryDoc);
+
+                                                                    if ($resultDoc->num_rows > 0) {
+                                                                        $i = 1;
+                                                                        while ($clearanceDoc = $resultDoc->fetch_assoc()) {
+                                                                            $url = $clearanceDoc['location'];
+                                                                            $fileExtension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+
+                                                                            echo '<div style="margin-bottom: 20px;">';
+
+                                                                            if (in_array($fileExtension, ['jpg', 'jpeg', 'png'])) {
+                                                                                // Display Image
+                                                                                echo '<div style="max-width: 500px; max-height: 600px; overflow: hidden;">';
+                                                                                echo '<img src="' . htmlspecialchars($url) . '" style="width: 100%; height: auto; display: block; border: 1px solid #ddd; border-radius: 8px; padding: 5px;">';
+                                                                                echo '</div>';
+                                                                            } elseif ($fileExtension === 'pdf') {
+                                                                                // Display PDF Link
+                                                                                echo '<a href="' . htmlspecialchars($url) . '" target="_blank" style="font-weight: bold; color: blue; text-decoration: underline;">' . $i . '. View Document (PDF)</a>';
+                                                                                $i++;
+                                                                            } else {
+                                                                                // Unsupported Format
+                                                                                echo '<p>Unsupported file format.</p>';
+                                                                            }
+
+                                                                            echo '</div>';
+                                                                        }
+                                                                    } else {
+                                                                        echo '<div><p>No file uploaded.</p></div>';
+                                                                    }
+                                                                    ?>
+                                                                </td>
+                                                                <td></td>
+                                                                <td></td>
+                                                            </tr>
+                                                        </table>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
-
-                            </div>
                             </div>
                         </div>
-                        </div>
-
                     </div>
-                </div>
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="container mt-4">
-                <form action="" method="post">
+                    <div class="row">
+                        <div class="container mt-4">
+                            <form action="" method="post">
 
-                    <?php
-                    $d_code = $clearance['bd_code'];
-                    $b_or_d = $conn->query("SELECT is_branch FROM branch_departments WHERE bd_code = '$d_code'")->fetch_assoc();
-                    $cl_step_id = $clearance['cl_step_id'];
+                                <?php
+                                $d_code = $clearance['bd_code'];
+                                $b_or_d = $conn->query("SELECT is_branch FROM branch_departments WHERE bd_code = '$d_code'")->fetch_assoc();
+                                $cl_step_id = $clearance['cl_step_id'];
 
-                    if ($b_or_d['is_branch'] == 1) {
-                    echo '<div class="card mt-2"><div class="card-body"><div class="row">
+                                if ($b_or_d['is_branch'] == 1) {
+                                    echo '<div class="card mt-2"><div class="card-body"><div class="row">
                             <label for="customerVisitReport" class="col-sm-3 col-form-label">Customer Visit Report *</label>
                             <div class="col-sm-9">
                                 <input type="file" class="form-control mb-2" id="customervisitreport" name="customervisitreport" accept=".pdf, .jpg, .jpeg, .png" required>';
 
-                                
 
-                            echo '</div>
+
+                                    echo '</div>
                          </div></div></div>';
-                    }
+                                }
 
-                    function getItems($conn, $d_code) {
-                        global $b_or_d;
-                        if ($b_or_d['is_branch'] == 1) {
-                            return $conn->query("SELECT * FROM cl_amount_items WHERE bd_id = '9999999' AND status = 1");
-                        } else {
-                            return $conn->query("SELECT * FROM cl_amount_items WHERE bd_id = 
+                                function getItems($conn, $d_code)
+                                {
+                                    global $b_or_d;
+                                    if ($b_or_d['is_branch'] == 1) {
+                                        return $conn->query("SELECT * FROM cl_amount_items WHERE bd_id = '9999999' AND status = 1");
+                                    } else {
+                                        return $conn->query("SELECT * FROM cl_amount_items WHERE bd_id = 
                             (SELECT bd_id FROM branch_departments WHERE bd_code ='$d_code') AND status = 1");
-                        }
-                    }
+                                    }
+                                }
 
-                    function getSavedItems($conn, $cl_step_id) {
-                        $saved = [];
-                        $result = $conn->query("SELECT cl_amount_item_id, amount, quantity, issued_date, remark,item_type,return_status,document_path FROM cl_request_step_amunt_items 
+                                function getSavedItems($conn, $cl_step_id)
+                                {
+                                    $saved = [];
+                                    $result = $conn->query("SELECT cl_amount_item_id, amount, quantity, issued_date, remark,item_type,return_status,document_path FROM cl_request_step_amunt_items 
                                                 WHERE step_id = '$cl_step_id'");
-                        while ($row = $result->fetch_assoc()) {
-                            $saved[$row['cl_amount_item_id']] = $row;
-                        }
-                        return $saved;
-                    }
+                                    while ($row = $result->fetch_assoc()) {
+                                        $saved[$row['cl_amount_item_id']] = $row;
+                                    }
+                                    return $saved;
+                                }
 
-                    function generateTable($conn, $d_code, $cl_step_id) {
-                        global $prepare_check_approve;
-                        $dis = '';
-                        
-                        if ($prepare_check_approve != '0' && $prepare_check_approve != '1') {
-                            $dis = 'disabled';
-                        }
-                        $items = getItems($conn, $d_code);
-                        $savedItems = getSavedItems($conn,$cl_step_id);
+                                function generateTable($conn, $d_code, $cl_step_id)
+                                {
+                                    global $prepare_check_approve;
+                                    $dis = '';
 
-                        if ($items->num_rows > 0) {
-                            echo "<div class='card mt-2'>";
-                            echo "<div class='card-header' role='button' data-bs-toggle='collapse' data-bs-target='#MonetaryCard'>";
-                            echo "<h5 class='mb-0'>Monetary Items <i class='mdi mdi-chevron-down'></i></h5>";
-                            echo "</div>";
-                            echo "<div id='MonetaryCard' class='collapse'>";
-                            echo "<div class='card-body'>";
-                            echo "<table class='table table-bordered'>";
-                            echo "<thead><tr>
+                                    if ($prepare_check_approve != '0' && $prepare_check_approve != '1') {
+                                        $dis = 'disabled';
+                                    }
+                                    $items = getItems($conn, $d_code);
+                                    $savedItems = getSavedItems($conn, $cl_step_id);
+
+                                    if ($items->num_rows > 0) {
+                                        echo "<div class='card mt-2'>";
+                                        echo "<div class='card-header' role='button' data-bs-toggle='collapse' data-bs-target='#MonetaryCard'>";
+                                        echo "<h5 class='mb-0'>Monetary Items <i class='mdi mdi-chevron-down'></i></h5>";
+                                        echo "</div>";
+                                        echo "<div id='MonetaryCard' class='collapse'>";
+                                        echo "<div class='card-body'>";
+                                        echo "<table class='table table-bordered'>";
+                                        echo "<thead><tr>
                                     <th>#</th>
                                     <th>Item Name</th>
                                     <th style='min-width:100px'>Status *</th>
@@ -393,24 +411,24 @@
                                     <th>Remarks</th>
                                     <th>Attachments</th>
                                 </tr></thead>";
-                            echo "<tbody>";
+                                        echo "<tbody>";
 
-                            while ($item = $items->fetch_assoc()) {
-                                $itemId = $item['cl_amount_item_id'];
-                                $checked = isset($savedItems[$itemId]) ? "checked" : "";
-                                $quantity = isset($savedItems[$itemId]) ? $savedItems[$itemId]['quantity'] : "1";
-                                $issuedDate = isset($savedItems[$itemId]) ? $savedItems[$itemId]['issued_date'] : "";
-                                $amount = isset($savedItems[$itemId]) ? $savedItems[$itemId]['amount'] : "0.00";
-                                $remarks = isset($savedItems[$itemId]) ? $savedItems[$itemId]['remark'] : "";
-                                $item_type = isset($savedItems[$itemId]) ? $savedItems[$itemId]['item_type'] : "";
-                                $return_status = isset($savedItems[$itemId]) ? $savedItems[$itemId]['return_status'] : "";
-                                $document_path = isset($savedItems[$itemId]) ? $savedItems[$itemId]['document_path'] : "";
-                                
-                                echo "<tr>";
-                                echo "<td><input type='checkbox' class='MonetaryCard-check' name='MonetaryCard_check[]' value='{$itemId}' $checked $dis></td>";
-                                echo "<td>{$item['item_name']}</td>";
+                                        while ($item = $items->fetch_assoc()) {
+                                            $itemId = $item['cl_amount_item_id'];
+                                            $checked = isset($savedItems[$itemId]) ? "checked" : "";
+                                            $quantity = isset($savedItems[$itemId]) ? $savedItems[$itemId]['quantity'] : "1";
+                                            $issuedDate = isset($savedItems[$itemId]) ? $savedItems[$itemId]['issued_date'] : "";
+                                            $amount = isset($savedItems[$itemId]) ? $savedItems[$itemId]['amount'] : "0.00";
+                                            $remarks = isset($savedItems[$itemId]) ? $savedItems[$itemId]['remark'] : "";
+                                            $item_type = isset($savedItems[$itemId]) ? $savedItems[$itemId]['item_type'] : "";
+                                            $return_status = isset($savedItems[$itemId]) ? $savedItems[$itemId]['return_status'] : "";
+                                            $document_path = isset($savedItems[$itemId]) ? $savedItems[$itemId]['document_path'] : "";
 
-                                echo "<td>
+                                            echo "<tr>";
+                                            echo "<td><input type='checkbox' class='MonetaryCard-check' name='MonetaryCard_check[]' value='{$itemId}' $checked $dis></td>";
+                                            echo "<td>{$item['item_name']}</td>";
+
+                                            echo "<td>
                                         <select class='form-control mt-2' name='MonetaryCard_status[{$itemId}]'>
                                             <option value=''>Select</option>
                                             <option value='1' " . ($return_status == '1' ? "selected" : "") . ">Returned</option>
@@ -419,8 +437,8 @@
                                         </select>
                                     </td>";
 
-                                
-                                echo "<td>
+
+                                            echo "<td>
                                             <select class='form-control mt-2 MonetaryCard-action' name='MonetaryCard_action[{$itemId}]'>
                                                 <option value=''>Select</option>
                                                 <option value='1' " . ($item_type == '1' ? "selected" : "") . ">Deduct</option>
@@ -429,68 +447,71 @@
                                             </select>
                                      </td>";
 
-                                echo "<td><input type='number' class='form-control MonetaryCard-quantity' name='MonetaryCard_quantity[{$itemId}]' min='1' step='1' value='$quantity'></td>";
-                                echo "<td><input type='number' class='form-control MonetaryCard-amount' name='MonetaryCard_amount[{$itemId}]' min='0' step='0.01' value='$amount' required></td>";
-                                echo "<td><input type='date' class='form-control MonetaryCard-issued-date' name='MonetaryCard_issued_date[{$itemId}]' value='$issuedDate'></td>";
-                                echo "<td>
+                                            echo "<td><input type='number' class='form-control MonetaryCard-quantity' name='MonetaryCard_quantity[{$itemId}]' min='1' step='1' value='$quantity'></td>";
+                                            echo "<td><input type='number' class='form-control MonetaryCard-amount' name='MonetaryCard_amount[{$itemId}]' min='0' step='0.01' value='$amount' required></td>";
+                                            echo "<td><input type='date' class='form-control MonetaryCard-issued-date' name='MonetaryCard_issued_date[{$itemId}]' value='$issuedDate'></td>";
+                                            echo "<td>
                                         <input type='text' class='form-control' name='MonetaryCard_note[{$itemId}]' value='$remarks'>
                                     </td>";
-                                echo "<td>
+                                            echo "<td>
                                         <input type='file' class='form-control'  name='attachments[{$itemId}]' accept='.pdf, .jpg, .jpeg, .png' >";
-                                if (!empty($document_path)) {
-                                    echo "<a href='".$document_path."' target='_blank'><button type='button' class='btn btn-primary btn-sm mt-2'>view</button></a>";
+                                            if (!empty($document_path)) {
+                                                echo "<a href='" . $document_path . "' target='_blank'><button type='button' class='btn btn-primary btn-sm mt-2'>view</button></a>";
+                                            }
+                                            echo "</td>";
+                                            echo "</tr>";
+                                        }
+
+                                        echo "</tbody>";
+                                        echo "</table>";
+                                        echo "</div></div></div>";
+                                    }
                                 }
-                                echo "</td>";
-                                echo "</tr>";
-                            }
 
-                            echo "</tbody>";
-                            echo "</table>";
-                            echo "</div></div></div>";
-                        }
-                    }
+                                // Generate tables with existing records
+                                generateTable($conn, $d_code, $cl_step_id);
 
-                    // Generate tables with existing records
-                    generateTable($conn, $d_code, $cl_step_id);
-
-                    function getPhysicalItems($conn, $d_code) {
-                        global $b_or_d;
-                        if ($b_or_d['is_branch'] == 1) {
-                            return $conn->query("SELECT * FROM cl_physical_items WHERE bd_id = '9999999' AND status = 1");
-                        } else {
-                            return $conn->query("SELECT * FROM cl_physical_items WHERE bd_id = 
+                                function getPhysicalItems($conn, $d_code)
+                                {
+                                    global $b_or_d;
+                                    if ($b_or_d['is_branch'] == 1) {
+                                        return $conn->query("SELECT * FROM cl_physical_items WHERE bd_id = '9999999' AND status = 1");
+                                    } else {
+                                        return $conn->query("SELECT * FROM cl_physical_items WHERE bd_id = 
                             (SELECT bd_id FROM branch_departments WHERE bd_code ='$d_code') AND status = 1");
-                        }
-                    }
+                                    }
+                                }
 
-                    function getSavedPhysicalItems($conn, $cl_step_id) {
-                        $saved = [];
-                        $result = $conn->query("SELECT cl_physical_item_id, quantity, remark, item_type, document_path FROM cl_request_step_physical_items 
+                                function getSavedPhysicalItems($conn, $cl_step_id)
+                                {
+                                    $saved = [];
+                                    $result = $conn->query("SELECT cl_physical_item_id, quantity, remark, item_type, document_path FROM cl_request_step_physical_items 
                                                 WHERE step_id = '$cl_step_id'");
-                        while ($row = $result->fetch_assoc()) {
-                            $saved[$row['cl_physical_item_id']] = $row;
-                        }
-                        return $saved;
-                    }
+                                    while ($row = $result->fetch_assoc()) {
+                                        $saved[$row['cl_physical_item_id']] = $row;
+                                    }
+                                    return $saved;
+                                }
 
-                    function generatePhysicalTable($conn, $d_code, $cl_step_id) {
-                        global $prepare_check_approve;
-                        $dis = '';
-                        if ($prepare_check_approve != '0' && $prepare_check_approve != '1') {
-                            $dis = 'disabled';
-                        }
-                        $items = getPhysicalItems($conn, $d_code);
-                        $savedItems = getSavedPhysicalItems($conn, $cl_step_id);
+                                function generatePhysicalTable($conn, $d_code, $cl_step_id)
+                                {
+                                    global $prepare_check_approve;
+                                    $dis = '';
+                                    if ($prepare_check_approve != '0' && $prepare_check_approve != '1') {
+                                        $dis = 'disabled';
+                                    }
+                                    $items = getPhysicalItems($conn, $d_code);
+                                    $savedItems = getSavedPhysicalItems($conn, $cl_step_id);
 
-                        if ($items->num_rows > 0) {
-                            echo "<div class='card mt-2'>";
-                            echo "<div class='card-header' role='button' data-bs-toggle='collapse' data-bs-target='#IssueCard'>";
-                            echo "<h5 class='mb-0'>Non Monetary Items <i class='mdi mdi-chevron-down'></i></h5>";
-                            echo "</div>";
-                            echo "<div id='IssueCard' class='collapse'>";
-                            echo "<div class='card-body'>";
-                            echo "<table class='table table-bordered'>";
-                            echo "<thead><tr>
+                                    if ($items->num_rows > 0) {
+                                        echo "<div class='card mt-2'>";
+                                        echo "<div class='card-header' role='button' data-bs-toggle='collapse' data-bs-target='#IssueCard'>";
+                                        echo "<h5 class='mb-0'>Non Monetary Items <i class='mdi mdi-chevron-down'></i></h5>";
+                                        echo "</div>";
+                                        echo "<div id='IssueCard' class='collapse'>";
+                                        echo "<div class='card-body'>";
+                                        echo "<table class='table table-bordered'>";
+                                        echo "<thead><tr>
                                     <th>#</th>
                                     <th>Item Name</th>
                                     <th>Quantity *</th>
@@ -498,21 +519,21 @@
                                     <th>Remarks</th>
                                     <th>Attachments</th>
                                 </tr></thead>";
-                            echo "<tbody>";
+                                        echo "<tbody>";
 
-                            while ($item = $items->fetch_assoc()) {
-                                $itemId = $item['cl_physical_item_id'];
-                                $checked = isset($savedItems[$itemId]) ? "checked" : "";
-                                $quantity = isset($savedItems[$itemId]) ? $savedItems[$itemId]['quantity'] : "1";
-                                $remarks = isset($savedItems[$itemId]) ? $savedItems[$itemId]['remark'] : "";
-                                $item_type = isset($savedItems[$itemId]) ? $savedItems[$itemId]['item_type'] : "";
-                                $document_path = isset($savedItems[$itemId]) ? $savedItems[$itemId]['document_path'] : "";
+                                        while ($item = $items->fetch_assoc()) {
+                                            $itemId = $item['cl_physical_item_id'];
+                                            $checked = isset($savedItems[$itemId]) ? "checked" : "";
+                                            $quantity = isset($savedItems[$itemId]) ? $savedItems[$itemId]['quantity'] : "1";
+                                            $remarks = isset($savedItems[$itemId]) ? $savedItems[$itemId]['remark'] : "";
+                                            $item_type = isset($savedItems[$itemId]) ? $savedItems[$itemId]['item_type'] : "";
+                                            $document_path = isset($savedItems[$itemId]) ? $savedItems[$itemId]['document_path'] : "";
 
-                                echo "<tr>";
-                                echo "<td><input type='checkbox' class='issue-check' name='issue_check[]' value='{$itemId}' $checked $dis></td>";
-                                echo "<td>{$item['item_name']}</td>";
-                                echo "<td><input type='number' class='form-control issue-quantity' name='issue_quantity[{$itemId}]' min='1' step='1' value='$quantity'></td>";
-                                echo "<td>
+                                            echo "<tr>";
+                                            echo "<td><input type='checkbox' class='issue-check' name='issue_check[]' value='{$itemId}' $checked $dis></td>";
+                                            echo "<td>{$item['item_name']}</td>";
+                                            echo "<td><input type='number' class='form-control issue-quantity' name='issue_quantity[{$itemId}]' min='1' step='1' value='$quantity'></td>";
+                                            echo "<td>
                                             <select class='form-control mt-2' name='issue_action[{$itemId}]'>
                                                 <option value=''>Select</option>
                                                 <option value='1' " . ($item_type == '1' ? "selected" : "") . ">Issued</option>
@@ -521,117 +542,126 @@
                                                 <option value='4' " . ($item_type == '4' ? "selected" : "") . ">Not Returned</option>
                                             </select>
                                      </td>";
-                                echo "<td>
+                                            echo "<td>
                                 <input type='text' class='form-control' name='issue_note[{$itemId}]' value='$remarks'>
                                 </td>
                                 <td>
                                         <input type='file' class='form-control' name='physical_attachments[{$itemId}]' accept='.pdf, .jpg, .jpeg, .png' >";
-                                if (!empty($document_path)) {
-                                    echo "<a href='".$document_path."' target='_blank'><button type='button' class='btn btn-primary btn-sm mt-2'>view</button></a>";
-                                }
-                                echo "</td>
+                                            if (!empty($document_path)) {
+                                                echo "<a href='" . $document_path . "' target='_blank'><button type='button' class='btn btn-primary btn-sm mt-2'>view</button></a>";
+                                            }
+                                            echo "</td>
                                 ";
-                                echo "</tr>";
-                            }
+                                            echo "</tr>";
+                                        }
 
-                            echo "</tbody>";
-                            echo "</table>";
-                            echo "</div></div></div>";
-                        }
-                    }
-
-                    // Generate tables with existing records
-                     generatePhysicalTable($conn, $d_code, $cl_step_id);
-                    ?>
-
-                    <div class="mt-4">
-                        <h5>Amount Totals</h5>
-                        <div class="mt-2"> <b> <i class="mdi mdi-cash"></i> Deduction Total :  </b>Rs. <span id="deduct-total">0.00</span></div>
-                        <div class="mt-2"> <b> <i class="mdi mdi-cash"></i> Payable Total :  </b>Rs. <span id="payable-total">0.00</span></div>
-                    </div>
-
-                    <div class="form-group mt-3">
-                        <label for="note">Note</label>
-                        <textarea class="form-control" id="note" name="note" rows="3" placeholder="Please write note here.."><?php
-                            $notes = [];
-                            if (!empty($clearance['pending_note'])) {
-                                $notes[] = '* ' . trim($clearance['pending_note']);
-                            }
-                            if (!empty($clearance['complete_note'])) {
-                                $notes[] = '* ' . trim($clearance['complete_note']);
-                            }
-                            echo implode("\n", $notes);
-                        ?></textarea>
-
-                    </div>
-
-                    <input type="hidden" name="cl_id" id="cl_id" value="<?= $cl_id ?>">
-                    <input type="hidden" name="cl_step_id" id="cl_step_id" value="<?= $cl_step_id ?>">
-                    
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <?php
-                                $disabled = '';
-                                if($user_level != '1' && $user_level!='2' && $clearance['assigned_preparer_user_id'] != $user_id && $clearance['assigned_checker_user_id'] != $user_id && $clearance['assigned_approver_user_id'] != $user_id) {
-                                    $disabled = 'disabled';
-                                }
-                                if ($user_level != '1' && $user_level!='2' && $clearance['prepare_check_approve']=='1' && 
-                                (empty($clearance['assigned_checker_user_id']) && $clearance['assigned_approver_user_id'] != $user_id)) {
-                                    $disabled = 'disabled';
-                                }
-                                if ($user_level != '1' && $user_level!='2' && $clearance['prepare_check_approve']=='2' && ($clearance['assigned_approver_user_id'] != $user_id)) {
-                                    $disabled = 'disabled';
-                                }
-                                if ($user_level != '1' && $user_level!='2' && $clearance['prepare_check_approve']=='3') {
-                                    $disabled = 'disabled';
-                                }
-
-                                if ($clearance['prepare_check_approve']=='0') {
-                                    if ($user_level == '1' || $user_level =='2' ||
-                                        (
-                                            $clearance['assigned_preparer_user_id'] == $user_id || 
-                                            (empty($clearance['assigned_preparer_user_id']) && $clearance['assigned_checker_user_id'] == $user_id) ||
-                                            ( empty($clearance['assigned_preparer_user_id']) && empty($clearance['assigned_checker_user_id']) && $clearance['assigned_approver_user_id'] == $user_id)
-                                        )
-                                    ) {
-                                        echo '<button type="button" name="submit" id="submit" class="btn btn-success btn-sm me-1" '. $disabled .' >Submit</button>';
-                                    }
-                                }
-                                if ($clearance['prepare_check_approve']=='1') {
-                                    if ($user_level == '1' || $user_level =='2' || $clearance['assigned_checker_user_id'] == $user_id || 
-                                    (empty($clearance['assigned_checker_user_id']) && $clearance['assigned_approver_user_id'] == $user_id)) {
-                                        echo '<button type="button" name="submit" id="submit" class="btn btn-success btn-sm me-1" '. $disabled .' >Submit</button>';
-                                        echo '<button type="button" name="che" id="che" class="btn btn-success btn-sm me-1" '. $disabled .' >Checked</button>';
-                                    }
-                                }
-                                if ($clearance['prepare_check_approve']=='2') {
-                                    if ($user_level == '1' || $user_level =='2' || $clearance['assigned_approver_user_id'] == $user_id) {
-                                        echo '<button type="button" name="approve" id="approve" class="btn btn-success btn-sm me-1" '. $disabled .' >Approve</button>';
-                                        echo '<button type="button" name="reject" id="reject" class="btn btn-danger btn-sm me-1" '. $disabled .' >Revers to Checking</button>';
-                                        echo '<button type="button" id="pending" class="btn btn-warning btn-sm" '. $disabled .' >Pending</button>';
+                                        echo "</tbody>";
+                                        echo "</table>";
+                                        echo "</div></div></div>";
                                     }
                                 }
 
-                                if ($clearance['prepare_check_approve']=='1' || $clearance['prepare_check_approve']=='0') {
-                                    echo '<button type="button" id="pending" class="btn btn-warning btn-sm" '. $disabled .' >Pending</button>';
-                                }
-                            ?>
-                            
+                                // Generate tables with existing records
+                                generatePhysicalTable($conn, $d_code, $cl_step_id);
+                                ?>
+
+                                <div class="mt-4">
+                                    <h5>Amount Totals</h5>
+                                    <div class="mt-2"> <b> <i class="mdi mdi-cash"></i> Deduction Total : </b>Rs. <span
+                                            id="deduct-total">0.00</span></div>
+                                    <div class="mt-2"> <b> <i class="mdi mdi-cash"></i> Payable Total : </b>Rs. <span
+                                            id="payable-total">0.00</span></div>
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="note">Note</label>
+                                    <textarea class="form-control" id="note" name="note" rows="3"
+                                        placeholder="Please write note here.."><?php
+                                        $notes = [];
+                                        if (!empty($clearance['pending_note'])) {
+                                            $notes[] = '* ' . trim($clearance['pending_note']);
+                                        }
+                                        if (!empty($clearance['complete_note'])) {
+                                            $notes[] = '* ' . trim($clearance['complete_note']);
+                                        }
+                                        echo implode("\n", $notes);
+                                        ?></textarea>
+
+                                </div>
+
+                                <input type="hidden" name="cl_id" id="cl_id" value="<?= $cl_id ?>">
+                                <input type="hidden" name="cl_step_id" id="cl_step_id" value="<?= $cl_step_id ?>">
+
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <?php
+                                        $disabled = '';
+                                        if ($user_level != '1' && $user_level != '2' && $clearance['assigned_preparer_user_id'] != $user_id && $clearance['assigned_checker_user_id'] != $user_id && $clearance['assigned_approver_user_id'] != $user_id) {
+                                            $disabled = 'disabled';
+                                        }
+                                        if (
+                                            $user_level != '1' && $user_level != '2' && $clearance['prepare_check_approve'] == '1' &&
+                                            (empty($clearance['assigned_checker_user_id']) && $clearance['assigned_approver_user_id'] != $user_id)
+                                        ) {
+                                            $disabled = 'disabled';
+                                        }
+                                        if ($user_level != '1' && $user_level != '2' && $clearance['prepare_check_approve'] == '2' && ($clearance['assigned_approver_user_id'] != $user_id)) {
+                                            $disabled = 'disabled';
+                                        }
+                                        if ($user_level != '1' && $user_level != '2' && $clearance['prepare_check_approve'] == '3') {
+                                            $disabled = 'disabled';
+                                        }
+
+                                        if ($clearance['prepare_check_approve'] == '0') {
+                                            if (
+                                                $user_level == '1' || $user_level == '2' ||
+                                                (
+                                                    $clearance['assigned_preparer_user_id'] == $user_id ||
+                                                    (empty($clearance['assigned_preparer_user_id']) && $clearance['assigned_checker_user_id'] == $user_id) ||
+                                                    (empty($clearance['assigned_preparer_user_id']) && empty($clearance['assigned_checker_user_id']) && $clearance['assigned_approver_user_id'] == $user_id)
+                                                )
+                                            ) {
+                                                echo '<button type="button" name="submit" id="submit" class="btn btn-success btn-sm me-1" ' . $disabled . ' >Submit</button>';
+                                            }
+                                        }
+                                        if ($clearance['prepare_check_approve'] == '1') {
+                                            if (
+                                                $user_level == '1' || $user_level == '2' || $clearance['assigned_checker_user_id'] == $user_id ||
+                                                (empty($clearance['assigned_checker_user_id']) && $clearance['assigned_approver_user_id'] == $user_id)
+                                            ) {
+                                                echo '<button type="button" name="reject" id="reject-1" class="btn btn-danger btn-sm me-1" ' . $disabled . ' >Revers to Prepare</button>';
+                                                echo '<button type="button" name="submit" id="submit" class="btn btn-success btn-sm me-1" ' . $disabled . ' >Submit</button>';
+                                                echo '<button type="button" name="che" id="che" class="btn btn-success btn-sm me-1" ' . $disabled . ' >Checked</button>';
+                                            }
+                                        }
+                                        if ($clearance['prepare_check_approve'] == '2') {
+                                            if ($user_level == '1' || $user_level == '2' || $clearance['assigned_approver_user_id'] == $user_id) {
+                                                echo '<button type="button" name="approve" id="approve" class="btn btn-success btn-sm me-1" ' . $disabled . ' >Approve</button>';
+                                                echo '<button type="button" name="reject" id="reject" class="btn btn-danger btn-sm me-1" ' . $disabled . ' >Revers to Checking</button>';
+                                                echo '<button type="button" id="pending" class="btn btn-warning btn-sm" ' . $disabled . ' >Pending</button>';
+                                            }
+                                        }
+
+                                        if ($clearance['prepare_check_approve'] == '1' || $clearance['prepare_check_approve'] == '0') {
+                                            echo '<button type="button" id="pending" class="btn btn-warning btn-sm" ' . $disabled . ' >Pending</button>';
+                                        }
+                                        ?>
+
+                                    </div>
+                                    <a href="clearance-allocated.php" class="btn btn-info btn-sm">Back</a>
+                                </div>
+
+                            </form>
                         </div>
-                        <a href="clearance-allocated.php" class="btn btn-info btn-sm">Back</a>
                     </div>
 
-                </form>
                 </div>
             </div>
-
         </div>
-      </div>
     </div>
-  </div>
-  <div id="customAlert" class="custom-alert"></div>
-<div id="customAlertSuccess" class="custom-alert-success"></div>
-  <?php require '../../partials/scripts.php'; ?>
+    <div id="customAlert" class="custom-alert"></div>
+    <div id="customAlertSuccess" class="custom-alert-success"></div>
+    <?php require '../../partials/scripts.php'; ?>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -640,7 +670,7 @@
                 let totalPay = 0;
 
                 $(".MonetaryCard-check:checked").each(function () {
-                    
+
                     let itemId = $(this).val();
                     let action = $(`select[name='MonetaryCard_action[${itemId}]']`).val();
                     let amount = parseFloat($(`input[name='MonetaryCard_amount[${itemId}]']`).val()) || 0;
@@ -651,9 +681,9 @@
                         totalPay += amount;
                     }
 
-                    
+
                 });
-                
+
                 // Format numbers with thousand separators and two decimal places
                 document.getElementById("deduct-total").textContent = totalDeduct.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 document.getElementById("payable-total").textContent = totalPay.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -661,8 +691,8 @@
 
             // Attach event listeners
             document.addEventListener("change", function (event) {
-                if (event.target.classList.contains("MonetaryCard-check") || 
-                    event.target.classList.contains("MonetaryCard-amount") || 
+                if (event.target.classList.contains("MonetaryCard-check") ||
+                    event.target.classList.contains("MonetaryCard-amount") ||
                     event.target.classList.contains("MonetaryCard-action")) {
                     updateTotals();
                 }
@@ -673,17 +703,17 @@
         });
     </script>
 
-  <script>
+    <script>
 
-    $(document).ready(function () {
-        $('#pending').click(function () {
-            $("#pending").prop("disabled", true);
+        $(document).ready(function () {
+            $('#pending').click(function () {
+                $("#pending").prop("disabled", true);
 
-            let pending_note = document.getElementById('note').value;
-            let cl_id = document.getElementById('cl_id').value;
-            let cl_step_id = document.getElementById('cl_step_id').value;
+                let pending_note = document.getElementById('note').value;
+                let cl_id = document.getElementById('cl_id').value;
+                let cl_step_id = document.getElementById('cl_step_id').value;
 
-            if (pending_note.trim() === '') {
+                if (pending_note.trim() === '') {
                     $("#pending").prop("disabled", false);
                     const alertBox = document.getElementById('customAlert');
                     alertBox.textContent = 'Please enter reason for pending.';
@@ -694,24 +724,331 @@
                         alertBox.style.display = 'none';
                     }, 3000);
                     return;
-            }
+                }
+
+                $.ajax({
+                    url: '../../back/clearance-allocated-manage.php',
+                    type: 'POST',
+                    data: { pending_note: pending_note, cl_id: cl_id, cl_step_id: cl_step_id, pending: 'pending' },
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status === 'success') {
+
+                            //location.reload();
+                            location.href = 'clearance-allocated.php';
+
+                        } else {
+                            //alert("Error: " + response.message);
+                            $("#pending").prop("disabled", false);
+                            const alertBox = document.getElementById('customAlert');
+                            alertBox.innerHTML = response.message.join('<br>');
+                            alertBox.style.display = 'block';
+
+                            // Hide the alert after 3 seconds
+                            setTimeout(() => {
+                                alertBox.style.display = 'none';
+                            }, 3000);
+                        }
+                    },
+                    error: function () {
+                        //alert('An error occurred. Please try again.');
+                        $("#pending").prop("disabled", false);
+                        const alertBox = document.getElementById('customAlert');
+                        alertBox.textContent = 'An error occurred. Please try again.';
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+                    }
+                });
+            });
+
+        });
+
+        // $(document).ready(function () {
+        //     $("#submit").on("click", function (event) {
+        //         event.preventDefault(); // Prevent form submission in case it's inside a form
+        //         $("#submit").prop("disabled", true);
+
+        //         let formData = {
+        //             submit: true,  
+        //             cl_id: $("#cl_id").val(),
+        //             cl_step_id: $("#cl_step_id").val(),
+        //             note: $("#note").val(),
+        //             physical_items: [],
+        //             amount_items: []
+        //         };
+
+        //         let validationFailed = false; // Flag to track validation status
+
+        //         // Collect physical items
+        //         $(".Received-check:checked, .Issued-check:checked").each(function () {
+        //             let itemId = $(this).val();
+        //             let prefix = $(this).hasClass("Received-check") ? "Received" : "Issued";
+
+        //             formData.physical_items.push({
+        //                 item_id: itemId,
+        //                 quantity: $(`.${prefix}-quantity[name='${prefix}_quantity[${itemId}]']`).val() || 1,
+        //                 remark: $(`input[name='${prefix}_note[${itemId}]']`).val(),
+        //                 type: $(`input[name='${prefix}_type[${itemId}]']`).val()
+        //             });
+        //         });
+
+        //         // Collect amount items with validation
+        //         $(".deduct-check:checked, .payable-check:checked, .hold-check:checked").each(function () {
+        //             let itemId = $(this).val();
+        //             let prefix = $(this).hasClass("deduct-check") ? "deduct" :
+        //                         $(this).hasClass("payable-check") ? "payable" : "hold";
+
+        //             let amount = $(`.${prefix}-amount[name='${prefix}_amount[${itemId}]']`).val();
+        //             if (!amount || isNaN(amount) || amount <= 0) {
+
+        //                 $("#submit").prop("disabled", false);
+        //                 const alertBox = document.getElementById('customAlert');
+        //                 alertBox.textContent = 'Amount must be a valid number greater than zero.';
+        //                 alertBox.style.display = 'block';
+
+        //                 // Hide the alert after 3 seconds
+        //                 setTimeout(() => {
+        //                     alertBox.style.display = 'none';
+        //                 }, 3000);
+
+        //                 validationFailed = true; // Set flag to true
+        //                 return false; // Break out of the `.each()` loop
+        //             }
+
+        //             formData.amount_items.push({
+        //                 item_id: itemId,
+        //                 quantity: $(`.${prefix}-quantity[name='${prefix}_quantity[${itemId}]']`).val() || 1,
+        //                 amount: amount,
+        //                 issued_date: $(`.${prefix}-issued-date[name='${prefix}_issued_date[${itemId}]']`).val(),
+        //                 remark: $(`input[name='${prefix}_note[${itemId}]']`).val(),
+        //                 type: $(`input[name='${prefix}_type[${itemId}]']`).val()
+        //             });
+        //         });
+
+        //         // If validation failed, do not send AJAX request
+        //         if (validationFailed) {
+        //             return;
+        //         }
+
+        //         // AJAX request
+        //         $.ajax({
+        //             url: "../../back/clearance-allocated-manage.php",
+        //             type: "POST",
+        //             data: formData,
+        //             dataType: "json",
+        //             success: function (response) {
+        //                 if (response.error) {
+        //                     //alert(response.error);
+        //                     $("#submit").prop("disabled", false);
+        //                     const alertBox = document.getElementById('customAlert');
+        //                     alertBox.textContent = response.error;
+        //                     alertBox.style.display = 'block';
+
+        //                     // Hide the alert after 3 seconds
+        //                     setTimeout(() => {
+        //                         alertBox.style.display = 'none';
+        //                     }, 3000);
+        //                 } else {
+        //                     //alert(response.message);
+
+        //                     location.reload(); // Reload page on success
+        //                 }
+        //             },
+        //             error: function () {
+        //                 $("#submit").prop("disabled", false);
+        //                 const alertBox = document.getElementById('customAlert');
+        //                 alertBox.textContent = 'An error occurred. Please try again.';
+        //                 alertBox.style.display = 'block';
+
+        //                 // Hide the alert after 3 seconds
+        //                 setTimeout(() => {
+        //                     alertBox.style.display = 'none';
+        //                 }, 3000);
+
+        //             }
+        //         });
+        //     });
+        // });
+
+        $(document).ready(function () {
+            $("#submit").click(function (e) {
+                e.preventDefault();
+
+                let formData = new FormData();
+                let hasError = false;
+
+                // Get hidden inputs
+                formData.append("cl_step_id", $("#cl_step_id").val());
+                formData.append("cl_id", $("#cl_id").val());
+                formData.append("note", $("#note").val());
+                var fileInput = $("#customervisitreport");
+                var OldfileInput = $("#old_cvr_url");
+
+                if (fileInput.length > 0) {
+                    //formData.append("customervisitreport", fileInput[0].files[0]); // Append file if exists
+                    if (fileInput[0].files.length > 0) {
+                        formData.append("customervisitreport", fileInput[0].files[0]); // Append file if selected
+                    }
+                    else if (OldfileInput) {
+
+                    }
+                    else {
+                        $("#submit").prop("disabled", false);
+                        const alertBox = document.getElementById('customAlert');
+                        alertBox.textContent = "Customer Visit Report is Required.";
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+
+                        hasError = true;
+                        return false;
+                    }
+                }
+
+                $("#submit").prop("disabled", true);
+                // Collect monetary items
+                $(".MonetaryCard-check:checked").each(function () {
+                    let itemId = $(this).val();
+                    let action = $(`select[name='MonetaryCard_action[${itemId}]']`).val();
+                    let status = $(`select[name='MonetaryCard_status[${itemId}]']`).val();
+                    let amount = $(`input[name='MonetaryCard_amount[${itemId}]']`).val();
+
+                    if (!status || !action) {
+
+                        $("#submit").prop("disabled", false);
+                        const alertBox = document.getElementById('customAlert');
+                        alertBox.textContent = "Monetary item status and action are required.";
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+
+                        hasError = true;
+                        return false;
+                    }
+                    if ((action == "1" || action == "2") && (!amount || amount <= 0)) {
+
+                        $("#submit").prop("disabled", false);
+                        const alertBox = document.getElementById('customAlert');
+                        alertBox.textContent = "Amount is required when Deduct or Pay is selected.";
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+                        hasError = true;
+                        return false;
+                    }
+
+                    formData.append("monetary_items[" + itemId + "][cl_amount_item_id]", itemId);
+                    formData.append("monetary_items[" + itemId + "][item_type]", $(`select[name='MonetaryCard_action[${itemId}]']`).val());
+                    formData.append("monetary_items[" + itemId + "][return_status]", $(`select[name='MonetaryCard_status[${itemId}]']`).val());
+                    formData.append("monetary_items[" + itemId + "][quantity]", $(`input[name='MonetaryCard_quantity[${itemId}]']`).val());
+                    formData.append("monetary_items[" + itemId + "][amount]", amount);
+                    formData.append("monetary_items[" + itemId + "][issued_date]", $(`input[name='MonetaryCard_issued_date[${itemId}]']`).val());
+                    formData.append("monetary_items[" + itemId + "][remark]", $(`input[name='MonetaryCard_note[${itemId}]']`).val());
+
+                    let fileInputElem = $(`input[name='attachments[${itemId}]']`)[0];
+                    if (fileInputElem && fileInputElem.files.length > 0) {
+                        let fileInput = fileInputElem.files[0];
+                        console.log("File selected: ", fileInput.name);
+                        formData.append("files[" + itemId + "]", fileInput);
+                    }
+
+                });
+
+                // Collect physical items
+                $(".issue-check:checked").each(function () {
+                    let itemId = $(this).val();
+                    let issueAction = $(`select[name='issue_action[${itemId}]']`).val();
+
+                    if (!issueAction) {
+
+                        $("#submit").prop("disabled", false);
+                        const alertBox = document.getElementById('customAlert');
+                        alertBox.textContent = "Issue action is required for checked physical items.";
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+                        hasError = true;
+                        return false;
+                    }
+
+                    formData.append("physical_items[" + itemId + "][cl_physical_item_id]", itemId);
+                    formData.append("physical_items[" + itemId + "][item_type]", $(`select[name='issue_action[${itemId}]']`).val());
+                    formData.append("physical_items[" + itemId + "][quantity]", $(`input[name='issue_quantity[${itemId}]']`).val());
+                    formData.append("physical_items[" + itemId + "][remark]", $(`input[name='issue_note[${itemId}]']`).val());
+
+                    let fileInputElem = $(`input[name='physical_attachments[${itemId}]']`)[0];
+                    if (fileInputElem && fileInputElem.files.length > 0) {
+                        let fileInput = fileInputElem.files[0];
+                        formData.append("physical_files[" + itemId + "]", fileInput);
+                    }
+                });
+
+                if (hasError) return false;
+
+                // AJAX request
+                $.ajax({
+                    url: "../../back/clearance-allocated-action-manage.php",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        //alert(response);
+                        window.location.reload();
+                    },
+                    error: function () {
+
+                        $("#submit").prop("disabled", false);
+                        const alertBox = document.getElementById('customAlert');
+                        alertBox.textContent = "Error submitting the form.";
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+                    },
+                });
+            });
+        });
+
+
+        $('#approve').click(function () {
+            $("#approve").prop("disabled", true);
+            let approve_note = document.getElementById('note').value;
+            let cl_step_id = document.getElementById('cl_step_id').value;
+            let cl_id = document.getElementById('cl_id').value;
 
             $.ajax({
-                url: '../../back/clearance-allocated-manage.php',
-                type: 'POST',
-                data: {pending_note: pending_note, cl_id: cl_id, cl_step_id:cl_step_id, pending: 'pending'},
+                url: "../../back/clearance-allocated-manage.php",
+                type: "POST",
+                data: { approve_note: approve_note, cl_step_id: cl_step_id, approve: 'approve', cl_id: cl_id },
                 dataType: 'json',
                 success: function (response) {
                     if (response.status === 'success') {
-                        
-                         //location.reload();
-                         location.href = 'clearance-allocated.php';
 
+                        location.reload();
                     } else {
                         //alert("Error: " + response.message);
-                        $("#pending").prop("disabled", false);
+                        $("#approve").prop("disabled", false);
                         const alertBox = document.getElementById('customAlert');
-                        alertBox.innerHTML  =  response.message.join('<br>');
+                        alertBox.innerHTML = response.message.join('<br>');
                         alertBox.style.display = 'block';
 
                         // Hide the alert after 3 seconds
@@ -722,7 +1059,7 @@
                 },
                 error: function () {
                     //alert('An error occurred. Please try again.');
-                    $("#pending").prop("disabled", false);
+                    $("#approve").prop("disabled", false);
                     const alertBox = document.getElementById('customAlert');
                     alertBox.textContent = 'An error occurred. Please try again.';
                     alertBox.style.display = 'block';
@@ -735,333 +1072,39 @@
             });
         });
 
-    });    
-    
-    // $(document).ready(function () {
-    //     $("#submit").on("click", function (event) {
-    //         event.preventDefault(); // Prevent form submission in case it's inside a form
-    //         $("#submit").prop("disabled", true);
+        $('#che').click(function () {
+            $("#che").prop("disabled", true);
+            let note = document.getElementById('note').value;
+            let cl_step_id = document.getElementById('cl_step_id').value;
+            let cl_id = document.getElementById('cl_id').value;
 
-    //         let formData = {
-    //             submit: true,  
-    //             cl_id: $("#cl_id").val(),
-    //             cl_step_id: $("#cl_step_id").val(),
-    //             note: $("#note").val(),
-    //             physical_items: [],
-    //             amount_items: []
-    //         };
-
-    //         let validationFailed = false; // Flag to track validation status
-
-    //         // Collect physical items
-    //         $(".Received-check:checked, .Issued-check:checked").each(function () {
-    //             let itemId = $(this).val();
-    //             let prefix = $(this).hasClass("Received-check") ? "Received" : "Issued";
-
-    //             formData.physical_items.push({
-    //                 item_id: itemId,
-    //                 quantity: $(`.${prefix}-quantity[name='${prefix}_quantity[${itemId}]']`).val() || 1,
-    //                 remark: $(`input[name='${prefix}_note[${itemId}]']`).val(),
-    //                 type: $(`input[name='${prefix}_type[${itemId}]']`).val()
-    //             });
-    //         });
-
-    //         // Collect amount items with validation
-    //         $(".deduct-check:checked, .payable-check:checked, .hold-check:checked").each(function () {
-    //             let itemId = $(this).val();
-    //             let prefix = $(this).hasClass("deduct-check") ? "deduct" :
-    //                         $(this).hasClass("payable-check") ? "payable" : "hold";
-
-    //             let amount = $(`.${prefix}-amount[name='${prefix}_amount[${itemId}]']`).val();
-    //             if (!amount || isNaN(amount) || amount <= 0) {
-                    
-    //                 $("#submit").prop("disabled", false);
-    //                 const alertBox = document.getElementById('customAlert');
-    //                 alertBox.textContent = 'Amount must be a valid number greater than zero.';
-    //                 alertBox.style.display = 'block';
-
-    //                 // Hide the alert after 3 seconds
-    //                 setTimeout(() => {
-    //                     alertBox.style.display = 'none';
-    //                 }, 3000);
-
-    //                 validationFailed = true; // Set flag to true
-    //                 return false; // Break out of the `.each()` loop
-    //             }
-
-    //             formData.amount_items.push({
-    //                 item_id: itemId,
-    //                 quantity: $(`.${prefix}-quantity[name='${prefix}_quantity[${itemId}]']`).val() || 1,
-    //                 amount: amount,
-    //                 issued_date: $(`.${prefix}-issued-date[name='${prefix}_issued_date[${itemId}]']`).val(),
-    //                 remark: $(`input[name='${prefix}_note[${itemId}]']`).val(),
-    //                 type: $(`input[name='${prefix}_type[${itemId}]']`).val()
-    //             });
-    //         });
-
-    //         // If validation failed, do not send AJAX request
-    //         if (validationFailed) {
-    //             return;
-    //         }
-
-    //         // AJAX request
-    //         $.ajax({
-    //             url: "../../back/clearance-allocated-manage.php",
-    //             type: "POST",
-    //             data: formData,
-    //             dataType: "json",
-    //             success: function (response) {
-    //                 if (response.error) {
-    //                     //alert(response.error);
-    //                     $("#submit").prop("disabled", false);
-    //                     const alertBox = document.getElementById('customAlert');
-    //                     alertBox.textContent = response.error;
-    //                     alertBox.style.display = 'block';
-
-    //                     // Hide the alert after 3 seconds
-    //                     setTimeout(() => {
-    //                         alertBox.style.display = 'none';
-    //                     }, 3000);
-    //                 } else {
-    //                     //alert(response.message);
-                        
-    //                     location.reload(); // Reload page on success
-    //                 }
-    //             },
-    //             error: function () {
-    //                 $("#submit").prop("disabled", false);
-    //                 const alertBox = document.getElementById('customAlert');
-    //                 alertBox.textContent = 'An error occurred. Please try again.';
-    //                 alertBox.style.display = 'block';
-
-    //                 // Hide the alert after 3 seconds
-    //                 setTimeout(() => {
-    //                     alertBox.style.display = 'none';
-    //                 }, 3000);
-                    
-    //             }
-    //         });
-    //     });
-    // });
-
-    $(document).ready(function () {
-        $("#submit").click(function (e) {
-            e.preventDefault();
-
-            let formData = new FormData();
-            let hasError = false;
-
-            // Get hidden inputs
-            formData.append("cl_step_id", $("#cl_step_id").val());
-            formData.append("cl_id", $("#cl_id").val());
-            formData.append("note", $("#note").val());
-            var fileInput = $("#customervisitreport");
-            var OldfileInput = $("#old_cvr_url");
-
-            if (fileInput.length > 0 ) {
-                //formData.append("customervisitreport", fileInput[0].files[0]); // Append file if exists
-                if (fileInput[0].files.length > 0) {
-                    formData.append("customervisitreport", fileInput[0].files[0]); // Append file if selected
-                }
-                else if (OldfileInput) {
-                    
-                }
-                else {
-                    $("#submit").prop("disabled", false);
-                    const alertBox = document.getElementById('customAlert');
-                    alertBox.textContent = "Customer Visit Report is Required.";
-                    alertBox.style.display = 'block';
-
-                    // Hide the alert after 3 seconds
-                    setTimeout(() => {
-                        alertBox.style.display = 'none';
-                    }, 3000);
-
-                    hasError = true;
-                    return false;
-                }
-            }
-
-            $("#submit").prop("disabled", true);
-            // Collect monetary items
-            $(".MonetaryCard-check:checked").each(function () {
-                let itemId = $(this).val();
-                let action = $(`select[name='MonetaryCard_action[${itemId}]']`).val();
-                let status = $(`select[name='MonetaryCard_status[${itemId}]']`).val();
-                let amount = $(`input[name='MonetaryCard_amount[${itemId}]']`).val();
-
-                if (!status || !action) {
-                    
-                    $("#submit").prop("disabled", false);
-                    const alertBox = document.getElementById('customAlert');
-                    alertBox.textContent = "Monetary item status and action are required.";
-                    alertBox.style.display = 'block';
-
-                    // Hide the alert after 3 seconds
-                    setTimeout(() => {
-                        alertBox.style.display = 'none';
-                    }, 3000);
-
-                    hasError = true;
-                    return false;
-                }
-                if ((action == "1" || action == "2") && (!amount || amount <= 0)) {
-                    
-                    $("#submit").prop("disabled", false);
-                    const alertBox = document.getElementById('customAlert');
-                    alertBox.textContent = "Amount is required when Deduct or Pay is selected.";
-                    alertBox.style.display = 'block';
-
-                    // Hide the alert after 3 seconds
-                    setTimeout(() => {
-                        alertBox.style.display = 'none';
-                    }, 3000);
-                    hasError = true;
-                    return false;
-                }
-
-                formData.append("monetary_items[" + itemId + "][cl_amount_item_id]", itemId);
-                formData.append("monetary_items[" + itemId + "][item_type]", $(`select[name='MonetaryCard_action[${itemId}]']`).val());
-                formData.append("monetary_items[" + itemId + "][return_status]", $(`select[name='MonetaryCard_status[${itemId}]']`).val());
-                formData.append("monetary_items[" + itemId + "][quantity]", $(`input[name='MonetaryCard_quantity[${itemId}]']`).val());
-                formData.append("monetary_items[" + itemId + "][amount]", amount);
-                formData.append("monetary_items[" + itemId + "][issued_date]", $(`input[name='MonetaryCard_issued_date[${itemId}]']`).val());
-                formData.append("monetary_items[" + itemId + "][remark]", $(`input[name='MonetaryCard_note[${itemId}]']`).val());
-
-                let fileInputElem = $(`input[name='attachments[${itemId}]']`)[0];
-                if (fileInputElem && fileInputElem.files.length > 0) {
-                    let fileInput = fileInputElem.files[0];
-                    console.log("File selected: ", fileInput.name);
-                    formData.append("files[" + itemId + "]", fileInput);
-                }
-
-            });
-
-            // Collect physical items
-            $(".issue-check:checked").each(function () {
-                let itemId = $(this).val();
-                let issueAction = $(`select[name='issue_action[${itemId}]']`).val();
-
-                if (!issueAction) {
-                    
-                    $("#submit").prop("disabled", false);
-                    const alertBox = document.getElementById('customAlert');
-                    alertBox.textContent = "Issue action is required for checked physical items.";
-                    alertBox.style.display = 'block';
-
-                    // Hide the alert after 3 seconds
-                    setTimeout(() => {
-                        alertBox.style.display = 'none';
-                    }, 3000);
-                    hasError = true;
-                    return false;
-                }
-
-                formData.append("physical_items[" + itemId + "][cl_physical_item_id]", itemId);
-                formData.append("physical_items[" + itemId + "][item_type]", $(`select[name='issue_action[${itemId}]']`).val());
-                formData.append("physical_items[" + itemId + "][quantity]", $(`input[name='issue_quantity[${itemId}]']`).val());
-                formData.append("physical_items[" + itemId + "][remark]", $(`input[name='issue_note[${itemId}]']`).val());
-
-                let fileInputElem = $(`input[name='physical_attachments[${itemId}]']`)[0];
-                if (fileInputElem && fileInputElem.files.length > 0) {
-                    let fileInput = fileInputElem.files[0];
-                    formData.append("physical_files[" + itemId + "]", fileInput);
-                }
-            });
-
-            if (hasError) return false;
-
-            // AJAX request
             $.ajax({
-                url: "../../back/clearance-allocated-action-manage.php",
+                url: "../../back/clearance-allocated-manage.php",
                 type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
+                data: { note: note, cl_step_id: cl_step_id, che: 'che', cl_id: cl_id },
+                dataType: 'json',
                 success: function (response) {
-                    //alert(response);
-                    window.location.reload();
+                    if (response.status === 'success') {
+
+                        location.reload();
+                    } else {
+                        //alert("Error: " + response.message);
+                        $("#che").prop("disabled", false);
+                        const alertBox = document.getElementById('customAlert');
+                        alertBox.innerHTML = response.message.join('<br>');
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+                    }
                 },
                 error: function () {
-                    
-                    $("#submit").prop("disabled", false);
-                    const alertBox = document.getElementById('customAlert');
-                    alertBox.textContent = "Error submitting the form.";
-                    alertBox.style.display = 'block';
-
-                    // Hide the alert after 3 seconds
-                    setTimeout(() => {
-                        alertBox.style.display = 'none';
-                    }, 3000);
-                },
-            });
-        });
-    });
-
-
-    $('#approve').click(function () {
-        $("#approve").prop("disabled", true);
-        let approve_note = document.getElementById('note').value;
-        let cl_step_id = document.getElementById('cl_step_id').value;
-        let cl_id = document.getElementById('cl_id').value;
-
-        $.ajax({
-            url: "../../back/clearance-allocated-manage.php",
-            type: "POST",
-            data: {approve_note: approve_note, cl_step_id: cl_step_id, approve: 'approve', cl_id: cl_id},
-            dataType: 'json',
-            success: function (response) {
-                if (response.status === 'success') {
-                    
-                    location.reload();
-                } else {
-                    //alert("Error: " + response.message);
-                    $("#approve").prop("disabled", false);
-                    const alertBox = document.getElementById('customAlert');
-                    alertBox.innerHTML  =  response.message.join('<br>');
-                    alertBox.style.display = 'block';
-
-                    // Hide the alert after 3 seconds
-                    setTimeout(() => {
-                        alertBox.style.display = 'none';
-                    }, 3000);
-                }
-            },
-            error: function () {
-                //alert('An error occurred. Please try again.');
-                $("#approve").prop("disabled", false);
-                const alertBox = document.getElementById('customAlert');
-                alertBox.textContent = 'An error occurred. Please try again.';
-                alertBox.style.display = 'block';
-
-                // Hide the alert after 3 seconds
-                setTimeout(() => {
-                    alertBox.style.display = 'none';
-                }, 3000);
-            }
-        });
-    });
-
-    $('#che').click(function () {
-        $("#che").prop("disabled", true);
-        let note = document.getElementById('note').value;
-        let cl_step_id = document.getElementById('cl_step_id').value;
-        let cl_id = document.getElementById('cl_id').value;
-
-        $.ajax({
-            url: "../../back/clearance-allocated-manage.php",
-            type: "POST",
-            data: {note: note, cl_step_id: cl_step_id, che: 'che', cl_id: cl_id},
-            dataType: 'json',
-            success: function (response) {
-                if (response.status === 'success') {
-                    
-                    location.reload();
-                } else {
-                    //alert("Error: " + response.message);
+                    //alert('An error occurred. Please try again.');
                     $("#che").prop("disabled", false);
                     const alertBox = document.getElementById('customAlert');
-                    alertBox.innerHTML  =  response.message.join('<br>');
+                    alertBox.textContent = 'An error occurred. Please try again.';
                     alertBox.style.display = 'block';
 
                     // Hide the alert after 3 seconds
@@ -1069,42 +1112,42 @@
                         alertBox.style.display = 'none';
                     }, 3000);
                 }
-            },
-            error: function () {
-                //alert('An error occurred. Please try again.');
-                $("#che").prop("disabled", false);
-                const alertBox = document.getElementById('customAlert');
-                alertBox.textContent = 'An error occurred. Please try again.';
-                alertBox.style.display = 'block';
-
-                // Hide the alert after 3 seconds
-                setTimeout(() => {
-                    alertBox.style.display = 'none';
-                }, 3000);
-            }
+            });
         });
-    });
 
-    $('#reject').click(function () {
-        $("#reject").prop("disabled", true);
-        let note = document.getElementById('note').value;
-        let cl_step_id = document.getElementById('cl_step_id').value;
-        let cl_id = document.getElementById('cl_id').value;
+        $('#reject').click(function () {
+            $("#reject").prop("disabled", true);
+            let note = document.getElementById('note').value;
+            let cl_step_id = document.getElementById('cl_step_id').value;
+            let cl_id = document.getElementById('cl_id').value;
 
-        $.ajax({
-            url: "../../back/clearance-allocated-manage.php",
-            type: "POST",
-            data: {note: note, cl_step_id: cl_step_id, reject: 'reject', cl_id: cl_id},
-            dataType: 'json',
-            success: function (response) {
-                if (response.status === 'success') {
-                    
-                    location.reload();
-                } else {
-                    //alert("Error: " + response.message);
+            $.ajax({
+                url: "../../back/clearance-allocated-manage.php",
+                type: "POST",
+                data: { note: note, cl_step_id: cl_step_id, reject: 'reject', cl_id: cl_id },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status === 'success') {
+
+                        location.reload();
+                    } else {
+                        //alert("Error: " + response.message);
+                        $("#reject").prop("disabled", false);
+                        const alertBox = document.getElementById('customAlert');
+                        alertBox.innerHTML = response.message.join('<br>');
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+                    }
+                },
+                error: function () {
+                    //alert('An error occurred. Please try again.');
                     $("#reject").prop("disabled", false);
                     const alertBox = document.getElementById('customAlert');
-                    alertBox.innerHTML  =  response.message.join('<br>');
+                    alertBox.textContent = 'An error occurred. Please try again.';
                     alertBox.style.display = 'block';
 
                     // Hide the alert after 3 seconds
@@ -1112,25 +1155,55 @@
                         alertBox.style.display = 'none';
                     }, 3000);
                 }
-            },
-            error: function () {
-                //alert('An error occurred. Please try again.');
-                $("#reject").prop("disabled", false);
-                const alertBox = document.getElementById('customAlert');
-                alertBox.textContent = 'An error occurred. Please try again.';
-                alertBox.style.display = 'block';
-
-                // Hide the alert after 3 seconds
-                setTimeout(() => {
-                    alertBox.style.display = 'none';
-                }, 3000);
-            }
+            });
         });
-    });
 
-  </script>
+        $('#reject-1').click(function () {
+            $("#reject-1").prop("disabled", true);
+            let note = document.getElementById('note').value;
+            let cl_step_id = document.getElementById('cl_step_id').value;
+            let cl_id = document.getElementById('cl_id').value;
 
-  
+            $.ajax({
+                url: "../../back/clearance-allocated-manage.php",
+                type: "POST",
+                data: { note: note, cl_step_id: cl_step_id, reject1: 'reject-1', cl_id: cl_id },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status === 'success') {
+
+                        location.reload();
+                    } else {
+                        //alert("Error: " + response.message);
+                        $("#reject-1").prop("disabled", false);
+                        const alertBox = document.getElementById('customAlert');
+                        alertBox.innerHTML = response.message.join('<br>');
+                        alertBox.style.display = 'block';
+
+                        // Hide the alert after 3 seconds
+                        setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 3000);
+                    }
+                },
+                error: function () {
+                    //alert('An error occurred. Please try again.');
+                    $("#reject-1").prop("disabled", false);
+                    const alertBox = document.getElementById('customAlert');
+                    alertBox.textContent = 'An error occurred. Please try again.';
+                    alertBox.style.display = 'block';
+
+                    // Hide the alert after 3 seconds
+                    setTimeout(() => {
+                        alertBox.style.display = 'none';
+                    }, 3000);
+                }
+            });
+        });
+
+    </script>
+
+
 </body>
 
 </html>

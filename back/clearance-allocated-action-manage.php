@@ -3,6 +3,11 @@ session_start();
 require "connection/connection.php";
 require "functions.php";
 include "mail-function.php";
+// if $_SESSION['uid'] is not set, return to login page
+if (!isset($_SESSION['uid'])) {
+    header("Location: ../index.php");
+    exit;
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['customerVisitReportForm'])) {
     $cl_id = $_POST['cl_id'];
